@@ -1,0 +1,9 @@
+.claude
+.spec-workflow
+.agents
+.tool-versions
+doc
+skills-lock.json
+CLAUDE.md
+design_prompt.md
+audit.log

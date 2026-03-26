@@ -1,0 +1,28 @@
+import { Controller, Get, Param, Res, StreamableFile } from '@nestjs/common';
+import { createReadStream } from 'fs';
+import { join, extname } from 'path';
+
+const UPLOADS_ROOT = '/app/uploads';
+
+const MIME_TYPES: Record<string, string> = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+};
+
+@Controller('uploads')
+export class UploadsController {
+  @Get('champions/:filename')
+  serveChampionPhoto(
+    @Param('filename') filename: string,
+    @Res({ passthrough: true }) res,
+  ) {
+    const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '');
+    const filePath = join(UPLOADS_ROOT, 'champions', safeName);
+    const ext = extname(safeName).toLowerCase();
+    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+    res.set({ 'Content-Type': contentType });
+    return new StreamableFile(createReadStream(filePath));
+  }
+}

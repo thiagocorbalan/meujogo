@@ -1,0 +1,257 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MODERADOR
+  USUARIO
+}
+
+enum PlayerPosition {
+  LINHA
+  GOLEIRO
+}
+
+enum PlayerType {
+  FIXO
+  CONVIDADO
+  RESERVA
+}
+
+enum PlayerStatus {
+  ATIVO
+  LESIONADO
+  AUSENTE
+  RESERVA
+}
+
+enum SessionStatus {
+  PENDING
+  IN_PROGRESS
+  FINISHED
+}
+
+enum DrawMode {
+  ALEATORIO
+  EQUILIBRADO
+}
+
+enum MatchEventType {
+  MATCH_STARTED
+  GOAL_SCORED
+  MATCH_ENDED
+}
+
+model User {
+  id    Int      @id @default(autoincrement())
+  name  String
+  email String   @unique
+  role  UserRole @default(USUARIO)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Player {
+  id       Int            @id @default(autoincrement())
+  name     String
+  position PlayerPosition
+  type     PlayerType
+  status   PlayerStatus   @default(ATIVO)
+  elo      Float          @default(1200)
+  isActive Boolean        @default(true)
+  goals    Int            @default(0)
+  games    Int            @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teamPlayers TeamPlayer[]
+  goalEvents  Goal[]
+  attendances Attendance[]
+
+  @@map("players")
+}
+
+model Season {
+  id        Int       @id @default(autoincrement())
+  year      Int
+  startDate DateTime
+  endDate   DateTime?
+  isClosed  Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions Session[]
+
+  @@map("seasons")
+}
+
+model Session {
+  id                   Int           @id @default(autoincrement())
+  seasonId             Int
+  durationMinutes      Int
+  matchDurationMinutes Int
+  totalMatches         Int
+  status               SessionStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  season      Season       @relation(fields: [seasonId], references: [id])
+  teams       Team[]
+  matches     Match[]
+  champion    Champion?
+  attendances Attendance[]
+
+  @@map("sessions")
+}
+
+model Team {
+  id        Int    @id @default(autoincrement())
+  name      String
+  color     String
+  sessionId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  session    Session      @relation(fields: [sessionId], references: [id])
+  players    TeamPlayer[]
+  matchesAsA Match[]      @relation("teamA")
+  matchesAsB Match[]      @relation("teamB")
+  matchesWon Match[]      @relation("winner")
+  goals      Goal[]
+  champions  Champion[]
+
+  @@map("teams")
+}
+
+model TeamPlayer {
+  id       Int @id @default(autoincrement())
+  teamId   Int
+  playerId Int
+
+  team   Team   @relation(fields: [teamId], references: [id])
+  player Player @relation(fields: [playerId], references: [id])
+
+  @@unique([teamId, playerId])
+  @@map("team_players")
+}
+
+model Match {
+  id         Int     @id @default(autoincrement())
+  sessionId  Int
+  teamAId    Int
+  teamBId    Int
+  scoreA     Int     @default(0)
+  scoreB     Int     @default(0)
+  winnerId   Int?
+  isDraw     Boolean @default(false)
+  matchOrder Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  session Session      @relation(fields: [sessionId], references: [id])
+  teamA   Team         @relation("teamA", fields: [teamAId], references: [id])
+  teamB   Team         @relation("teamB", fields: [teamBId], references: [id])
+  winner  Team?        @relation("winner", fields: [winnerId], references: [id])
+  events  MatchEvent[]
+  goals   Goal[]
+
+  @@map("matches")
+}
+
+model MatchEvent {
+  id        Int            @id @default(autoincrement())
+  matchId   Int
+  type      MatchEventType
+  timestamp DateTime       @default(now())
+  payload   Json?
+
+  match Match @relation(fields: [matchId], references: [id])
+
+  @@map("match_events")
+}
+
+model Goal {
+  id       Int  @id @default(autoincrement())
+  matchId  Int
+  playerId Int
+  teamId   Int
+  minute   Int?
+
+  createdAt DateTime @default(now())
+
+  match  Match  @relation(fields: [matchId], references: [id])
+  player Player @relation(fields: [playerId], references: [id])
+  team   Team   @relation(fields: [teamId], references: [id])
+
+  @@map("goals")
+}
+
+model Champion {
+  id        Int     @id @default(autoincrement())
+  sessionId Int     @unique
+  teamId    Int
+  photoUrl  String?
+
+  createdAt DateTime @default(now())
+
+  session Session @relation(fields: [sessionId], references: [id])
+  team    Team    @relation(fields: [teamId], references: [id])
+
+  @@map("champions")
+}
+
+model Attendance {
+  id        Int          @id @default(autoincrement())
+  sessionId Int
+  playerId  Int
+  status    PlayerStatus
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  session Session @relation(fields: [sessionId], references: [id])
+  player  Player  @relation(fields: [playerId], references: [id])
+
+  @@unique([sessionId, playerId])
+  @@map("attendances")
+}
+
+model Settings {
+  id                  Int      @id @default(1)
+  maxTeams            Int      @default(4)
+  playersPerTeam      Int      @default(5)
+  sessionDurationMin  Int      @default(60)
+  matchDurationMin    Int      @default(10)
+  drawMode            DrawMode @default(ALEATORIO)
+  defaultElo          Float    @default(1200)
+  kFactor             Float    @default(32)
+  maxConsecutiveGames Int      @default(2)
+  updatedAt           DateTime @updatedAt
+  vests               Vest[]
+
+  @@map("settings")
+}
+
+model Vest {
+  id         Int      @id @default(autoincrement())
+  name       String
+  color      String
+  settingsId Int      @default(1)
+  settings   Settings @relation(fields: [settingsId], references: [id])
+
+  @@map("vests")
+}

@@ -1,0 +1,66 @@
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    container_name: matchsoccer-api
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://matchsoccer:matchsoccer@postgres:5432/matchsoccer?schema=public
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+      - ./api/uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - matchsoccer-network
+
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.dev
+    container_name: matchsoccer-app
+    ports:
+      - '4000:4000'
+    environment:
+      API_BASE_URL: http://api:3000
+      PUBLIC_API_BASE_URL: http://localhost:3000
+    volumes:
+      - ./app:/app
+      - /app/node_modules
+      - /app/.nuxt
+    depends_on:
+      - api
+    networks:
+      - matchsoccer-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: matchsoccer-postgres
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: matchsoccer
+      POSTGRES_PASSWORD: matchsoccer
+      POSTGRES_DB: matchsoccer
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U matchsoccer -d matchsoccer']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - matchsoccer-network
+
+volumes:
+  postgres_data:
+
+networks:
+  matchsoccer-network:
+    driver: bridge

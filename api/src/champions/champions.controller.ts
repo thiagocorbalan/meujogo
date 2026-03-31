@@ -10,15 +10,21 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { ChampionsService } from './champions.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
+import { UserRole } from '@prisma/client';
 
 const UPLOAD_DIR = '/app/uploads/champions';
 
 @Controller()
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ChampionsController {
   constructor(private readonly championsService: ChampionsService) {}
 
@@ -38,11 +44,13 @@ export class ChampionsController {
   }
 
   @Post('sessions/:sessionId/champion')
+  @Roles(UserRole.MODERADOR, UserRole.ADMIN)
   create(@Param('sessionId', ParseIntPipe) sessionId: number) {
     return this.championsService.create(sessionId);
   }
 
   @Post('champions/:id/photo')
+  @Roles(UserRole.MODERADOR, UserRole.ADMIN)
   @UseInterceptors(
     FileInterceptor('photo', {
       storage: diskStorage({

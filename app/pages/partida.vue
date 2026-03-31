@@ -46,7 +46,7 @@
         </h2>
 
         <!-- No current match but teams exist: start match -->
-        <div v-if="!currentMatch && teams.length > 0" class="bg-white border rounded-lg p-5 flex flex-col gap-4">
+        <div v-if="!currentMatch && teams.length > 0 && !hasReachedMaxMatches && canManageMatch()" class="bg-white border rounded-lg p-5 flex flex-col gap-4">
           <!-- First match: manual team selection -->
           <template v-if="isFirstMatch">
             <p class="text-sm text-muted-foreground mb-1">Selecione os times para a primeira partida:</p>
@@ -131,6 +131,12 @@
           </template>
         </div>
 
+          <!-- Max matches reached message -->
+          <div v-if="!currentMatch && teams.length > 0 && hasReachedMaxMatches" class="bg-amber-50 border border-amber-200 rounded-lg p-5 text-center">
+            <p class="text-amber-800 font-medium">Todas as partidas da sessão foram realizadas.</p>
+            <p class="text-amber-600 text-sm mt-1">Encerre a sessão para salvar os resultados e atualizar as estatísticas.</p>
+          </div>
+
         <!-- Active match board -->
         <template v-if="currentMatch">
           <!-- Match Timer -->
@@ -157,11 +163,11 @@
           <MatchesMatchBoard
             :match="currentMatch"
             :teams="teams"
-            :disabled="loading"
+            :disabled="loading || !canManageMatch()"
             @goal="handleGoal"
           />
 
-          <div class="flex justify-end mt-4">
+          <div v-if="canManageMatch()" class="flex justify-end mt-4">
             <BaseButton
               variant="danger"
               size="md"
@@ -208,7 +214,7 @@
       </section>
 
       <!-- Finalize session button -->
-      <section v-if="!currentMatch && finishedMatches.length > 0" class="mb-9 pt-4 border-t border-border">
+      <section v-if="!currentMatch && finishedMatches.length > 0 && canManageMatch()" class="mb-9 pt-4 border-t border-border">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-lg font-semibold text-foreground">Encerrar Sessao</h2>
@@ -282,6 +288,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
+const { canManageMatch } = usePermissions()
 const { getSessions, getSession, endSession } = useSessions()
 const { getTeams } = useTeams()
 const { getMatches, startMatch, registerGoal, endMatch, getNextMatch } = useMatches()
@@ -362,6 +369,11 @@ const matchCountColor = computed(() => {
   const played = finishedMatches.value.length + (currentMatch.value ? 1 : 0)
   if (played >= session.value.totalMatches) return 'text-red-600 font-semibold'
   return 'text-slate-700'
+})
+
+const hasReachedMaxMatches = computed(() => {
+  if (!session.value) return false
+  return finishedMatches.value.length >= session.value.totalMatches
 })
 
 function teamName(id: number | null | undefined): string {

@@ -97,10 +97,61 @@
         </CardContent>
       </Card>
 
-      <div class="flex justify-end">
+      <div v-if="canEdit('settings')" class="flex justify-end">
         <BaseButton type="submit" :loading="saving">Salvar Configurações</BaseButton>
       </div>
     </form>
+
+    <!-- Data Management -->
+    <Card v-if="canDelete('settings')" class="mt-8">
+      <CardHeader>
+        <CardTitle>Gerenciamento de Dados</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <BaseButton variant="danger" @click="showResetModal = true">Resetar Dados</BaseButton>
+          <BaseButton variant="secondary" @click="showSeasonModal = true">Encerrar Temporada Atual</BaseButton>
+        </div>
+      </CardContent>
+    </Card>
+
+    <!-- Reset Data Modal -->
+    <BaseModal :show="showResetModal" title="Resetar Dados" @close="closeResetModal">
+      <div class="text-sm text-muted-foreground">
+        <p class="mb-2 font-semibold text-destructive">Atenção: esta ação é irreversível!</p>
+        <p>Todos os dados serão apagados permanentemente:</p>
+        <ul class="list-disc pl-5 mt-1 mb-2">
+          <li>Partidas e eventos</li>
+          <li>Temporadas e sessões</li>
+          <li>Jogadores e estatísticas</li>
+          <li>Times e classificações</li>
+          <li>Presenças e campeões</li>
+        </ul>
+        <p>Apenas <strong>usuários</strong> e <strong>configurações</strong> serão mantidos.</p>
+      </div>
+      <div v-if="resetError" class="rounded-lg border border-destructive bg-destructive/10 p-3 text-destructive text-sm mt-3">
+        <p>{{ resetError }}</p>
+      </div>
+      <template #footer>
+        <BaseButton variant="secondary" @click="closeResetModal">Cancelar</BaseButton>
+        <BaseButton variant="danger" :loading="resetting" @click="onResetData">Confirmar Reset</BaseButton>
+      </template>
+    </BaseModal>
+
+    <!-- Close Season Modal -->
+    <BaseModal :show="showSeasonModal" title="Encerrar Temporada Atual" @close="closeSeasonModal">
+      <div class="text-sm text-muted-foreground">
+        <p>A temporada atual será encerrada e uma nova temporada será criada automaticamente.</p>
+        <p class="mt-2">Os dados da temporada anterior serão preservados.</p>
+      </div>
+      <div v-if="seasonError" class="rounded-lg border border-destructive bg-destructive/10 p-3 text-destructive text-sm mt-3">
+        <p>{{ seasonError }}</p>
+      </div>
+      <template #footer>
+        <BaseButton variant="secondary" @click="closeSeasonModal">Cancelar</BaseButton>
+        <BaseButton :loading="closingSeason" @click="onCloseSeason">Confirmar</BaseButton>
+      </template>
+    </BaseModal>
   </div>
 </template>
 
@@ -109,7 +160,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-const { getSettings, updateSettings } = useSettings()
+const { canEdit, canDelete } = usePermissions()
+const { getSettings, updateSettings, resetData } = useSettings()
+const { closeAndRenewSeason } = useSeasons()
 
 const loading = ref(true)
 const saving = ref(false)
@@ -170,6 +223,53 @@ async function onSave() {
     error.value = e?.data?.message || e?.message || 'Erro ao salvar configurações.'
   } finally {
     saving.value = false
+  }
+}
+
+// Data Management
+const showResetModal = ref(false)
+const resetting = ref(false)
+const resetError = ref<string | null>(null)
+
+const showSeasonModal = ref(false)
+const closingSeason = ref(false)
+const seasonError = ref<string | null>(null)
+
+function closeResetModal() {
+  showResetModal.value = false
+  resetError.value = null
+}
+
+function closeSeasonModal() {
+  showSeasonModal.value = false
+  seasonError.value = null
+}
+
+async function onResetData() {
+  resetting.value = true
+  resetError.value = null
+  try {
+    await resetData()
+    closeResetModal()
+    success.value = 'Dados resetados com sucesso.'
+  } catch (e: any) {
+    resetError.value = e?.data?.message || e?.message || 'Erro ao resetar dados.'
+  } finally {
+    resetting.value = false
+  }
+}
+
+async function onCloseSeason() {
+  closingSeason.value = true
+  seasonError.value = null
+  try {
+    await closeAndRenewSeason()
+    closeSeasonModal()
+    success.value = 'Temporada encerrada e nova temporada criada com sucesso.'
+  } catch (e: any) {
+    seasonError.value = e?.data?.message || e?.message || 'Erro ao encerrar temporada.'
+  } finally {
+    closingSeason.value = false
   }
 }
 </script>

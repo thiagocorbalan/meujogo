@@ -15,9 +15,10 @@ import { ChampionsModule } from './champions/champions.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { StatsModule } from './stats/stats.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [PrismaModule, SettingsModule, PlayersModule, UsersModule, SeasonsModule, SessionsModule, MatchesModule, TeamsModule, AttendanceModule, RankingModule, ChampionsModule, DashboardModule, UploadsModule, StatsModule],
+  imports: [PrismaModule, SettingsModule, PlayersModule, UsersModule, SeasonsModule, SessionsModule, MatchesModule, TeamsModule, AttendanceModule, RankingModule, ChampionsModule, DashboardModule, UploadsModule, StatsModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })

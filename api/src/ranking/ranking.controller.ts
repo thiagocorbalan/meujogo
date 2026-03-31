@@ -1,7 +1,10 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { RankingService } from './ranking.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
 
 @Controller()
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class RankingController {
   constructor(private readonly rankingService: RankingService) {}
 

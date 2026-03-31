@@ -59,4 +59,30 @@ export class SeasonsService {
       },
     });
   }
+
+  async closeAndCreateNew() {
+    return this.prisma.$transaction(async (tx) => {
+      const openSeason = await tx.season.findFirst({
+        where: { isClosed: false },
+      });
+
+      if (openSeason) {
+        await tx.season.update({
+          where: { id: openSeason.id },
+          data: {
+            isClosed: true,
+            endDate: new Date(),
+          },
+        });
+      }
+
+      return tx.season.create({
+        data: {
+          year: new Date().getFullYear(),
+          startDate: new Date(),
+          isClosed: false,
+        },
+      });
+    });
+  }
 }

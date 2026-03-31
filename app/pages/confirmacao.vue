@@ -33,8 +33,11 @@
       </button>
     </div>
 
-    <div v-if="!sessionId && !loading" class="p-8 text-center bg-muted rounded-lg text-muted-foreground">
-      <p>Nenhuma sessão ativa. Crie uma sessão antes de confirmar presenças.</p>
+    <div v-if="!sessionId && !loading" class="p-8 text-center bg-muted rounded-lg">
+      <p class="text-muted-foreground mb-4">Nenhuma sessão ativa. Crie uma sessão para confirmar presenças.</p>
+      <BaseButton v-if="canManageMatch()" variant="primary" :loading="creatingSession" @click="handleCreateSession">
+        Nova Sessão
+      </BaseButton>
     </div>
 
     <template v-else-if="sessionId">
@@ -50,9 +53,24 @@
       <AttendanceTable
         :attendances="attendances"
         :loading="loading"
-        :disabled="matchInProgress"
+        :disabled="matchInProgress || updating"
+        :show-actions="canEdit('attendance')"
         @update="onUpdate"
       />
+
+      <div v-if="canManageMatch()" class="mt-5">
+        <BaseButton
+          variant="primary"
+          :disabled="!canDraw"
+          :title="canDraw ? 'Ir para o sorteio de times' : `Mínimo de ${minPlayersForDraw} jogadores confirmados para sortear`"
+          @click="navigateTo('/sorteio')"
+        >
+          Sortear Times
+        </BaseButton>
+        <p v-if="!canDraw && confirmedCount > 0" class="text-xs text-muted-foreground mt-2">
+          {{ confirmedCount }} de {{ minPlayersForDraw }} jogadores confirmados para sortear.
+        </p>
+      </div>
 
       <p v-if="matchInProgress" class="text-xs text-muted-foreground mt-3">
         Alterações bloqueadas: partida em andamento.
@@ -62,23 +80,38 @@
 </template>
 
 <script setup lang="ts">
-const { getSessions } = useSessions()
+const { canManageMatch, canEdit } = usePermissions()
+const { getSessions, createSession } = useSessions()
 const { getAttendance, updateAttendance } = useAttendance()
+const { getSeasons } = useSeasons()
+const { getSettings } = useSettings()
 
 const sessionId = ref<number | null>(null)
 const attendances = ref<any[]>([])
 const loading = ref(true)
+const updating = ref(false)
+const creatingSession = ref(false)
 const search = ref('')
 const matchInProgress = ref(false)
 const errorMessage = ref('')
+const settings = ref<any>(null)
 
 const confirmedCount = computed(() =>
   attendances.value.filter((a: any) => a.status === 'ATIVO').length
 )
 
+const minPlayersForDraw = computed(() => {
+  if (!settings.value) return Infinity
+  return 2 * (settings.value.playersPerTeam ?? 5)
+})
+
+const canDraw = computed(() => confirmedCount.value >= minPlayersForDraw.value)
+
 onMounted(async () => {
   try {
-    const sessions = await getSessions()
+    const [sessions, settingsData] = await Promise.all([getSessions(), getSettings()])
+    settings.value = settingsData
+
     const active = (sessions as any[])
       .filter((s: any) => s.status !== 'FINISHED')
       .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
@@ -96,16 +129,47 @@ onMounted(async () => {
   }
 })
 
-async function fetchAttendance() {
+async function handleCreateSession() {
+  creatingSession.value = true
+  errorMessage.value = ''
+  try {
+    const [seasonsData, settingsData] = await Promise.all([getSeasons(), getSettings()])
+    settings.value = settingsData
+
+    const activeSeason = (seasonsData as any[]).find((s: any) => !s.isClosed)
+    if (!activeSeason) {
+      errorMessage.value = 'Nenhuma temporada ativa encontrada. Crie uma temporada antes.'
+      return
+    }
+
+    const s = settingsData as any
+    const session = await createSession({
+      seasonId: activeSeason.id,
+      durationMinutes: s?.sessionDurationMin ?? 60,
+      matchDurationMinutes: s?.matchDurationMin ?? 10,
+    }) as any
+
+    sessionId.value = session.id
+    matchInProgress.value = false
+    await fetchAttendance()
+  } catch (e) {
+    console.error('Erro ao criar sessão:', e)
+    errorMessage.value = 'Erro ao criar sessão. Tente novamente.'
+  } finally {
+    creatingSession.value = false
+  }
+}
+
+async function fetchAttendance(silent = false) {
   if (!sessionId.value) return
-  loading.value = true
+  if (!silent) loading.value = true
   try {
     attendances.value = (await getAttendance(sessionId.value, search.value || undefined)) as any[]
   } catch (e) {
     console.error('Erro ao buscar presenças:', e)
     errorMessage.value = 'Erro ao buscar lista de presenças. Tente novamente.'
   } finally {
-    loading.value = false
+    if (!silent) loading.value = false
   }
 }
 
@@ -114,12 +178,15 @@ watch(search, () => fetchAttendance())
 async function onUpdate(playerId: number, status: string) {
   if (!sessionId.value) return
   errorMessage.value = ''
+  updating.value = true
   try {
     await updateAttendance(sessionId.value, playerId, { status })
-    await fetchAttendance()
+    await fetchAttendance(true)
   } catch (e) {
     console.error('Erro ao atualizar presença:', e)
     errorMessage.value = 'Erro ao atualizar presença do jogador. Tente novamente.'
+  } finally {
+    updating.value = false
   }
 }
 </script>

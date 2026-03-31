@@ -12,7 +12,7 @@
             <TableHead>ELO</TableHead>
             <TableHead>Gols</TableHead>
             <TableHead>Jogos</TableHead>
-            <TableHead>Ações</TableHead>
+            <TableHead v-if="showActions">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -24,7 +24,7 @@
             <TableCell>{{ player.elo ?? '—' }}</TableCell>
             <TableCell>{{ player.goals ?? 0 }}</TableCell>
             <TableCell>{{ player.games ?? 0 }}</TableCell>
-            <TableCell>
+            <TableCell v-if="showActions">
               <div class="flex gap-2">
                 <BaseButton size="sm" variant="secondary" @click="emit('edit', player)">Editar</BaseButton>
                 <BaseButton size="sm" variant="danger" @click="emit('delete', player)">Excluir</BaseButton>
@@ -32,7 +32,7 @@
             </TableCell>
           </TableRow>
           <TableRow v-if="!players.length">
-            <TableCell colspan="8" class="text-center text-muted-foreground p-6 text-sm">
+            <TableCell :colspan="showActions ? 8 : 7" class="text-center text-muted-foreground p-6 text-sm">
               Nenhum jogador encontrado.
             </TableCell>
           </TableRow>
@@ -45,10 +45,13 @@
 <script setup lang="ts">
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
-defineProps<{
+withDefaults(defineProps<{
   players: any[]
   loading: boolean
-}>()
+  showActions?: boolean
+}>(), {
+  showActions: true,
+})
 
 const emit = defineEmits<{
   edit: [player: any]

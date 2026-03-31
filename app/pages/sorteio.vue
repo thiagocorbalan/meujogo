@@ -41,7 +41,7 @@
       </div>
 
       <!-- Draw controls -->
-      <div class="flex flex-wrap items-center gap-4 bg-white border rounded-lg p-5 mb-6">
+      <div v-if="canManageMatch()" class="flex flex-wrap items-center gap-4 bg-white border rounded-lg p-5 mb-6">
         <fieldset class="border-none p-0 m-0 flex items-center gap-4">
           <legend class="text-sm font-semibold text-foreground mr-2 float-left">Modo de sorteio</legend>
           <label class="flex items-center gap-1.5 text-sm text-foreground cursor-pointer">
@@ -93,6 +93,7 @@
 </template>
 
 <script setup lang="ts">
+const { canManageMatch } = usePermissions()
 const { getSessions } = useSessions()
 const { getSettings } = useSettings()
 const { getTeams, drawTeams } = useTeams()

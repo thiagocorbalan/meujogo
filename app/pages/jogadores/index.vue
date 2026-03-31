@@ -2,7 +2,7 @@
   <div class="max-w-[1100px] mx-auto p-6">
     <div class="flex items-center justify-between mb-5">
       <h1 class="text-3xl font-bold text-foreground">Jogadores</h1>
-      <BaseButton @click="openNew">Novo Jogador</BaseButton>
+      <BaseButton v-if="canCreate('players')" @click="openNew">Novo Jogador</BaseButton>
     </div>
 
     <div v-if="error" class="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive text-sm mb-4">
@@ -13,7 +13,7 @@
       <SearchInput v-model="search" placeholder="Buscar jogador..." />
     </div>
 
-    <PlayersPlayerTable :players="filtered" :loading="store.loading" @edit="openEdit" @delete="confirmDelete" />
+    <PlayersPlayerTable :players="filtered" :loading="store.loading" :show-actions="canEdit('players')" @edit="openEdit" @delete="confirmDelete" />
 
     <PlayersPlayerForm :show="showForm" :player="editing" @save="onSave" @close="closeForm" />
 
@@ -29,6 +29,7 @@
 
 <script setup lang="ts">
 const store = usePlayersStore()
+const { canCreate, canEdit, canDelete } = usePermissions()
 const search = ref('')
 const showForm = ref(false)
 const editing = ref<any>(null)

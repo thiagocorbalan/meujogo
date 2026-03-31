@@ -1,7 +1,10 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { StatsService } from './stats.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
 
 @Controller('stats')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class StatsController {
   constructor(private readonly statsService: StatsService) {}
 

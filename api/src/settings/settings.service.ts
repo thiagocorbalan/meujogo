@@ -48,4 +48,21 @@ export class SettingsService {
       include: { vests: true },
     });
   }
+
+  async resetData() {
+    await this.prisma.$transaction(async (tx) => {
+      await tx.goal.deleteMany();
+      await tx.matchEvent.deleteMany();
+      await tx.match.deleteMany();
+      await tx.champion.deleteMany();
+      await tx.teamPlayer.deleteMany();
+      await tx.team.deleteMany();
+      await tx.attendance.deleteMany();
+      await tx.session.deleteMany();
+      await tx.season.deleteMany();
+      await tx.player.deleteMany();
+    });
+
+    return { message: 'Dados resetados com sucesso.' };
+  }
 }

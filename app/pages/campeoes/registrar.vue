@@ -43,7 +43,7 @@
       <div class="mb-8 bg-white border rounded-lg p-6">
         <h2 class="text-lg font-semibold text-foreground mb-3">Foto do Campeao</h2>
 
-        <div v-if="!photoFile && !champion.photoUrl" class="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors" @click="triggerFileInput" @dragover.prevent @drop.prevent="onDrop">
+        <div v-if="canCreate('champions') && !photoFile && !champion.photoUrl" class="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors" @click="triggerFileInput" @dragover.prevent @drop.prevent="onDrop">
           <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" @change="onFileSelect" />
           <p class="text-muted-foreground text-sm mb-1">Arraste uma imagem ou clique para selecionar</p>
           <p class="text-muted-foreground text-xs">JPG, PNG ou WebP (max 5MB)</p>
@@ -51,7 +51,7 @@
 
         <div v-if="photoPreview" class="mt-4">
           <img :src="photoPreview" alt="Preview" class="max-h-[240px] rounded-lg mx-auto object-cover" />
-          <div class="flex justify-center mt-3 gap-2">
+          <div v-if="canCreate('champions')" class="flex justify-center mt-3 gap-2">
             <BaseButton variant="secondary" size="sm" @click="clearPhoto">Trocar</BaseButton>
           </div>
         </div>
@@ -63,7 +63,7 @@
 
       <!-- Actions -->
       <div class="flex justify-center gap-4">
-        <BaseButton variant="primary" size="md" :loading="saving" :disabled="!photoFile" @click="handleSave">
+        <BaseButton v-if="canCreate('champions')" variant="primary" size="md" :loading="saving" :disabled="!photoFile" @click="handleSave">
           Salvar Foto e Finalizar
         </BaseButton>
         <BaseButton variant="secondary" size="md" @click="navigateTo('/campeoes')">
@@ -82,6 +82,7 @@
 </template>
 
 <script setup lang="ts">
+const { canCreate } = usePermissions()
 const route = useRoute()
 const { getSessionChampion, uploadChampionPhoto } = useChampions()
 const { getSessionRanking } = useRanking()

@@ -2,7 +2,7 @@
   <div class="max-w-[900px] mx-auto p-6">
     <div class="flex items-center justify-between mb-5">
       <h1 class="text-3xl font-bold text-foreground">Usuários</h1>
-      <BaseButton @click="openNew">Novo Usuário</BaseButton>
+      <BaseButton v-if="canCreate('users')" @click="openNew">Novo Usuário</BaseButton>
     </div>
 
     <div v-if="error" class="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive text-sm mb-4">
@@ -18,7 +18,7 @@
             <TableHead>Nome</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Papel</TableHead>
-            <TableHead>Ações</TableHead>
+            <TableHead v-if="canEdit('users') || canDelete('users')">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -28,10 +28,10 @@
             <TableCell>
               <Badge :variant="roleBadgeVariant(u.role)">{{ u.role }}</Badge>
             </TableCell>
-            <TableCell>
+            <TableCell v-if="canEdit('users') || canDelete('users')">
               <div class="flex gap-2">
-                <BaseButton size="sm" variant="secondary" @click="openEdit(u)">Editar</BaseButton>
-                <BaseButton size="sm" variant="danger" @click="confirmDelete(u)">Excluir</BaseButton>
+                <BaseButton v-if="canEdit('users')" size="sm" variant="secondary" @click="openEdit(u)">Editar</BaseButton>
+                <BaseButton v-if="canDelete('users')" size="sm" variant="danger" @click="confirmDelete(u)">Excluir</BaseButton>
               </div>
             </TableCell>
           </TableRow>
@@ -52,9 +52,28 @@
           <Label>Email</Label>
           <Input v-model="form.email" type="email" required />
         </div>
-        <div v-if="!editingUser" class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1">
           <Label>Senha</Label>
-          <Input v-model="form.password" type="password" required />
+          <div class="relative">
+            <Input
+              v-model="form.password"
+              :type="showPassword ? 'text' : 'password'"
+              :required="!editingUser"
+              :placeholder="editingUser ? 'Deixe em branco para manter a atual' : ''"
+              class="pr-10"
+              @input="validatePassword"
+            />
+            <button
+              type="button"
+              class="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-muted-foreground hover:text-foreground p-1"
+              :aria-label="showPassword ? 'Ocultar senha' : 'Mostrar senha'"
+              @click="showPassword = !showPassword"
+            >
+              <EyeOff v-if="showPassword" class="w-4 h-4" />
+              <Eye v-else class="w-4 h-4" />
+            </button>
+          </div>
+          <p v-if="passwordError" class="text-xs text-destructive mt-1">{{ passwordError }}</p>
         </div>
         <div class="flex flex-col gap-1">
           <Label>Papel</Label>
@@ -87,7 +106,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Eye, EyeOff } from 'lucide-vue-next'
 
+const { canCreate, canEdit, canDelete } = usePermissions()
 const { getUsers, createUser, updateUser, deleteUser } = useUsers()
 
 const users = ref<any[]>([])
@@ -99,6 +120,8 @@ const showDeleteConfirm = ref(false)
 const deleting = ref<any>(null)
 
 const form = ref({ name: '', email: '', password: '', role: 'USUARIO' })
+const showPassword = ref(false)
+const passwordError = ref<string | null>(null)
 
 onMounted(async () => {
   try {
@@ -119,28 +142,58 @@ function roleBadgeVariant(role: string) {
   return (map[role] ?? 'secondary') as any
 }
 
+function validatePassword() {
+  if (!form.value.password) {
+    passwordError.value = null
+    return true
+  }
+  if (form.value.password.length < 8) {
+    passwordError.value = 'A senha deve ter no mínimo 8 caracteres.'
+    return false
+  }
+  passwordError.value = null
+  return true
+}
+
 function openNew() {
   editingUser.value = null
   form.value = { name: '', email: '', password: '', role: 'USUARIO' }
+  showPassword.value = false
+  passwordError.value = null
   showForm.value = true
 }
 
 function openEdit(user: any) {
   editingUser.value = user
   form.value = { name: user.name, email: user.email, password: '', role: user.role }
+  showPassword.value = false
+  passwordError.value = null
   showForm.value = true
 }
 
 function closeForm() {
   showForm.value = false
   editingUser.value = null
+  showPassword.value = false
+  passwordError.value = null
 }
 
 async function onSave() {
   error.value = null
+
+  // Validate password
+  if (form.value.password && !validatePassword()) return
+  if (!editingUser.value && !form.value.password) {
+    passwordError.value = 'A senha é obrigatória para novos usuários.'
+    return
+  }
+
   try {
     if (editingUser.value) {
       const payload: any = { name: form.value.name, email: form.value.email, role: form.value.role }
+      if (form.value.password) {
+        payload.password = form.value.password
+      }
       const updated = await updateUser(editingUser.value.id, payload)
       const idx = users.value.findIndex((u: any) => u.id === editingUser.value.id)
       if (idx !== -1) users.value[idx] = updated

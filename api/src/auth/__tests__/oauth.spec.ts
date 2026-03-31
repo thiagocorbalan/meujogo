@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
+import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { UsersService } from '../../users/users.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -11,6 +12,11 @@ jest.mock('bcrypt', () => ({
 
 jest.mock('crypto', () => ({
   randomUUID: jest.fn().mockReturnValue('mock-uuid'),
+  createHash: jest.fn().mockReturnValue({
+    update: jest.fn().mockReturnValue({
+      digest: jest.fn().mockReturnValue('hashed-mock-uuid'),
+    }),
+  }),
 }));
 
 describe('AuthService - validateOAuthUser', () => {
@@ -99,11 +105,22 @@ describe('AuthService - validateOAuthUser', () => {
       });
     });
 
-    it('should link to existing user by email', async () => {
+    it('should throw UnauthorizedException when linking to user with password', async () => {
       (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
       (usersService.findByEmail as jest.Mock).mockResolvedValue(baseMockUser as any);
+
+      await expect(
+        service.validateOAuthUser(googleProfile, 'google'),
+      ).rejects.toThrow(UnauthorizedException);
+      expect(prismaService.user.update).not.toHaveBeenCalled();
+    });
+
+    it('should link to existing OAuth-only user by email', async () => {
+      const oauthOnlyUser = { ...baseMockUser, password: null };
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(oauthOnlyUser as any);
       (prismaService.user.update as jest.Mock).mockResolvedValue({
-        ...baseMockUser,
+        ...oauthOnlyUser,
         googleId: 'google-id-123',
       });
 
@@ -151,11 +168,22 @@ describe('AuthService - validateOAuthUser', () => {
       });
     });
 
-    it('should link to existing user', async () => {
+    it('should throw UnauthorizedException when linking to user with password', async () => {
       (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
       (usersService.findByEmail as jest.Mock).mockResolvedValue(baseMockUser as any);
+
+      await expect(
+        service.validateOAuthUser(appleProfile, 'apple'),
+      ).rejects.toThrow(UnauthorizedException);
+      expect(prismaService.user.update).not.toHaveBeenCalled();
+    });
+
+    it('should link to existing OAuth-only user', async () => {
+      const oauthOnlyUser = { ...baseMockUser, password: null };
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(oauthOnlyUser as any);
       (prismaService.user.update as jest.Mock).mockResolvedValue({
-        ...baseMockUser,
+        ...oauthOnlyUser,
         appleId: 'apple-id-456',
       });
 
@@ -188,11 +216,25 @@ describe('AuthService - validateOAuthUser', () => {
       expect(prismaService.user.update).not.toHaveBeenCalled();
     });
 
-    it('should update appleId on existing user found by email', async () => {
+    it('should throw UnauthorizedException when linking appleId to user with password', async () => {
       (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
       (usersService.findByEmail as jest.Mock).mockResolvedValue(baseMockUser as any);
+
+      await expect(
+        service.validateOAuthUser(
+          { email: 'existing@example.com', name: 'Existing User', providerId: 'apple-id-new' },
+          'apple',
+        ),
+      ).rejects.toThrow(UnauthorizedException);
+      expect(prismaService.user.update).not.toHaveBeenCalled();
+    });
+
+    it('should update appleId on existing OAuth-only user found by email', async () => {
+      const oauthOnlyUser = { ...baseMockUser, password: null };
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(oauthOnlyUser as any);
       (prismaService.user.update as jest.Mock).mockResolvedValue({
-        ...baseMockUser,
+        ...oauthOnlyUser,
         appleId: 'apple-id-new',
       });
 

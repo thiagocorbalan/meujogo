@@ -84,13 +84,19 @@ export class AuthService {
 
     const newAccessToken = this.jwtService.sign(
       { sub: user.id, role: user.role },
-      {
-        secret: process.env.JWT_SECRET,
-        expiresIn: '15m',
-      },
+      { secret: process.env.JWT_SECRET, expiresIn: '15m' },
     );
 
-    return { accessToken: newAccessToken };
+    // Rotate refresh token
+    const newRefreshToken = this.jwtService.sign(
+      { sub: user.id, role: user.role },
+      { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' },
+    );
+
+    const hashedRefreshToken = await bcrypt.hash(newRefreshToken, 10);
+    await this.usersService.updateRefreshToken(user.id, hashedRefreshToken);
+
+    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
   }
 
   async logout(userId: number) {
@@ -104,17 +110,30 @@ export class AuthService {
     }
 
     const resetToken = crypto.randomUUID();
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
     const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000);
 
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { resetToken, resetTokenExpiry },
+      data: { resetToken: hashedToken, resetTokenExpiry },
     });
+
+    // The unhashed resetToken would be sent to the user via email
+    // Return it here so the caller (controller) can include it in the email
+    return resetToken;
   }
 
   async resetPassword(token: string, newPassword: string) {
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
     const user = await this.prisma.user.findFirst({
-      where: { resetToken: token },
+      where: { resetToken: hashedToken },
     });
 
     if (!user) {
@@ -155,6 +174,13 @@ export class AuthService {
     user = await this.usersService.findByEmail(profile.email);
 
     if (user) {
+      // If user has a password (local account), don't auto-link — require login first
+      if (user.password) {
+        throw new UnauthorizedException(
+          'Uma conta com este email já existe. Faça login com sua senha para vincular sua conta.',
+        );
+      }
+      // If user has no password (OAuth-only), safe to link
       user = await this.prisma.user.update({
         where: { id: user.id },
         data: { [providerIdField]: profile.providerId },

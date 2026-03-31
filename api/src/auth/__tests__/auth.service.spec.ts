@@ -13,6 +13,11 @@ jest.mock('bcrypt', () => ({
 
 jest.mock('crypto', () => ({
   randomUUID: jest.fn().mockReturnValue('mock-uuid'),
+  createHash: jest.fn().mockReturnValue({
+    update: jest.fn().mockReturnValue({
+      digest: jest.fn().mockReturnValue('hashed-mock-uuid'),
+    }),
+  }),
 }));
 
 describe('AuthService', () => {
@@ -148,15 +153,19 @@ describe('AuthService', () => {
   });
 
   describe('refreshToken', () => {
-    it('should return new accessToken for valid token', async () => {
+    it('should return new accessToken and rotated refreshToken for valid token', async () => {
       (jwtService.verify as jest.Mock).mockReturnValue({ sub: 1, role: 'USUARIO' });
       (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      (jwtService.sign as jest.Mock).mockReturnValue('new-access-token');
+      (jwtService.sign as jest.Mock)
+        .mockReturnValueOnce('new-access-token')
+        .mockReturnValueOnce('new-refresh-token');
 
       const result = await service.refreshToken('valid-refresh-token');
 
       expect(result.accessToken).toBe('new-access-token');
+      expect(result.refreshToken).toBe('new-refresh-token');
+      expect(usersService.updateRefreshToken).toHaveBeenCalledWith(1, 'hashed-value');
     });
 
     it('should throw UnauthorizedException for invalid token', async () => {
@@ -190,7 +199,7 @@ describe('AuthService', () => {
       expect(prismaService.user.update).toHaveBeenCalledWith({
         where: { id: 1 },
         data: {
-          resetToken: 'mock-uuid',
+          resetToken: 'hashed-mock-uuid',
           resetTokenExpiry: expect.any(Date),
         },
       });
@@ -276,11 +285,22 @@ describe('AuthService', () => {
       });
     });
 
-    it('should link to existing user by email', async () => {
+    it('should throw UnauthorizedException when linking to user with password', async () => {
       (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
       (usersService.findByEmail as jest.Mock).mockResolvedValue(mockUser as any);
+
+      await expect(
+        service.validateOAuthUser(profile, 'google'),
+      ).rejects.toThrow(UnauthorizedException);
+      expect(prismaService.user.update).not.toHaveBeenCalled();
+    });
+
+    it('should link to existing OAuth-only user by email', async () => {
+      const oauthOnlyUser = { ...mockUser, password: null };
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(oauthOnlyUser as any);
       (prismaService.user.update as jest.Mock).mockResolvedValue({
-        ...mockUser,
+        ...oauthOnlyUser,
         googleId: 'google-123',
       });
 

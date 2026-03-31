@@ -48,17 +48,13 @@ export function getNextMatch(
         ? last.teamBId
         : last.teamAId;
 
-  // Teams that were just playing
   const playingIds = new Set([last.teamAId, last.teamBId]);
 
-  // Queue: teams not currently playing, in original order
   const waiting = teams.filter((t) => !playingIds.has(t.id));
 
-  // Determine which team stays (winner) and which rotates out (loser)
   const winnerTeam = teams.find((t) => t.id === winnerId) ?? null;
   const loserTeam = loserId !== null ? (teams.find((t) => t.id === loserId) ?? null) : null;
 
-  // Draw case: both teams rotate normally — treat teamA as loser for rotation purposes
   const stayingTeam =
     winnerId === null
       ? teams.find((t) => t.id === last.teamAId) ?? null
@@ -68,18 +64,15 @@ export function getNextMatch(
       ? teams.find((t) => t.id === last.teamBId) ?? null
       : loserTeam;
 
-  // Build queue: waiting teams first, then the rotating-out team
   const queue: Team[] = [
     ...waiting,
     ...(rotatingOutTeam ? [rotatingOutTeam] : []),
   ];
 
-  // Check if staying team must be force-rotated
   if (
     stayingTeam &&
     shouldForceRotation(stayingTeam.id, matchHistory, maxConsecutiveGames)
   ) {
-    // Force staying team to back of queue, next two in queue play
     const fullQueue: Team[] = [...queue, stayingTeam];
     if (fullQueue.length < 2) return null;
     return { teamA: fullQueue[0], teamB: fullQueue[1] };

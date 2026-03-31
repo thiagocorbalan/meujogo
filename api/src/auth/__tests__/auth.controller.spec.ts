@@ -20,6 +20,27 @@ describe('AuthController', () => {
     user: mockUser,
   };
 
+  function createMockResponse() {
+    const cookies: Array<{
+      name: string;
+      value: string;
+      options: Record<string, any>;
+    }> = [];
+    const clearedCookies: Array<{ name: string; options?: any }> = [];
+
+    return {
+      cookie: jest.fn((name: string, value: string, options: any) => {
+        cookies.push({ name, value, options });
+      }),
+      clearCookie: jest.fn((name: string, options?: any) => {
+        clearedCookies.push({ name, options });
+      }),
+      redirect: jest.fn(),
+      getCookies: () => cookies,
+      getClearedCookies: () => clearedCookies,
+    };
+  }
+
   beforeEach(async () => {
     authService = {
       validateUser: jest.fn(),
@@ -44,15 +65,16 @@ describe('AuthController', () => {
 
   describe('POST /auth/login', () => {
     it('should return 200 with tokens for valid credentials', async () => {
-      authService.validateUser!.mockResolvedValue(mockUser);
-      authService.login!.mockResolvedValue(mockTokens);
+      (authService.validateUser as jest.Mock).mockResolvedValue(mockUser);
+      (authService.login as jest.Mock).mockResolvedValue(mockTokens);
+      const res = createMockResponse();
 
-      const result = await controller.login({
-        email: 'test@example.com',
-        password: 'password123',
-      });
+      const result = await controller.login(
+        { email: 'test@example.com', password: 'password123' },
+        res as any,
+      );
 
-      expect(result).toEqual(mockTokens);
+      expect(result).toEqual({ user: mockUser });
       expect(authService.validateUser).toHaveBeenCalledWith(
         'test@example.com',
         'password123',
@@ -61,37 +83,43 @@ describe('AuthController', () => {
     });
 
     it('should throw 401 for invalid credentials', async () => {
-      authService.validateUser!.mockResolvedValue(null);
+      (authService.validateUser as jest.Mock).mockResolvedValue(null);
+      const res = createMockResponse();
 
       await expect(
-        controller.login({
-          email: 'test@example.com',
-          password: 'wrong-password',
-        }),
+        controller.login(
+          { email: 'test@example.com', password: 'wrong-password' },
+          res as any,
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
 
   describe('POST /auth/refresh', () => {
     it('should return 200 with new access token', async () => {
-      authService.refreshToken!.mockResolvedValue({
+      (authService.refreshToken as jest.Mock).mockResolvedValue({
         accessToken: 'new-access-token',
       });
+      const req = { cookies: {} } as any;
+      const res = createMockResponse();
 
-      const result = await controller.refresh({
-        refreshToken: 'valid-refresh-token',
-      });
+      const result = await controller.refresh(
+        { refreshToken: 'valid-refresh-token' },
+        req,
+        res as any,
+      );
 
-      expect(result.accessToken).toBe('new-access-token');
+      expect(result).toEqual({ message: 'Token atualizado com sucesso' });
     });
   });
 
   describe('POST /auth/logout', () => {
     it('should return 200', async () => {
-      authService.logout!.mockResolvedValue(undefined);
+      (authService.logout as jest.Mock).mockResolvedValue(undefined);
+      const res = createMockResponse();
 
       const req = { user: { id: 1 } };
-      const result = await controller.logout(req);
+      const result = await controller.logout(req, res as any);
 
       expect(result).toEqual({ message: 'Logout realizado com sucesso' });
       expect(authService.logout).toHaveBeenCalledWith(1);
@@ -100,7 +128,7 @@ describe('AuthController', () => {
 
   describe('POST /auth/forgot-password', () => {
     it('should return 200 always', async () => {
-      authService.forgotPassword!.mockResolvedValue(undefined);
+      (authService.forgotPassword as jest.Mock).mockResolvedValue(undefined);
 
       const result = await controller.forgotPassword({
         email: 'test@example.com',
@@ -114,7 +142,7 @@ describe('AuthController', () => {
 
   describe('POST /auth/reset-password', () => {
     it('should return 200 with valid token', async () => {
-      authService.resetPassword!.mockResolvedValue(undefined);
+      (authService.resetPassword as jest.Mock).mockResolvedValue(undefined);
 
       const result = await controller.resetPassword({
         token: 'valid-token',

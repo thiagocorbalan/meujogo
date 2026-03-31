@@ -6,19 +6,9 @@ services:
     container_name: matchsoccer-api
     ports:
       - '3000:3000'
+    env_file: .env
     environment:
-      NODE_ENV: development
-      PORT: 3000
-      DATABASE_URL: postgresql://matchsoccer:matchsoccer@postgres:5432/matchsoccer?schema=public
-      JWT_SECRET: matchsoccer-jwt-secret-dev-only-change-in-production
-      JWT_REFRESH_SECRET: matchsoccer-jwt-refresh-secret-dev-only-change-in-production
-      GOOGLE_CLIENT_ID: your-google-client-id
-      GOOGLE_CLIENT_SECRET: your-google-client-secret
-      GOOGLE_CALLBACK_URL: http://localhost:3000/auth/google/callback
-      APPLE_CLIENT_ID: your-apple-client-id
-      APPLE_TEAM_ID: your-apple-team-id
-      APPLE_KEY_ID: your-apple-key-id
-      APPLE_CALLBACK_URL: http://localhost:3000/auth/apple/callback
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
     volumes:
       - ./api:/app
       - /app/node_modules
@@ -36,9 +26,10 @@ services:
     container_name: matchsoccer-app
     ports:
       - '4000:4000'
+    env_file: .env
     environment:
-      API_BASE_URL: http://api:3000
-      PUBLIC_API_BASE_URL: http://localhost:3000
+      API_BASE_URL: ${API_BASE_URL:-http://api:3000}
+      PUBLIC_API_BASE_URL: ${PUBLIC_API_BASE_URL:-http://localhost:3000}
     volumes:
       - ./app:/app
       - /app/node_modules
@@ -54,13 +45,13 @@ services:
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_USER: matchsoccer
-      POSTGRES_PASSWORD: matchsoccer
-      POSTGRES_DB: matchsoccer
+      POSTGRES_USER: ${POSTGRES_USER:-matchsoccer}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-matchsoccer}
+      POSTGRES_DB: ${POSTGRES_DB:-matchsoccer}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U matchsoccer -d matchsoccer']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-matchsoccer} -d ${POSTGRES_DB:-matchsoccer}']
       interval: 5s
       timeout: 5s
       retries: 5

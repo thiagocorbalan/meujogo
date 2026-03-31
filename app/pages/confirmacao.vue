@@ -1,9 +1,7 @@
 <template>
   <div class="max-w-[1100px] mx-auto p-6">
     <h1 class="text-3xl font-bold text-foreground mb-5">Confirmação de Presença</h1>
-
-    <!-- Error banner -->
-    <div
+<div
       v-if="errorMessage"
       class="flex items-start gap-3 p-4 mb-6 bg-red-50 border border-red-200 rounded-lg text-red-800"
       role="alert"

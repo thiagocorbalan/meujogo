@@ -6,7 +6,7 @@
           <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
             MS
           </div>
-          <span class="text-2xl font-bold text-foreground">MatchSoccer</span>
+          <span class="text-2xl font-bold text-foreground">Meu Jogo</span>
         </div>
         <CardTitle class="text-xl">Recuperar senha</CardTitle>
         <CardDescription>
@@ -15,17 +15,14 @@
       </CardHeader>
 
       <CardContent class="flex flex-col gap-4">
-        <!-- Error message -->
-        <div
+<div
           v-if="errorMessage"
           class="rounded-lg border border-destructive bg-destructive/10 p-3 text-destructive text-sm"
           role="alert"
         >
           {{ errorMessage }}
         </div>
-
-        <!-- Success message -->
-        <div
+<div
           v-if="sent"
           class="rounded-lg border border-green-500 bg-green-500/10 p-3 text-green-600 text-sm"
           role="status"
@@ -34,8 +31,7 @@
         </div>
 
         <form v-if="!sent" @submit.prevent="handleSubmit" class="flex flex-col gap-4">
-          <!-- Email -->
-          <div class="flex flex-col gap-1.5">
+<div class="flex flex-col gap-1.5">
             <Label for="email">Email</Label>
             <Input
               id="email"
@@ -48,9 +44,7 @@
             />
             <p v-if="emailError" class="text-xs text-destructive">{{ emailError }}</p>
           </div>
-
-          <!-- Submit -->
-          <BaseButton
+<BaseButton
             type="submit"
             :loading="isLoading"
             :disabled="isLoading"
@@ -59,9 +53,7 @@
             Enviar link de recuperacao
           </BaseButton>
         </form>
-
-        <!-- Back to login -->
-        <div class="text-center">
+<div class="text-center">
           <NuxtLink
             to="/login"
             class="text-sm text-primary hover:underline"
@@ -115,7 +107,6 @@ async function handleSubmit() {
     await forgotPassword(email.value)
     sent.value = true
   } catch (e: any) {
-    // Always show success to avoid email enumeration
     sent.value = true
   } finally {
     isLoading.value = false

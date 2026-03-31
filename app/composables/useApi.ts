@@ -1,71 +1,93 @@
+
+function getCookie(name: string): string | null {
+  if (import.meta.server) return null
+  const match = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)'))
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+const STATE_CHANGING_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
+
+let csrfToken: string | null = null
+
+async function fetchCsrfToken(baseURL: string): Promise<string | null> {
+  const fromCookie = getCookie('csrf-token') || getCookie('XSRF-TOKEN')
+  if (fromCookie) {
+    csrfToken = fromCookie
+    return csrfToken
+  }
+
+  try {
+    const result = await $fetch<{ token: string }>('/auth/csrf-token', {
+      baseURL,
+      credentials: 'include',
+    })
+    csrfToken = result.token
+    return csrfToken
+  } catch {
+    return null
+  }
+}
+
 export function useApi() {
   const config = useRuntimeConfig()
   const baseURL = import.meta.server
     ? config.apiBaseUrl
     : config.public.apiBaseUrl
 
-  const authEndpoints = [
-    '/auth/login',
-    '/auth/refresh',
-    '/auth/forgot-password',
-    '/auth/reset-password',
-  ]
-
   return {
     baseURL,
-    fetch: async (path: string, opts?: Parameters<typeof $fetch>[1]) => {
+    fetch: async <T = any>(path: string, opts?: Parameters<typeof $fetch>[1]): Promise<T> => {
       const headers: Record<string, string> = {}
+      const method = ((opts?.method as string) || 'GET').toUpperCase()
 
-      // Add auth header if not an auth endpoint
-      if (!authEndpoints.includes(path)) {
-        try {
-          const authStore = useAuthStore()
-          if (authStore.accessToken) {
-            headers['Authorization'] = `Bearer ${authStore.accessToken}`
-          }
-        } catch {
-          // Store might not be initialized (SSR)
+      if (STATE_CHANGING_METHODS.includes(method)) {
+        const token = csrfToken || getCookie('csrf-token') || getCookie('XSRF-TOKEN')
+        if (token) {
+          headers['X-CSRF-Token'] = token
+          csrfToken = token
         }
       }
 
       try {
-        return await $fetch(path, {
+        return await $fetch<T>(path, {
           baseURL,
+          credentials: 'include',
           headers,
           ...opts,
         })
       } catch (error: any) {
-        // Handle 401 - try token refresh
-        if (error?.status === 401 && !authEndpoints.includes(path)) {
-          try {
-            const authStore = useAuthStore()
-            if (authStore.refreshToken) {
-              const refreshResult: any = await $fetch('/auth/refresh', {
-                baseURL,
-                method: 'POST',
-                body: { refreshToken: authStore.refreshToken },
-              })
-              authStore.setTokens(
-                refreshResult.accessToken,
-                authStore.refreshToken,
-              )
+        if (error?.status === 403 && STATE_CHANGING_METHODS.includes(method)) {
+          const newToken = await fetchCsrfToken(baseURL)
+          if (newToken) {
+            headers['X-CSRF-Token'] = newToken
+            return await $fetch<T>(path, {
+              baseURL,
+              credentials: 'include',
+              headers,
+              ...opts,
+            })
+          }
+        }
 
-              // Retry original request with new token
-              return await $fetch(path, {
-                baseURL,
-                headers: {
-                  Authorization: `Bearer ${refreshResult.accessToken}`,
-                },
-                ...opts,
-              })
-            }
+        if (error?.status === 401) {
+          try {
+            await $fetch('/auth/refresh', {
+              baseURL,
+              method: 'POST',
+              credentials: 'include',
+            })
+
+            return await $fetch<T>(path, {
+              baseURL,
+              credentials: 'include',
+              headers,
+              ...opts,
+            })
           } catch {
-            // Refresh failed - clear auth state
             try {
               const authStore = useAuthStore()
               authStore.clearAuth()
             } catch {
-              // Store not available
             }
           }
         }

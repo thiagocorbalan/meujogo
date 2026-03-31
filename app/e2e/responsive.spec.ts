@@ -1,17 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-/**
- * Testes de layout responsivo.
- *
- * Verifica que o dashboard renderiza corretamente em cada viewport
- * e que a sidebar se comporta de acordo com o breakpoint:
- * - Mobile (390×844): sidebar oculta por padrão (translateX(-100%))
- * - Tablet (820×1180): sidebar oculta por padrão (mesmo comportamento que mobile)
- * - Desktop (1280×720): sidebar visível por padrão
- *
- * Os testes são independentes da API — verificam apenas estrutura de UI.
- */
-
 test.describe('Responsividade — Mobile (390×844)', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
@@ -22,9 +10,7 @@ test.describe('Responsividade — Mobile (390×844)', () => {
 
   test('Cards de estatísticas estão presentes no DOM', async ({ page }) => {
     await page.goto('/');
-    // Aguarda carregamento inicial terminar
     await page.waitForLoadState('networkidle');
-    // Os cards de stats existem na estrutura — a visibilidade depende da API
     const statsContainer = page.locator('.dashboard__stats, [class*="stats"]').first();
     await expect(statsContainer).toBeAttached();
   });
@@ -33,7 +19,6 @@ test.describe('Responsividade — Mobile (390×844)', () => {
     await page.goto('/');
     const sidebar = page.locator('.sidebar');
     await expect(sidebar).toBeAttached();
-    // No mobile a sidebar não tem a classe "open" — verificar que está fora da tela
     await expect(sidebar).not.toHaveClass(/\bopen\b/);
   });
 });
@@ -51,7 +36,6 @@ test.describe('Responsividade — Tablet (820×1180)', () => {
     page.on('pageerror', (err) => errors.push(err.message));
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    // Erros de rede da API são esperados — filtra apenas erros de JS críticos
     const jsErrors = errors.filter(
       (e) =>
         !e.includes('fetch') &&
@@ -89,7 +73,6 @@ test.describe('Responsividade — Desktop (1280×720)', () => {
     await page.goto('/');
     const sidebar = page.locator('.sidebar');
     await expect(sidebar).toBeAttached();
-    // No desktop a sidebar é visível — verifica que existe e contém links de navegação
     await expect(sidebar.locator('.nav-link').first()).toBeVisible();
   });
 });

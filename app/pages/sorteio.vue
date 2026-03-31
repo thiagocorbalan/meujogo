@@ -9,8 +9,7 @@
     </div>
 
     <template v-else-if="sessionId">
-      <!-- Error message -->
-      <div
+<div
         v-if="errorMessage"
         class="flex items-start gap-3 p-4 mb-6 bg-red-50 border border-red-200 rounded-lg text-red-800"
         role="alert"
@@ -39,9 +38,7 @@
           </svg>
         </button>
       </div>
-
-      <!-- Draw controls -->
-      <div v-if="canManageMatch()" class="flex flex-wrap items-center gap-4 bg-white border rounded-lg p-5 mb-6">
+<div v-if="canManageMatch()" class="flex flex-wrap items-center gap-4 bg-white border rounded-lg p-5 mb-6">
         <fieldset class="border-none p-0 m-0 flex items-center gap-4">
           <legend class="text-sm font-semibold text-foreground mr-2 float-left">Modo de sorteio</legend>
           <label class="flex items-center gap-1.5 text-sm text-foreground cursor-pointer">
@@ -72,9 +69,7 @@
       <p class="text-xs text-muted-foreground mb-6">
         Apenas jogadores de linha confirmados participam do sorteio. Goleiros são excluídos automaticamente.
       </p>
-
-      <!-- Results -->
-      <div v-if="teams.length > 0" class="mt-2">
+<div v-if="teams.length > 0" class="mt-2">
         <h2 class="text-xl font-semibold text-foreground mb-4">Times sorteados</h2>
         <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-4 mb-6">
           <TeamsTeamCard v-for="team in teams" :key="team.id" :team="team" />

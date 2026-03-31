@@ -13,7 +13,7 @@
       ]"
     >
       <div class="px-6 py-5 border-b border-white/10 mb-2">
-        <span class="text-xl font-bold text-white tracking-wide">MatchSoccer</span>
+        <span class="text-xl font-bold text-white tracking-wide">Meu Jogo</span>
         <p v-if="authStore.user" class="text-xs text-slate-400 mt-1 truncate">{{ authStore.user.name }}</p>
       </div>
       <ul class="list-none m-0 p-0 flex-1">

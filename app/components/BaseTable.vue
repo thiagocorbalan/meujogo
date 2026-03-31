@@ -15,7 +15,7 @@
             <TableCell v-for="col in columns" :key="col.key">{{ item[col.key] }}</TableCell>
           </template>
         </TableRow>
-        <TableRow v-if="data.length === 0">
+        <TableRow v-if="!data || data.length === 0">
           <TableCell :colspan="columns.length" class="text-center text-muted-foreground italic py-6">
             Nenhum registro encontrado.
           </TableCell>

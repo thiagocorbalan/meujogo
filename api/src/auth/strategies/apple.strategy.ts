@@ -36,8 +36,6 @@ export class AppleOAuthStrategy extends PassportStrategy(AppleStrategy, 'apple')
       return done(new Error('Invalid Apple ID token'), undefined);
     }
 
-    // Apple only sends name/email on the first login.
-    // On subsequent logins, we rely on the provider ID (sub) to find the user.
     const appleProfile = req.appleProfile as
       | { name?: { firstName?: string; lastName?: string }; email?: string }
       | undefined;
@@ -50,11 +48,9 @@ export class AppleOAuthStrategy extends PassportStrategy(AppleStrategy, 'apple')
       : undefined;
 
     if (!email) {
-      // If no email is available (subsequent login), look up by provider ID only.
-      // validateOAuthUser requires an email, so we attempt a direct lookup first.
       const user = await this.authService.validateOAuthUser(
         {
-          email: '', // Will match by providerId in validateOAuthUser
+          email: '',
           name: name || 'Apple User',
           providerId: decoded.sub,
         },

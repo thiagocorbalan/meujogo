@@ -3,7 +3,6 @@ import { mount } from '@vue/test-utils';
 import { ref } from 'vue';
 import ConfiguracoesPage from '../pages/configuracoes.vue';
 
-// Mock composables
 const mockResetData = vi.fn();
 const mockCloseAndRenewSeason = vi.fn();
 const mockGetSettings = vi.fn().mockResolvedValue({
@@ -36,11 +35,9 @@ vi.stubGlobal('useSeasons', () => ({
   closeAndRenewSeason: mockCloseAndRenewSeason,
 }));
 
-// Mock Nuxt auto-imports
 vi.stubGlobal('ref', ref);
 vi.stubGlobal('onMounted', (cb: () => void) => cb());
 
-// Stub UI components
 const stubComponents = {
   Card: { template: '<div class="card"><slot /></div>' },
   CardHeader: { template: '<div><slot /></div>' },
@@ -137,13 +134,11 @@ describe('Configurações - Gerenciamento de Dados', () => {
     await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
 
-    // Open modal
     const buttons = wrapper.findAll('button');
     const resetBtn = buttons.find((b) => b.text().includes('Resetar Dados'));
     await resetBtn!.trigger('click');
     await wrapper.vm.$nextTick();
 
-    // Click confirm
     const allButtons = wrapper.findAll('button');
     const confirmBtn = allButtons.find((b) => b.text().includes('Confirmar Reset'));
     await confirmBtn!.trigger('click');
@@ -157,13 +152,11 @@ describe('Configurações - Gerenciamento de Dados', () => {
     await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
 
-    // Open modal
     const buttons = wrapper.findAll('button');
     const seasonBtn = buttons.find((b) => b.text().includes('Encerrar Temporada Atual'));
     await seasonBtn!.trigger('click');
     await wrapper.vm.$nextTick();
 
-    // Click confirm
     const allButtons = wrapper.findAll('button');
     const confirmBtn = allButtons.find((b) => b.text() === 'Confirmar');
     await confirmBtn!.trigger('click');
@@ -179,7 +172,6 @@ describe('Configurações - Gerenciamento de Dados', () => {
     await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
 
-    // Open modal and confirm
     const buttons = wrapper.findAll('button');
     const resetBtn = buttons.find((b) => b.text().includes('Resetar Dados'));
     await resetBtn!.trigger('click');
@@ -189,11 +181,9 @@ describe('Configurações - Gerenciamento de Dados', () => {
     const confirmBtn = allButtons.find((b) => b.text().includes('Confirmar Reset'));
     await confirmBtn!.trigger('click');
 
-    // Wait for async
     await new Promise((r) => setTimeout(r, 10));
     await wrapper.vm.$nextTick();
 
-    // Modal should still be open with error
     const modal = wrapper.findAll('.modal').find((m) => m.text().includes('Confirmar Reset'));
     expect(modal).toBeTruthy();
     expect(wrapper.text()).toContain('Erro no servidor');
@@ -206,7 +196,6 @@ describe('Configurações - Gerenciamento de Dados', () => {
     await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
 
-    // Open modal and confirm
     const buttons = wrapper.findAll('button');
     const seasonBtn = buttons.find((b) => b.text().includes('Encerrar Temporada Atual'));
     await seasonBtn!.trigger('click');
@@ -216,11 +205,9 @@ describe('Configurações - Gerenciamento de Dados', () => {
     const confirmBtn = allButtons.find((b) => b.text() === 'Confirmar');
     await confirmBtn!.trigger('click');
 
-    // Wait for async
     await new Promise((r) => setTimeout(r, 10));
     await wrapper.vm.$nextTick();
 
-    // Modal should still be open with error
     const modal = wrapper.findAll('.modal').find((m) => m.text().includes('Confirmar'));
     expect(modal).toBeTruthy();
     expect(wrapper.text()).toContain('Temporada erro');

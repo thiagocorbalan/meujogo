@@ -1,4 +1,4 @@
-# MatchSoccer
+# Meu Jogo
 
 A web application for managing weekly soccer matches among friends. It handles player registration, attendance confirmation, team draws, live match tracking, scoring, ELO ratings, and season management.
 

@@ -6,7 +6,7 @@
           <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
             MS
           </div>
-          <span class="text-2xl font-bold text-foreground">MatchSoccer</span>
+          <span class="text-2xl font-bold text-foreground">Meu Jogo</span>
         </div>
         <CardTitle class="text-xl">Redefinir senha</CardTitle>
         <CardDescription>
@@ -15,8 +15,7 @@
       </CardHeader>
 
       <CardContent class="flex flex-col gap-4">
-        <!-- Token error -->
-        <div
+<div
           v-if="tokenError"
           class="rounded-lg border border-destructive bg-destructive/10 p-3 text-destructive text-sm"
           role="alert"
@@ -28,9 +27,7 @@
             </NuxtLink>
           </div>
         </div>
-
-        <!-- General error -->
-        <div
+<div
           v-if="errorMessage"
           class="rounded-lg border border-destructive bg-destructive/10 p-3 text-destructive text-sm"
           role="alert"
@@ -39,8 +36,7 @@
         </div>
 
         <form v-if="!tokenError" @submit.prevent="handleSubmit" class="flex flex-col gap-4">
-          <!-- New password -->
-          <div class="flex flex-col gap-1.5">
+<div class="flex flex-col gap-1.5">
             <Label for="password">Nova senha</Label>
             <div class="relative">
               <Input
@@ -65,9 +61,7 @@
             </div>
             <p v-if="errors.password" class="text-xs text-destructive">{{ errors.password }}</p>
           </div>
-
-          <!-- Confirm password -->
-          <div class="flex flex-col gap-1.5">
+<div class="flex flex-col gap-1.5">
             <Label for="confirmPassword">Confirmar senha</Label>
             <div class="relative">
               <Input
@@ -92,9 +86,7 @@
             </div>
             <p v-if="errors.confirmPassword" class="text-xs text-destructive">{{ errors.confirmPassword }}</p>
           </div>
-
-          <!-- Submit -->
-          <BaseButton
+<BaseButton
             type="submit"
             :loading="isLoading"
             :disabled="isLoading"
@@ -103,9 +95,7 @@
             Redefinir senha
           </BaseButton>
         </form>
-
-        <!-- Back to login -->
-        <div class="text-center">
+<div class="text-center">
           <NuxtLink
             to="/login"
             class="text-sm text-primary hover:underline"
@@ -145,7 +135,6 @@ const tokenError = ref('')
 
 const errors = ref<{ password?: string; confirmPassword?: string }>({})
 
-// Validate token on mount
 onMounted(() => {
   if (!token.value) {
     tokenError.value = 'Token de redefinicao ausente ou invalido. Solicite um novo link de recuperacao.'

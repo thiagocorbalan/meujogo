@@ -1,9 +1,7 @@
 <template>
   <div class="max-w-[1100px] mx-auto p-6">
     <h1 class="text-3xl font-bold text-foreground mb-5">Estatísticas</h1>
-
-    <!-- Error banner -->
-    <div v-if="errorMessage" class="mb-4 px-4 py-3 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm flex items-center justify-between">
+<div v-if="errorMessage" class="mb-4 px-4 py-3 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm flex items-center justify-between">
       <span>{{ errorMessage }}</span>
       <button class="ml-3 text-red-600 hover:text-red-800 font-bold" @click="errorMessage = null">&times;</button>
     </div>

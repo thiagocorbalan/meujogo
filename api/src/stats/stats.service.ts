@@ -22,7 +22,6 @@ export class StatsService {
       });
     }
 
-    // When filtering by season, aggregate goals from the Goal table
     const goalCounts = await this.prisma.goal.groupBy({
       by: ['playerId'],
       where: {
@@ -62,9 +61,6 @@ export class StatsService {
   }
 
   async getTopElo(limit = 10, _seasonId?: number) {
-    // ELO is a current cumulative value on the player record.
-    // Season filtering is not applicable since there are no
-    // per-season ELO snapshots in the data model.
     return this.prisma.player.findMany({
       where: { isActive: true },
       orderBy: { elo: 'desc' },

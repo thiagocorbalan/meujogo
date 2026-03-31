@@ -4,8 +4,8 @@ export function useAuth() {
   return {
     login: (data: { email: string; password: string; rememberMe?: boolean }) =>
       fetch('/auth/login', { method: 'POST', body: data }),
-    refresh: (refreshToken: string) =>
-      fetch('/auth/refresh', { method: 'POST', body: { refreshToken } }),
+    refresh: () =>
+      fetch('/auth/refresh', { method: 'POST' }),
     logout: () => fetch('/auth/logout', { method: 'POST' }),
     forgotPassword: (email: string) =>
       fetch('/auth/forgot-password', { method: 'POST', body: { email } }),

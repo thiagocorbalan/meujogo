@@ -55,7 +55,6 @@ function resolvePlayerName(playerId: number | undefined): string {
   for (const team of props.teams) {
     if (!team.players) continue
     for (const tp of team.players) {
-      // Handle nested TeamPlayer format: { player: { id, name } }
       const pid = tp.player?.id ?? tp.id
       const pname = tp.player?.name ?? tp.name
       if (pid === playerId) return pname

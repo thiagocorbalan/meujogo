@@ -6,23 +6,20 @@
           <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
             MS
           </div>
-          <span class="text-2xl font-bold text-foreground">MatchSoccer</span>
+          <span class="text-2xl font-bold text-foreground">Meu Jogo</span>
         </div>
         <CardDescription>Entre com sua conta para continuar</CardDescription>
       </CardHeader>
 
       <CardContent class="flex flex-col gap-4">
-        <!-- Error message -->
-        <div
+<div
           v-if="errorMessage"
           class="rounded-lg border border-destructive bg-destructive/10 p-3 text-destructive text-sm"
           role="alert"
         >
           {{ errorMessage }}
         </div>
-
-        <!-- Success message (from redirect) -->
-        <div
+<div
           v-if="successMessage"
           class="rounded-lg border border-green-500 bg-green-500/10 p-3 text-green-600 text-sm"
           role="status"
@@ -31,8 +28,7 @@
         </div>
 
         <form @submit.prevent="handleLogin" class="flex flex-col gap-4">
-          <!-- Email -->
-          <div class="flex flex-col gap-1.5">
+<div class="flex flex-col gap-1.5">
             <Label for="email">Email</Label>
             <Input
               id="email"
@@ -45,9 +41,7 @@
             />
             <p v-if="errors.email" class="text-xs text-destructive">{{ errors.email }}</p>
           </div>
-
-          <!-- Password -->
-          <div class="flex flex-col gap-1.5">
+<div class="flex flex-col gap-1.5">
             <Label for="password">Senha</Label>
             <div class="relative">
               <Input
@@ -72,9 +66,7 @@
             </div>
             <p v-if="errors.password" class="text-xs text-destructive">{{ errors.password }}</p>
           </div>
-
-          <!-- Remember me + forgot password -->
-          <div class="flex items-center justify-between">
+<div class="flex items-center justify-between">
             <label class="flex items-center gap-2 cursor-pointer">
               <input
                 v-model="form.rememberMe"
@@ -91,9 +83,7 @@
               Esqueceu a senha?
             </NuxtLink>
           </div>
-
-          <!-- Submit -->
-          <BaseButton
+<BaseButton
             type="submit"
             :loading="isLoading"
             :disabled="isLoading"
@@ -102,18 +92,13 @@
             Entrar
           </BaseButton>
         </form>
-
-        <!-- Divider -->
-        <div class="relative flex items-center">
+<div class="relative flex items-center">
           <div class="flex-grow border-t border-border" />
           <span class="mx-3 text-sm text-muted-foreground">ou</span>
           <div class="flex-grow border-t border-border" />
         </div>
-
-        <!-- Social login buttons -->
-        <div class="flex flex-col gap-3">
-          <!-- Google -->
-          <button
+<div class="flex flex-col gap-3">
+<button
             type="button"
             class="flex w-full items-center justify-center gap-3 rounded-md border border-input bg-background px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             aria-label="Entrar com Google"
@@ -127,9 +112,7 @@
             </svg>
             Entrar com Google
           </button>
-
-          <!-- Apple -->
-          <button
+<button
             type="button"
             class="flex w-full items-center justify-center gap-3 rounded-md bg-black px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-black/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             aria-label="Entrar com Apple"
@@ -173,7 +156,6 @@ const successMessage = ref('')
 
 const errors = ref<{ email?: string; password?: string }>({})
 
-// Check for success message from redirect (e.g. after password reset)
 onMounted(() => {
   if (route.query.success) {
     successMessage.value = route.query.success as string
@@ -211,8 +193,6 @@ async function handleLogin() {
     }) as any
 
     authStore.login({
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
       user: result.user,
     })
 

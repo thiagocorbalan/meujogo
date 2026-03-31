@@ -7,3 +7,8 @@ skills-lock.json
 CLAUDE.md
 design_prompt.md
 audit.log
+
+# Environment secrets
+.env
+.env.local
+.env.*.local

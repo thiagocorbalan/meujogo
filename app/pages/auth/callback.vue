@@ -2,14 +2,11 @@
   <div class="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
     <Card class="w-full max-w-md">
       <CardContent class="flex flex-col items-center gap-4 py-12">
-        <!-- Loading state -->
-        <template v-if="!errorMessage">
+<template v-if="!errorMessage">
           <Loader2 class="h-8 w-8 animate-spin text-primary" />
           <p class="text-sm text-muted-foreground">Autenticando...</p>
         </template>
-
-        <!-- Error state -->
-        <template v-else>
+<template v-else>
           <div
             class="w-full rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive text-sm text-center"
             role="alert"
@@ -38,48 +35,31 @@ const authStore = useAuthStore()
 const errorMessage = ref('')
 
 onMounted(async () => {
-  const { accessToken, refreshToken, error } = route.query
-
-  if (error) {
+  if (route.query.error) {
     errorMessage.value =
-      (error as string) || 'Erro durante a autenticacao. Tente novamente.'
+      (route.query.error as string) || 'Erro durante a autenticacao. Tente novamente.'
     return
   }
 
-  if (!accessToken || !refreshToken) {
-    errorMessage.value = 'Tokens de autenticacao nao encontrados. Tente novamente.'
-    return
+  if (Object.keys(route.query).length > 0) {
+    router.replace({ path: route.path, query: {} })
   }
 
   try {
-    authStore.setTokens(accessToken as string, refreshToken as string)
+    const { getMe } = useAuth()
+    const user = await getMe() as any
 
-    // Fetch user profile with new tokens
-    try {
-      const { getMe } = useAuth()
-      const user = await getMe() as any
-      if (user) {
-        authStore.setUser(user)
-      }
-    } catch {
-      // User fetch failed but tokens are stored, continue
+    if (user) {
+      authStore.setUser(user)
+      await router.push('/')
+    } else {
+      errorMessage.value = 'Nao foi possivel autenticar. Tente novamente.'
     }
-
-    // Save to localStorage
-    try {
-      localStorage.setItem('accessToken', accessToken as string)
-      localStorage.setItem('refreshToken', refreshToken as string)
-      if (authStore.user) {
-        localStorage.setItem('user', JSON.stringify(authStore.user))
-      }
-    } catch {
-      // localStorage may not be available
-    }
-
-    await router.push('/')
-  } catch (e: any) {
-    errorMessage.value =
-      e?.message || 'Erro ao processar autenticacao. Tente novamente.'
+  } catch {
+    errorMessage.value = 'Erro ao processar autenticacao. Tente novamente.'
+    setTimeout(() => {
+      router.push('/login')
+    }, 3000)
   }
 })
 </script>

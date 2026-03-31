@@ -88,7 +88,7 @@ describe('AuthService', () => {
 
   describe('validateUser', () => {
     it('should return user without password for valid credentials', async () => {
-      usersService.findByEmail!.mockResolvedValue(mockUser as any);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(mockUser as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       const result = await service.validateUser('test@example.com', 'password');
@@ -100,7 +100,7 @@ describe('AuthService', () => {
     });
 
     it('should return null for wrong password', async () => {
-      usersService.findByEmail!.mockResolvedValue(mockUser as any);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(mockUser as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       const result = await service.validateUser('test@example.com', 'wrong-password');
@@ -109,7 +109,7 @@ describe('AuthService', () => {
     });
 
     it('should return null for non-existent email', async () => {
-      usersService.findByEmail!.mockResolvedValue(null);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(null);
 
       const result = await service.validateUser('nonexistent@example.com', 'password');
 
@@ -119,10 +119,10 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('should generate accessToken and refreshToken', async () => {
-      jwtService.sign!
+      (jwtService.sign as jest.Mock)
         .mockReturnValueOnce('access-token')
         .mockReturnValueOnce('refresh-token');
-      usersService.updateRefreshToken!.mockResolvedValue(undefined as any);
+      (usersService.updateRefreshToken as jest.Mock).mockResolvedValue(undefined as any);
 
       const result = await service.login(mockUserWithoutPassword, false);
 
@@ -133,10 +133,10 @@ describe('AuthService', () => {
     });
 
     it('should generate 30d refresh token when rememberMe is true', async () => {
-      jwtService.sign!
+      (jwtService.sign as jest.Mock)
         .mockReturnValueOnce('access-token')
         .mockReturnValueOnce('refresh-token-30d');
-      usersService.updateRefreshToken!.mockResolvedValue(undefined as any);
+      (usersService.updateRefreshToken as jest.Mock).mockResolvedValue(undefined as any);
 
       await service.login(mockUserWithoutPassword, true);
 
@@ -149,10 +149,10 @@ describe('AuthService', () => {
 
   describe('refreshToken', () => {
     it('should return new accessToken for valid token', async () => {
-      jwtService.verify!.mockReturnValue({ sub: 1, role: 'USUARIO' });
-      prismaService.user.findUnique.mockResolvedValue(mockUser);
+      (jwtService.verify as jest.Mock).mockReturnValue({ sub: 1, role: 'USUARIO' });
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      jwtService.sign!.mockReturnValue('new-access-token');
+      (jwtService.sign as jest.Mock).mockReturnValue('new-access-token');
 
       const result = await service.refreshToken('valid-refresh-token');
 
@@ -160,7 +160,7 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException for invalid token', async () => {
-      jwtService.verify!.mockImplementation(() => {
+      (jwtService.verify as jest.Mock).mockImplementation(() => {
         throw new Error('invalid');
       });
 
@@ -172,7 +172,7 @@ describe('AuthService', () => {
 
   describe('logout', () => {
     it('should clear refreshToken in DB', async () => {
-      usersService.updateRefreshToken!.mockResolvedValue(undefined as any);
+      (usersService.updateRefreshToken as jest.Mock).mockResolvedValue(undefined as any);
 
       await service.logout(1);
 
@@ -182,8 +182,8 @@ describe('AuthService', () => {
 
   describe('forgotPassword', () => {
     it('should generate resetToken for existing email', async () => {
-      usersService.findByEmail!.mockResolvedValue(mockUser as any);
-      prismaService.user.update.mockResolvedValue(mockUser);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(mockUser as any);
+      (prismaService.user.update as jest.Mock).mockResolvedValue(mockUser);
 
       await service.forgotPassword('test@example.com');
 
@@ -197,7 +197,7 @@ describe('AuthService', () => {
     });
 
     it('should NOT throw for non-existent email', async () => {
-      usersService.findByEmail!.mockResolvedValue(null);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(null);
 
       await expect(
         service.forgotPassword('nonexistent@example.com'),
@@ -209,12 +209,12 @@ describe('AuthService', () => {
   describe('resetPassword', () => {
     it('should update password with valid token', async () => {
       const futureDate = new Date(Date.now() + 60 * 60 * 1000);
-      prismaService.user.findFirst.mockResolvedValue({
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue({
         ...mockUser,
         resetToken: 'valid-token',
         resetTokenExpiry: futureDate,
       });
-      prismaService.user.update.mockResolvedValue(mockUser);
+      (prismaService.user.update as jest.Mock).mockResolvedValue(mockUser);
 
       await service.resetPassword('valid-token', 'new-password');
 
@@ -230,7 +230,7 @@ describe('AuthService', () => {
 
     it('should throw BadRequestException for expired token', async () => {
       const pastDate = new Date(Date.now() - 60 * 60 * 1000);
-      prismaService.user.findFirst.mockResolvedValue({
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue({
         ...mockUser,
         resetToken: 'expired-token',
         resetTokenExpiry: pastDate,
@@ -250,9 +250,9 @@ describe('AuthService', () => {
     };
 
     it('should create new user when no existing user found', async () => {
-      prismaService.user.findFirst.mockResolvedValue(null);
-      usersService.findByEmail!.mockResolvedValue(null);
-      prismaService.user.create.mockResolvedValue({
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(null);
+      (prismaService.user.create as jest.Mock).mockResolvedValue({
         id: 2,
         name: 'OAuth User',
         email: 'oauth@example.com',
@@ -277,9 +277,9 @@ describe('AuthService', () => {
     });
 
     it('should link to existing user by email', async () => {
-      prismaService.user.findFirst.mockResolvedValue(null);
-      usersService.findByEmail!.mockResolvedValue(mockUser as any);
-      prismaService.user.update.mockResolvedValue({
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(mockUser as any);
+      (prismaService.user.update as jest.Mock).mockResolvedValue({
         ...mockUser,
         googleId: 'google-123',
       });

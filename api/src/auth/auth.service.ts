@@ -100,12 +100,11 @@ export class AuthService {
   async forgotPassword(email: string) {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
-      // Don't reveal if email exists — return silently
       return;
     }
 
     const resetToken = crypto.randomUUID();
-    const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000);
 
     await this.prisma.user.update({
       where: { id: user.id },
@@ -144,7 +143,6 @@ export class AuthService {
   ) {
     const providerIdField = provider === 'google' ? 'googleId' : 'appleId';
 
-    // First, try to find by provider ID
     let user = await this.prisma.user.findFirst({
       where: { [providerIdField]: profile.providerId },
     });
@@ -154,7 +152,6 @@ export class AuthService {
       return userWithoutPassword;
     }
 
-    // Try to find by email and link the provider
     user = await this.usersService.findByEmail(profile.email);
 
     if (user) {
@@ -166,7 +163,6 @@ export class AuthService {
       return userWithoutPassword;
     }
 
-    // Create new user
     user = await this.prisma.user.create({
       data: {
         name: profile.name,

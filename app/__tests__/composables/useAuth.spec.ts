@@ -16,7 +16,7 @@ describe('useAuth composable', () => {
   describe('login()', () => {
     it('should call POST /auth/login with correct params', async () => {
       const credentials = { email: 'user@test.com', password: 'secret123' };
-      mockFetch.mockResolvedValue({ accessToken: 'token' });
+      mockFetch.mockResolvedValue({ user: { id: 1 } });
 
       const { login } = useAuth();
       await login(credentials);
@@ -29,7 +29,7 @@ describe('useAuth composable', () => {
 
     it('should pass rememberMe option when provided', async () => {
       const credentials = { email: 'user@test.com', password: 'secret123', rememberMe: true };
-      mockFetch.mockResolvedValue({ accessToken: 'token' });
+      mockFetch.mockResolvedValue({ user: { id: 1 } });
 
       const { login } = useAuth();
       await login(credentials);
@@ -42,15 +42,14 @@ describe('useAuth composable', () => {
   });
 
   describe('refresh()', () => {
-    it('should call POST /auth/refresh with refreshToken', async () => {
-      mockFetch.mockResolvedValue({ accessToken: 'new-token' });
+    it('should call POST /auth/refresh without body (cookies handle tokens)', async () => {
+      mockFetch.mockResolvedValue({ user: { id: 1 } });
 
       const { refresh } = useAuth();
-      await refresh('my-refresh-token');
+      await refresh();
 
       expect(mockFetch).toHaveBeenCalledWith('/auth/refresh', {
         method: 'POST',
-        body: { refreshToken: 'my-refresh-token' },
       });
     });
   });

@@ -13,8 +13,7 @@
     <div v-if="loading" class="text-muted-foreground text-base py-10 text-center">Carregando...</div>
 
     <form v-else @submit.prevent="onSave" class="flex flex-col gap-8">
-      <!-- Rules -->
-      <Card>
+<Card>
         <CardHeader>
           <CardTitle>Regras</CardTitle>
         </CardHeader>
@@ -43,9 +42,7 @@
           </div>
         </CardContent>
       </Card>
-
-      <!-- Draw mode -->
-      <Card>
+<Card>
         <CardHeader>
           <CardTitle>Sorteio</CardTitle>
         </CardHeader>
@@ -59,9 +56,7 @@
           </div>
         </CardContent>
       </Card>
-
-      <!-- ELO -->
-      <Card>
+<Card>
         <CardHeader>
           <CardTitle>ELO</CardTitle>
         </CardHeader>
@@ -78,9 +73,7 @@
           </div>
         </CardContent>
       </Card>
-
-      <!-- Vests -->
-      <Card>
+<Card>
         <CardHeader>
           <CardTitle>Coletes</CardTitle>
         </CardHeader>
@@ -101,9 +94,7 @@
         <BaseButton type="submit" :loading="saving">Salvar Configurações</BaseButton>
       </div>
     </form>
-
-    <!-- Data Management -->
-    <Card v-if="canDelete('settings')" class="mt-8">
+<Card v-if="canDelete('settings')" class="mt-8">
       <CardHeader>
         <CardTitle>Gerenciamento de Dados</CardTitle>
       </CardHeader>
@@ -114,9 +105,7 @@
         </div>
       </CardContent>
     </Card>
-
-    <!-- Reset Data Modal -->
-    <BaseModal :show="showResetModal" title="Resetar Dados" @close="closeResetModal">
+<BaseModal :show="showResetModal" title="Resetar Dados" @close="closeResetModal">
       <div class="text-sm text-muted-foreground">
         <p class="mb-2 font-semibold text-destructive">Atenção: esta ação é irreversível!</p>
         <p>Todos os dados serão apagados permanentemente:</p>
@@ -137,9 +126,7 @@
         <BaseButton variant="danger" :loading="resetting" @click="onResetData">Confirmar Reset</BaseButton>
       </template>
     </BaseModal>
-
-    <!-- Close Season Modal -->
-    <BaseModal :show="showSeasonModal" title="Encerrar Temporada Atual" @close="closeSeasonModal">
+<BaseModal :show="showSeasonModal" title="Encerrar Temporada Atual" @close="closeSeasonModal">
       <div class="text-sm text-muted-foreground">
         <p>A temporada atual será encerrada e uma nova temporada será criada automaticamente.</p>
         <p class="mt-2">Os dados da temporada anterior serão preservados.</p>
@@ -226,7 +213,6 @@ async function onSave() {
   }
 }
 
-// Data Management
 const showResetModal = ref(false)
 const resetting = ref(false)
 const resetError = ref<string | null>(null)

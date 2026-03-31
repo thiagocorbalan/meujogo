@@ -40,9 +40,7 @@
     </div>
 
     <p v-else class="text-muted-foreground text-sm text-center py-10">Nenhum usuário cadastrado.</p>
-
-    <!-- User form modal -->
-    <BaseModal :show="showForm" :title="editingUser ? 'Editar Usuário' : 'Novo Usuário'" @close="closeForm">
+<BaseModal :show="showForm" :title="editingUser ? 'Editar Usuário' : 'Novo Usuário'" @close="closeForm">
       <form @submit.prevent="onSave" class="flex flex-col gap-4">
         <div class="flex flex-col gap-1">
           <Label>Nome</Label>
@@ -89,9 +87,7 @@
         <BaseButton @click="onSave">Salvar</BaseButton>
       </template>
     </BaseModal>
-
-    <!-- Delete confirmation -->
-    <BaseModal :show="showDeleteConfirm" title="Confirmar Exclusão" @close="showDeleteConfirm = false">
+<BaseModal :show="showDeleteConfirm" title="Confirmar Exclusão" @close="showDeleteConfirm = false">
       <p>Deseja realmente excluir <strong>{{ deleting?.name }}</strong>?</p>
       <template #footer>
         <BaseButton variant="secondary" @click="showDeleteConfirm = false">Cancelar</BaseButton>
@@ -181,7 +177,6 @@ function closeForm() {
 async function onSave() {
   error.value = null
 
-  // Validate password
   if (form.value.password && !validatePassword()) return
   if (!editingUser.value && !form.value.password) {
     passwordError.value = 'A senha é obrigatória para novos usuários.'

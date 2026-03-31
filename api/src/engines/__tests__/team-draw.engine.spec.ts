@@ -167,7 +167,6 @@ describe('drawTeamsRandom edge cases', () => {
     expect(result).toHaveLength(4);
     result.forEach((team) => expect(team.players).toHaveLength(10));
     const allIds = result.flatMap((t) => t.players.map((p) => p.id));
-    // All IDs unique
     expect(new Set(allIds).size).toBe(40);
   });
 });
@@ -187,7 +186,7 @@ describe('drawTeamsBalanced edge cases', () => {
   });
 
   it('all same ELO: balanced mode still distributes all players evenly', () => {
-    const players = makePlayers(6, 1000, 0); // all ELO = 1000
+    const players = makePlayers(6, 1000, 0);
     const result = drawTeamsBalanced(players, 3, 2);
     expect(result).toHaveLength(2);
     result.forEach((team) => {

@@ -36,8 +36,6 @@ describe('calculateNewElo', () => {
   });
 
   it('K=32 default: expected score formula is correct', () => {
-    // expected = 1 / (1 + 10^((1200-1200)/400)) = 0.5
-    // new = 1200 + 32 * (1 - 0.5) = 1216
     const newElo = calculateNewElo(1200, 1200, 1, 32);
     expect(newElo).toBe(1216);
   });
@@ -139,12 +137,10 @@ describe('calculateNewElo edge cases', () => {
 
   it('very high ELO (3000) vs very low (100): formula still produces valid numbers', () => {
     const highWins = calculateNewElo(3000, 100, 1, 32);
-    // Expected score ≈ 1; gain rounds to 0 due to extreme difference — result is unchanged or marginally higher
     expect(highWins).toBeGreaterThanOrEqual(3000);
     expect(highWins - 3000).toBeLessThan(1);
 
     const lowWins = calculateNewElo(100, 3000, 1, 32);
-    // Expected score ≈ 0; gain ≈ 32 * (1 - ~0) ≈ ~32
     expect(lowWins).toBeGreaterThan(100);
     expect(lowWins - 100).toBeCloseTo(32, 0);
   });
@@ -191,7 +187,6 @@ describe('processSessionElo edge cases', () => {
     const gainA = p1.newElo - p1.oldElo;
     const lossB = p2.oldElo - p2.newElo;
 
-    // For equal ELOs the gain and loss should be equal and opposite
     expect(gainA).toBeCloseTo(lossB, 5);
     expect(gainA).toBeGreaterThan(0);
   });

@@ -67,7 +67,6 @@ export function drawTeamsBalanced(
   for (let i = 0; i < eligible.length; i++) {
     const round = Math.floor(i / numTeams);
     const positionInRound = i % numTeams;
-    // Snake direction: even rounds go left-to-right, odd rounds go right-to-left
     const teamIndex =
       round % 2 === 0 ? positionInRound : numTeams - 1 - positionInRound;
     teams[teamIndex].push(eligible[i]);

@@ -10,34 +10,25 @@ export interface AuthUser {
 }
 
 export interface LoginResponse {
-  accessToken: string
-  refreshToken: string
   user: AuthUser
 }
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<AuthUser | null>(null)
-  const accessToken = ref('')
-  const refreshToken = ref('')
   const isLoading = ref(false)
 
-  const isAuthenticated = computed(() => !!accessToken.value)
+  const isAuthenticated = computed(() => !!user.value)
   const userRole = computed(() => user.value?.role ?? null)
   const isAdmin = computed(() => userRole.value === 'ADMIN')
   const isModerador = computed(() => userRole.value === 'MODERADOR')
   const isUsuario = computed(() => userRole.value === 'USUARIO')
 
   function login(data: LoginResponse) {
-    accessToken.value = data.accessToken
-    refreshToken.value = data.refreshToken
     user.value = data.user
 
     try {
-      localStorage.setItem('accessToken', data.accessToken)
-      localStorage.setItem('refreshToken', data.refreshToken)
       localStorage.setItem('user', JSON.stringify(data.user))
     } catch {
-      // localStorage may not be available (SSR)
     }
   }
 
@@ -45,59 +36,72 @@ export const useAuthStore = defineStore('auth', () => {
     clearAuth()
 
     try {
+      localStorage.removeItem('user')
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
-      localStorage.removeItem('user')
     } catch {
-      // localStorage may not be available (SSR)
     }
-  }
-
-  function setTokens(access: string, refresh: string) {
-    accessToken.value = access
-    refreshToken.value = refresh
   }
 
   function setUser(newUser: AuthUser) {
     user.value = newUser
+    try {
+      localStorage.setItem('user', JSON.stringify(newUser))
+    } catch {
+    }
   }
 
   function clearAuth() {
     user.value = null
-    accessToken.value = ''
-    refreshToken.value = ''
   }
 
-  function hydrateFromStorage() {
+  
+  async function hydrateFromStorage() {
     try {
-      const storedAccess = localStorage.getItem('accessToken')
-      const storedRefresh = localStorage.getItem('refreshToken')
       const storedUser = localStorage.getItem('user')
-
-      if (storedAccess) accessToken.value = storedAccess
-      if (storedRefresh) refreshToken.value = storedRefresh
       if (storedUser) user.value = JSON.parse(storedUser)
+
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
     } catch {
-      // localStorage may not be available (SSR) or JSON parse error
+    }
+
+    try {
+      const config = useRuntimeConfig()
+      const baseURL = import.meta.server
+        ? config.apiBaseUrl
+        : config.public.apiBaseUrl
+
+      const me = await $fetch<AuthUser>('/auth/me', {
+        baseURL,
+        credentials: 'include',
+      })
+      if (me) {
+        user.value = me
+        try {
+          localStorage.setItem('user', JSON.stringify(me))
+        } catch {
+        }
+      }
+    } catch {
+      user.value = null
+      try {
+        localStorage.removeItem('user')
+      } catch {
+      }
     }
   }
 
   return {
-    // State
     user,
-    accessToken,
-    refreshToken,
     isLoading,
-    // Computed
     isAuthenticated,
     userRole,
     isAdmin,
     isModerador,
     isUsuario,
-    // Actions
     login,
     logout,
-    setTokens,
     setUser,
     clearAuth,
     hydrateFromStorage,

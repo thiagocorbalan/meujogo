@@ -149,7 +149,6 @@ export class SessionsService {
           ),
       );
 
-      // Auto-create champion
       const rankingMatchResults: RankingMatchResult[] = matches.map((m) => ({
         teamAId: m.teamAId,
         teamBId: m.teamBId,

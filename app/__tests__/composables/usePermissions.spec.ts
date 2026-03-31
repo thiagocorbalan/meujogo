@@ -4,8 +4,6 @@ import { ref, computed } from 'vue';
 function createMockAuthStore(overrides: Record<string, any> = {}) {
   const defaults = {
     user: null,
-    accessToken: '',
-    refreshToken: '',
     isLoading: false,
     isAuthenticated: false,
     userRole: null,

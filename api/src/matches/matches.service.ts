@@ -38,7 +38,6 @@ export class MatchesService {
       );
     }
 
-    // Auto-transition session from PENDING to IN_PROGRESS on first match
     const session = await this.prisma.session.findUnique({ where: { id: sessionId } });
     if (session?.status === 'PENDING') {
       await this.prisma.session.update({

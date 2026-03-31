@@ -15,7 +15,6 @@ test.describe('Auth Login Flow', () => {
   test('should show validation errors for empty fields', async ({ page }) => {
     await page.goto('/login');
     await page.getByRole('button', { name: 'Entrar' }).click();
-    // The form validates on submit — empty email and password show error messages
     await expect(page.getByText('O email e obrigatorio.')).toBeVisible();
     await expect(page.getByText('A senha e obrigatoria.')).toBeVisible();
   });
@@ -32,10 +31,8 @@ test.describe('Auth Login Flow', () => {
     await page.goto('/login');
     const passwordInput = page.getByLabel('Senha');
     await expect(passwordInput).toHaveAttribute('type', 'password');
-    // Click toggle button — aria-label is "Mostrar senha" when password is hidden
     await page.getByRole('button', { name: 'Mostrar senha' }).click();
     await expect(passwordInput).toHaveAttribute('type', 'text');
-    // Click again to hide — aria-label changes to "Ocultar senha"
     await page.getByRole('button', { name: 'Ocultar senha' }).click();
     await expect(passwordInput).toHaveAttribute('type', 'password');
   });
@@ -45,7 +42,6 @@ test.describe('Auth Login Flow', () => {
     await page.getByLabel('Endereco de email').fill('wrong@email.com');
     await page.getByLabel('Senha').fill('wrongpassword');
     await page.getByRole('button', { name: 'Entrar' }).click();
-    // The error message comes from the API or falls back to a generic message
     await expect(page.locator('[role="alert"]')).toBeVisible({ timeout: 10_000 });
   });
 
@@ -60,9 +56,9 @@ test.describe('Auth Login Flow', () => {
     await expect(page).toHaveURL(/\/esqueceu-senha/);
   });
 
-  test('should display MatchSoccer branding on login page', async ({ page }) => {
+  test('should display Meu Jogo branding on login page', async ({ page }) => {
     await page.goto('/login');
-    await expect(page.getByText('MatchSoccer')).toBeVisible();
+    await expect(page.getByText('Meu Jogo')).toBeVisible();
     await expect(page.getByText('Entre com sua conta para continuar')).toBeVisible();
   });
 
@@ -74,8 +70,6 @@ test.describe('Auth Login Flow', () => {
     await checkbox.check();
     await expect(checkbox).toBeChecked();
   });
-
-  // --- Forgot password page ---
 
   test('should display forgot password page elements', async ({ page }) => {
     await page.goto('/esqueceu-senha');
@@ -103,7 +97,6 @@ test.describe('Auth Login Flow', () => {
     await page.goto('/esqueceu-senha');
     await page.getByLabel('Endereco de email').fill('test@example.com');
     await page.getByRole('button', { name: 'Enviar link de recuperacao' }).click();
-    // Always shows success to avoid email enumeration
     await expect(page.getByText(/Se o email existir em nossa base/)).toBeVisible({ timeout: 10_000 });
   });
 
@@ -112,8 +105,6 @@ test.describe('Auth Login Flow', () => {
     await page.getByText('Voltar ao login').click();
     await expect(page).toHaveURL(/\/login/);
   });
-
-  // --- Reset password page ---
 
   test('should display reset password page elements with valid token', async ({ page }) => {
     await page.goto('/redefinir-senha?token=test-token');
@@ -158,7 +149,6 @@ test.describe('Auth Login Flow', () => {
     const newPasswordInput = page.getByLabel('Nova senha');
     await expect(newPasswordInput).toHaveAttribute('type', 'password');
 
-    // There are two toggle buttons — first one is for "Nova senha"
     const toggleButtons = page.getByRole('button', { name: 'Mostrar senha' });
     await toggleButtons.first().click();
     await expect(newPasswordInput).toHaveAttribute('type', 'text');

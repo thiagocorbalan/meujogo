@@ -3,7 +3,7 @@
     <button class="bg-transparent border-none text-white text-[22px] cursor-pointer p-1 px-2 rounded hover:bg-white/10 leading-none" @click="emit('toggle-sidebar')" aria-label="Toggle sidebar">
       &#9776;
     </button>
-    <span class="text-lg font-bold tracking-wide flex-1">MatchSoccer</span>
+    <span class="text-lg font-bold tracking-wide flex-1">Meu Jogo</span>
     <span v-if="authStore.user" class="text-sm text-slate-300 truncate max-w-[120px]">{{ authStore.user.name }}</span>
     <button
       class="bg-transparent border-none text-slate-300 cursor-pointer p-1.5 rounded hover:bg-white/10 hover:text-white transition-colors"

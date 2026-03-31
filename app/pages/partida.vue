@@ -1,15 +1,11 @@
 <template>
   <div class="max-w-[900px] mx-auto py-8 px-4">
     <h1 class="text-3xl font-bold text-foreground mb-7">Partida ao Vivo</h1>
-
-    <!-- Error banner -->
-    <div v-if="errorMessage" class="mb-4 px-4 py-3 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm flex items-center justify-between">
+<div v-if="errorMessage" class="mb-4 px-4 py-3 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm flex items-center justify-between">
       <span>{{ errorMessage }}</span>
       <button class="ml-3 text-red-600 hover:text-red-800 font-bold" @click="errorMessage = null">&times;</button>
     </div>
-
-    <!-- No teams sorted yet -->
-    <div v-if="!loading && teams.length === 0" class="text-center bg-muted rounded-lg py-10 px-6 text-muted-foreground">
+<div v-if="!loading && teams.length === 0" class="text-center bg-muted rounded-lg py-10 px-6 text-muted-foreground">
       <p>Realize o sorteio antes de iniciar partidas.</p>
       <NuxtLink to="/sorteio">
         <BaseButton variant="primary" size="md" class="mt-3">Ir para Sorteio</BaseButton>
@@ -17,8 +13,7 @@
     </div>
 
     <template v-else>
-      <!-- Session info bar -->
-      <div v-if="session" class="mb-6 flex flex-wrap items-center gap-4 bg-slate-50 border border-slate-200 rounded-lg px-5 py-3 text-sm text-slate-700">
+<div v-if="session" class="mb-6 flex flex-wrap items-center gap-4 bg-slate-50 border border-slate-200 rounded-lg px-5 py-3 text-sm text-slate-700">
         <span>
           <strong>Sessao:</strong> {{ session.durationMinutes }} min total
         </span>
@@ -35,20 +30,15 @@
           <strong>Progresso:</strong> {{ finishedMatches.length + (currentMatch ? 1 : 0) }} de {{ session.totalMatches }}
         </span>
       </div>
-
-      <!-- Current match section -->
-      <section class="mb-9">
+<section class="mb-9">
         <h2 class="text-xl font-semibold text-foreground mb-4 pb-2 border-b-2 border-border">
           Partida Atual
           <span v-if="session" class="text-base font-normal text-muted-foreground ml-2">
             ({{ finishedMatches.length + 1 }} de {{ session.totalMatches }})
           </span>
         </h2>
-
-        <!-- No current match but teams exist: start match -->
-        <div v-if="!currentMatch && teams.length > 0 && !hasReachedMaxMatches && canManageMatch()" class="bg-white border rounded-lg p-5 flex flex-col gap-4">
-          <!-- First match: manual team selection -->
-          <template v-if="isFirstMatch">
+<div v-if="!currentMatch && teams.length > 0 && !hasReachedMaxMatches && canManageMatch()" class="bg-white border rounded-lg p-5 flex flex-col gap-4">
+<template v-if="isFirstMatch">
             <p class="text-sm text-muted-foreground mb-1">Selecione os times para a primeira partida:</p>
             <div class="grid grid-cols-2 gap-4">
               <div class="flex flex-col gap-1.5">
@@ -76,9 +66,7 @@
               Iniciar Partida
             </BaseButton>
           </template>
-
-          <!-- Subsequent matches: show suggested next match from backend -->
-          <template v-else>
+<template v-else>
             <div v-if="loadingNextMatch" class="text-center py-4 text-muted-foreground text-sm">
               Carregando proxima partida...
             </div>
@@ -130,17 +118,12 @@
             </div>
           </template>
         </div>
-
-          <!-- Max matches reached message -->
-          <div v-if="!currentMatch && teams.length > 0 && hasReachedMaxMatches" class="bg-amber-50 border border-amber-200 rounded-lg p-5 text-center">
+<div v-if="!currentMatch && teams.length > 0 && hasReachedMaxMatches" class="bg-amber-50 border border-amber-200 rounded-lg p-5 text-center">
             <p class="text-amber-800 font-medium">Todas as partidas da sessão foram realizadas.</p>
             <p class="text-amber-600 text-sm mt-1">Encerre a sessão para salvar os resultados e atualizar as estatísticas.</p>
           </div>
-
-        <!-- Active match board -->
-        <template v-if="currentMatch">
-          <!-- Match Timer -->
-          <div class="flex items-center justify-center gap-4 mb-4 py-3 px-5 bg-white border rounded-lg">
+<template v-if="currentMatch">
+<div class="flex items-center justify-center gap-4 mb-4 py-3 px-5 bg-white border rounded-lg">
             <div class="flex items-center gap-2">
               <span class="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Tempo</span>
               <span
@@ -177,17 +160,13 @@
               Encerrar Partida
             </BaseButton>
           </div>
-
-          <!-- Timeline -->
-          <div class="mt-2 bg-white border rounded-lg p-4">
+<div class="mt-2 bg-white border rounded-lg p-4">
             <h3 class="text-base font-semibold text-foreground mb-2.5 mt-0">Eventos</h3>
             <MatchesMatchTimeline :events="currentMatch.events ?? []" :teams="teams" />
           </div>
         </template>
       </section>
-
-      <!-- Finished matches -->
-      <section v-if="finishedMatches.length > 0" class="mb-9">
+<section v-if="finishedMatches.length > 0" class="mb-9">
         <h2 class="text-xl font-semibold text-foreground mb-4 pb-2 border-b-2 border-border">
           Partidas Concluidas
           <span class="text-base font-normal text-muted-foreground ml-1">({{ finishedMatches.length }})</span>
@@ -212,9 +191,7 @@
           </div>
         </div>
       </section>
-
-      <!-- Finalize session button -->
-      <section v-if="!currentMatch && finishedMatches.length > 0 && canManageMatch()" class="mb-9 pt-4 border-t border-border">
+<section v-if="!currentMatch && finishedMatches.length > 0 && canManageMatch()" class="mb-9 pt-4 border-t border-border">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-lg font-semibold text-foreground">Encerrar Sessao</h2>
@@ -233,9 +210,7 @@
         </div>
       </section>
     </template>
-
-    <!-- End match modal (draw on first match: pick winner) -->
-    <BaseModal :show="showWinnerModal" title="Empate -- Escolha o vencedor" @close="showWinnerModal = false">
+<BaseModal :show="showWinnerModal" title="Empate -- Escolha o vencedor" @close="showWinnerModal = false">
       <p class="text-foreground text-sm mb-4">
         A primeira partida terminou em empate. Escolha o time vencedor para fins de rodizio (ambos os times recebem 1 ponto):
       </p>
@@ -258,9 +233,7 @@
         </BaseButton>
       </div>
     </BaseModal>
-
-    <!-- End match confirm modal (normal) -->
-    <BaseModal :show="showEndModal" title="Encerrar Partida" @close="showEndModal = false">
+<BaseModal :show="showEndModal" title="Encerrar Partida" @close="showEndModal = false">
       <p class="text-foreground text-sm">Deseja realmente encerrar a partida atual?</p>
       <template #footer>
         <BaseButton variant="secondary" size="sm" @click="showEndModal = false">Cancelar</BaseButton>
@@ -269,9 +242,7 @@
         </BaseButton>
       </template>
     </BaseModal>
-
-    <!-- Finalize session confirm modal -->
-    <BaseModal :show="showFinalizeModal" title="Encerrar Sessao" @close="showFinalizeModal = false">
+<BaseModal :show="showFinalizeModal" title="Encerrar Sessao" @close="showFinalizeModal = false">
       <p class="text-foreground text-sm">
         Deseja realmente encerrar a sessao? Essa acao vai salvar todos os resultados, atualizar o ELO dos jogadores e finalizar a sessao.
       </p>
@@ -456,7 +427,6 @@ onMounted(async () => {
 
     await fetchAll()
 
-    // If there's no current match and it's not the first match, fetch next suggestion
     if (!currentMatch.value && finishedMatches.value.length > 0) {
       await fetchNextMatch()
     }
@@ -559,7 +529,6 @@ async function confirmEndMatch(winnerId: number | null | undefined) {
   try {
     await endMatch(currentMatch.value.id, winnerId != null ? { winnerId } : {})
     await fetchAll()
-    // After ending a match, fetch the next match suggestion
     if (!currentMatch.value) {
       await fetchNextMatch()
     }

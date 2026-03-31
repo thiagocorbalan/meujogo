@@ -1,7 +1,6 @@
 <template>
   <div class="max-w-[800px] mx-auto py-8 px-4">
-    <!-- Error banner -->
-    <div v-if="errorMessage" class="mb-4 px-4 py-3 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm flex items-center justify-between">
+<div v-if="errorMessage" class="mb-4 px-4 py-3 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm flex items-center justify-between">
       <span>{{ errorMessage }}</span>
       <button class="ml-3 text-red-600 hover:text-red-800 font-bold" @click="errorMessage = null">&times;</button>
     </div>
@@ -9,8 +8,7 @@
     <div v-if="loading" class="text-muted-foreground text-base py-10 text-center">Carregando...</div>
 
     <template v-else-if="champion">
-      <!-- Celebration header -->
-      <div class="text-center mb-8">
+<div class="text-center mb-8">
         <span class="text-6xl block mb-3">&#127942;</span>
         <h1 class="text-4xl font-extrabold text-foreground mb-2">Campeao!</h1>
         <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-bold" :style="{ background: champion.team?.color + '22', color: champion.team?.color, border: `2px solid ${champion.team?.color}` }">
@@ -18,9 +16,7 @@
           {{ champion.team?.name || 'Time Campeao' }}
         </div>
       </div>
-
-      <!-- Players -->
-      <div v-if="teamPlayers.length" class="mb-8">
+<div v-if="teamPlayers.length" class="mb-8">
         <h2 class="text-lg font-semibold text-foreground mb-3 text-center">Jogadores</h2>
         <div class="flex flex-wrap justify-center gap-3">
           <span
@@ -32,15 +28,11 @@
           </span>
         </div>
       </div>
-
-      <!-- Ranking -->
-      <div v-if="ranking.length" class="mb-8">
+<div v-if="ranking.length" class="mb-8">
         <h2 class="text-lg font-semibold text-foreground mb-3">Classificacao Final</h2>
         <RankingTable :ranking="ranking" :loading="false" />
       </div>
-
-      <!-- Photo upload -->
-      <div class="mb-8 bg-white border rounded-lg p-6">
+<div class="mb-8 bg-white border rounded-lg p-6">
         <h2 class="text-lg font-semibold text-foreground mb-3">Foto do Campeao</h2>
 
         <div v-if="canCreate('champions') && !photoFile && !champion.photoUrl" class="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors" @click="triggerFileInput" @dragover.prevent @drop.prevent="onDrop">
@@ -60,9 +52,7 @@
           <img :src="resolvePhotoUrl(champion.photoUrl)" alt="Foto do campeao" class="max-h-[240px] rounded-lg mx-auto object-cover" />
         </div>
       </div>
-
-      <!-- Actions -->
-      <div class="flex justify-center gap-4">
+<div class="flex justify-center gap-4">
         <BaseButton v-if="canCreate('champions')" variant="primary" size="md" :loading="saving" :disabled="!photoFile" @click="handleSave">
           Salvar Foto e Finalizar
         </BaseButton>
@@ -88,8 +78,8 @@ const { getSessionChampion, uploadChampionPhoto } = useChampions()
 const { getSessionRanking } = useRanking()
 const { baseURL } = useApi()
 
-function resolvePhotoUrl(url: string | null | undefined): string | null {
-  if (!url) return null
+function resolvePhotoUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined
   if (url.startsWith('http')) return url
   return `${baseURL}${url}`
 }

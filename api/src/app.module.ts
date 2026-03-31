@@ -1,25 +1,63 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { PrismaModule } from './prisma/prisma.module';
-import { SettingsModule } from './settings/settings.module';
-import { PlayersModule } from './players/players.module';
-import { UsersModule } from './users/users.module';
-import { SeasonsModule } from './seasons/seasons.module';
-import { SessionsModule } from './sessions/sessions.module';
-import { MatchesModule } from './matches/matches.module';
-import { TeamsModule } from './teams/teams.module';
-import { AttendanceModule } from './attendance/attendance.module';
-import { RankingModule } from './ranking/ranking.module';
-import { ChampionsModule } from './champions/champions.module';
-import { DashboardModule } from './dashboard/dashboard.module';
-import { UploadsModule } from './uploads/uploads.module';
-import { StatsModule } from './stats/stats.module';
-import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { CsrfGuard } from './common/guards/csrf.guard.js';
+import { AppController } from './app.controller.js';
+import { AppService } from './app.service.js';
+import { PrismaModule } from './prisma/prisma.module.js';
+import { SettingsModule } from './settings/settings.module.js';
+import { PlayersModule } from './players/players.module.js';
+import { UsersModule } from './users/users.module.js';
+import { SeasonsModule } from './seasons/seasons.module.js';
+import { SessionsModule } from './sessions/sessions.module.js';
+import { MatchesModule } from './matches/matches.module.js';
+import { TeamsModule } from './teams/teams.module.js';
+import { AttendanceModule } from './attendance/attendance.module.js';
+import { RankingModule } from './ranking/ranking.module.js';
+import { ChampionsModule } from './champions/champions.module.js';
+import { DashboardModule } from './dashboard/dashboard.module.js';
+import { UploadsModule } from './uploads/uploads.module.js';
+import { StatsModule } from './stats/stats.module.js';
+import { AuthModule } from './auth/auth.module.js';
 
 @Module({
-  imports: [PrismaModule, SettingsModule, PlayersModule, UsersModule, SeasonsModule, SessionsModule, MatchesModule, TeamsModule, AttendanceModule, RankingModule, ChampionsModule, DashboardModule, UploadsModule, StatsModule, AuthModule],
+  imports: [
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          name: 'default',
+          ttl: 60000,
+          limit: 100,
+        },
+      ],
+    }),
+    PrismaModule,
+    SettingsModule,
+    PlayersModule,
+    UsersModule,
+    SeasonsModule,
+    SessionsModule,
+    MatchesModule,
+    TeamsModule,
+    AttendanceModule,
+    RankingModule,
+    ChampionsModule,
+    DashboardModule,
+    UploadsModule,
+    StatsModule,
+    AuthModule,
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: CsrfGuard,
+    },
+  ],
 })
 export class AppModule {}

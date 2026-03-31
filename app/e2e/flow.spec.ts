@@ -1,24 +1,15 @@
 import { test, expect } from '@playwright/test';
 
-/**
- * Fluxo completo da sessão — navega pelas principais páginas em sequência
- * e verifica que cada uma carrega sem erros críticos.
- *
- * Os testes usam `test.describe.serial` para garantir execução ordenada.
- * Assertions de dados vindos da API são feitas com `softExpect` ou verificam
- * apenas elementos da UI que existem independentemente da API estar disponível.
- */
 test.describe.serial('Fluxo completo da sessão', () => {
   test('Dashboard carrega com título correto', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle(/MatchSoccer/i);
+    await expect(page).toHaveTitle(/Meu Jogo/i);
     await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
   });
 
   test('Página de Jogadores carrega com tabela visível', async ({ page }) => {
     await page.goto('/jogadores');
     await expect(page.getByRole('heading', { name: 'Jogadores' })).toBeVisible();
-    // A tabela pode estar vazia se a API estiver indisponível; verifica o container
     await expect(page.locator('.jogadores-page, main, [class*="jogadores"]').first()).toBeVisible();
   });
 
@@ -40,7 +31,6 @@ test.describe.serial('Fluxo completo da sessão', () => {
   test('Página de Estatísticas carrega com abas', async ({ page }) => {
     await page.goto('/estatisticas');
     await expect(page.getByRole('heading', { name: 'Estatísticas' })).toBeVisible();
-    // Verifica que as abas Sessão e Temporada existem
     await expect(page.getByRole('button', { name: 'Sessão' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Temporada' })).toBeVisible();
   });
@@ -58,7 +48,6 @@ test.describe.serial('Fluxo completo da sessão', () => {
   test('Página de Configurações carrega com formulário', async ({ page }) => {
     await page.goto('/configuracoes');
     await expect(page.getByRole('heading', { name: 'Configurações' })).toBeVisible();
-    // O formulário pode aparecer após carregamento; aguarda até 10s
     await expect(page.locator('form, .config-page__form').first()).toBeVisible({ timeout: 10_000 });
   });
 });

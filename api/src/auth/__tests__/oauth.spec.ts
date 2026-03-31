@@ -72,9 +72,9 @@ describe('AuthService - validateOAuthUser', () => {
     };
 
     it('should create new user with role USUARIO', async () => {
-      prismaService.user.findFirst.mockResolvedValue(null);
-      usersService.findByEmail!.mockResolvedValue(null);
-      prismaService.user.create.mockResolvedValue({
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(null);
+      (prismaService.user.create as jest.Mock).mockResolvedValue({
         id: 2,
         name: 'Google User',
         email: 'google@example.com',
@@ -100,9 +100,9 @@ describe('AuthService - validateOAuthUser', () => {
     });
 
     it('should link to existing user by email', async () => {
-      prismaService.user.findFirst.mockResolvedValue(null);
-      usersService.findByEmail!.mockResolvedValue(baseMockUser as any);
-      prismaService.user.update.mockResolvedValue({
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(baseMockUser as any);
+      (prismaService.user.update as jest.Mock).mockResolvedValue({
         ...baseMockUser,
         googleId: 'google-id-123',
       });
@@ -125,9 +125,9 @@ describe('AuthService - validateOAuthUser', () => {
     };
 
     it('should create new user', async () => {
-      prismaService.user.findFirst.mockResolvedValue(null);
-      usersService.findByEmail!.mockResolvedValue(null);
-      prismaService.user.create.mockResolvedValue({
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(null);
+      (prismaService.user.create as jest.Mock).mockResolvedValue({
         id: 3,
         name: 'Apple User',
         email: 'apple@example.com',
@@ -152,9 +152,9 @@ describe('AuthService - validateOAuthUser', () => {
     });
 
     it('should link to existing user', async () => {
-      prismaService.user.findFirst.mockResolvedValue(null);
-      usersService.findByEmail!.mockResolvedValue(baseMockUser as any);
-      prismaService.user.update.mockResolvedValue({
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(baseMockUser as any);
+      (prismaService.user.update as jest.Mock).mockResolvedValue({
         ...baseMockUser,
         appleId: 'apple-id-456',
       });
@@ -175,7 +175,7 @@ describe('AuthService - validateOAuthUser', () => {
         ...baseMockUser,
         googleId: 'google-id-123',
       };
-      prismaService.user.findFirst.mockResolvedValue(existingGoogleUser);
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(existingGoogleUser);
 
       const result = await service.validateOAuthUser(
         { email: 'google@example.com', name: 'Google User', providerId: 'google-id-123' },
@@ -184,15 +184,14 @@ describe('AuthService - validateOAuthUser', () => {
 
       expect(result).not.toHaveProperty('password');
       expect(result.id).toBe(1);
-      // Should NOT create or update since user was found by provider ID
       expect(prismaService.user.create).not.toHaveBeenCalled();
       expect(prismaService.user.update).not.toHaveBeenCalled();
     });
 
     it('should update appleId on existing user found by email', async () => {
-      prismaService.user.findFirst.mockResolvedValue(null);
-      usersService.findByEmail!.mockResolvedValue(baseMockUser as any);
-      prismaService.user.update.mockResolvedValue({
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(baseMockUser as any);
+      (prismaService.user.update as jest.Mock).mockResolvedValue({
         ...baseMockUser,
         appleId: 'apple-id-new',
       });

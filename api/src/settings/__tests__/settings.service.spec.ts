@@ -94,7 +94,6 @@ describe('SettingsService', () => {
     it('should NOT delete User, Settings, or Vest tables', async () => {
       await service.resetData();
 
-      // mockTx does not contain user, settings, or vest — confirming they are never called
       const deletedTables = Object.keys(mockTx);
       expect(deletedTables).not.toContain('user');
       expect(deletedTables).not.toContain('settings');

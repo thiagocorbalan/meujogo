@@ -51,8 +51,6 @@ describe('UsersService', () => {
     jest.clearAllMocks();
   });
 
-  // ─── create() ────────────────────────────────────────────────
-
   describe('create()', () => {
     const createDto = {
       name: 'John Doe',
@@ -127,8 +125,6 @@ describe('UsersService', () => {
     });
   });
 
-  // ─── findAll() ───────────────────────────────────────────────
-
   describe('findAll()', () => {
     it('returns users without password field', async () => {
       const users = [userWithoutPassword];
@@ -165,8 +161,6 @@ describe('UsersService', () => {
     });
   });
 
-  // ─── findOne() ───────────────────────────────────────────────
-
   describe('findOne()', () => {
     it('returns user without password field', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(userWithoutPassword);
@@ -195,8 +189,6 @@ describe('UsersService', () => {
     });
   });
 
-  // ─── findByEmail() ──────────────────────────────────────────
-
   describe('findByEmail()', () => {
     it('returns user with password for login validation', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(userWithPassword);
@@ -219,13 +211,9 @@ describe('UsersService', () => {
     });
   });
 
-  // ─── update() ────────────────────────────────────────────────
-
   describe('update()', () => {
     it('hashes password when provided', async () => {
-      // findOne check
       mockPrisma.user.findUnique.mockResolvedValueOnce(userWithoutPassword);
-      // email uniqueness check
       mockPrisma.user.findUnique.mockResolvedValueOnce(null);
       mockedBcrypt.hash.mockResolvedValue('new_hashed_pw' as never);
       mockPrisma.user.update.mockResolvedValue(userWithoutPassword);
@@ -247,7 +235,6 @@ describe('UsersService', () => {
     });
 
     it('does not include password in data when not provided', async () => {
-      // findOne check
       mockPrisma.user.findUnique.mockResolvedValueOnce(userWithoutPassword);
       mockPrisma.user.update.mockResolvedValue(userWithoutPassword);
 
@@ -260,9 +247,7 @@ describe('UsersService', () => {
 
     it('throws ConflictException for duplicate email on another user', async () => {
       const otherUser = { ...userWithPassword, id: 2 };
-      // findOne check
       mockPrisma.user.findUnique.mockResolvedValueOnce(userWithoutPassword);
-      // email uniqueness check - returns another user with the same email
       mockPrisma.user.findUnique.mockResolvedValueOnce(otherUser);
 
       const promise = service.update(1, { email: 'taken@example.com' });
@@ -272,9 +257,7 @@ describe('UsersService', () => {
 
     it('throws ConflictException with correct message for duplicate email', async () => {
       const otherUser = { ...userWithPassword, id: 2 };
-      // findOne check
       mockPrisma.user.findUnique.mockResolvedValueOnce(userWithoutPassword);
-      // email uniqueness check - returns another user with the same email
       mockPrisma.user.findUnique.mockResolvedValueOnce(otherUser);
 
       await expect(
@@ -284,9 +267,7 @@ describe('UsersService', () => {
 
     it('allows updating email when it belongs to the same user', async () => {
       const existingUser = { ...userWithPassword, id: 1, email: 'john@example.com' };
-      // findOne check
       mockPrisma.user.findUnique.mockResolvedValueOnce(userWithoutPassword);
-      // email uniqueness check - same user
       mockPrisma.user.findUnique.mockResolvedValueOnce(existingUser);
       mockPrisma.user.update.mockResolvedValue(userWithoutPassword);
 
@@ -322,8 +303,6 @@ describe('UsersService', () => {
     });
   });
 
-  // ─── updateRefreshToken() ───────────────────────────────────
-
   describe('updateRefreshToken()', () => {
     it('saves hashed refresh token', async () => {
       mockPrisma.user.update.mockResolvedValue(userWithPassword);
@@ -347,8 +326,6 @@ describe('UsersService', () => {
       });
     });
   });
-
-  // ─── remove() ────────────────────────────────────────────────
 
   describe('remove()', () => {
     it('deletes user after verifying existence', async () => {

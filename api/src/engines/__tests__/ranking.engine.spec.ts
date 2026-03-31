@@ -29,7 +29,6 @@ describe('calculateRanking', () => {
   });
 
   it('should tiebreak by goal difference', () => {
-    // Team 1 and Team 2 both have 3 pts; Team 1 has better GD
     const matches: MatchResult[] = [
       { teamAId: 1, teamBId: 3, scoreA: 3, scoreB: 0, isDraw: false, winnerId: 1 },
       { teamAId: 2, teamBId: 3, scoreA: 1, scoreB: 0, isDraw: false, winnerId: 2 },
@@ -38,9 +37,6 @@ describe('calculateRanking', () => {
 
     const ranking = calculateRanking(matches, teams);
 
-    // Team 2: 6 pts (wins vs 3 and vs 1)
-    // Team 1: 3 pts, GD = +3-1 = +2 (beat 3 by 3, lost to 2 by 1)
-    // Team 3: 0 pts
     expect(ranking[0].teamId).toBe(2);
     expect(ranking[0].points).toBe(6);
 
@@ -51,9 +47,6 @@ describe('calculateRanking', () => {
   });
 
   it('should tiebreak by goals scored when points and GD are equal', () => {
-    // Team 1 beats team 3 by 3-1 (GD +2, GF 3)
-    // Team 2 beats team 3 by 2-0 (GD +2, GF 2)
-    // Team 1 vs Team 2 => draw
     const matches: MatchResult[] = [
       { teamAId: 1, teamBId: 3, scoreA: 3, scoreB: 1, isDraw: false, winnerId: 1 },
       { teamAId: 2, teamBId: 3, scoreA: 2, scoreB: 0, isDraw: false, winnerId: 2 },
@@ -62,9 +55,6 @@ describe('calculateRanking', () => {
 
     const ranking = calculateRanking(matches, teams);
 
-    // Team 1: 1 win + 1 draw = 4 pts, GF=4, GA=2, GD=+2
-    // Team 2: 1 win + 1 draw = 4 pts, GF=3, GA=1, GD=+2
-    // Same pts, same GD => tiebreak by goalsFor: Team 1 (4) > Team 2 (3)
     expect(ranking[0].teamId).toBe(1);
     expect(ranking[0].points).toBe(4);
     expect(ranking[0].goalsFor).toBe(4);
@@ -112,8 +102,6 @@ describe('calculateRanking', () => {
       expect(entry.goalDifference).toBe(0);
     }
 
-    // Team 2 and 3 scored more goals total than Team 1
-    // Team 2: GF = 1+2 = 3; Team 3: GF = 0+2 = 2; Team 1: GF = 1+0 = 1
     const goalsFor = ranking.map((r) => r.goalsFor);
     expect(goalsFor[0]).toBeGreaterThanOrEqual(goalsFor[1]);
     expect(goalsFor[1]).toBeGreaterThanOrEqual(goalsFor[2]);
@@ -167,12 +155,10 @@ describe('calculateRanking edge cases', () => {
   it('match referencing a team not in teams list: skips match gracefully without crash', () => {
     const knownTeams: TeamInfo[] = [{ id: 1, name: 'Red', color: '#FF0000' }];
     const matches: MatchResult[] = [
-      // team 99 is not in the teams list
       { teamAId: 1, teamBId: 99, scoreA: 2, scoreB: 0, isDraw: false, winnerId: 1 },
     ];
     expect(() => calculateRanking(matches, knownTeams)).not.toThrow();
     const ranking = calculateRanking(matches, knownTeams);
-    // The match is skipped; team 1 should still have 0 played
     const red = ranking.find((r) => r.teamId === 1)!;
     expect(red.played).toBe(0);
     expect(red.points).toBe(0);

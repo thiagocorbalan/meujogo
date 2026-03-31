@@ -65,33 +65,12 @@ test.describe('Auth RBAC UI', () => {
   });
 
   test('unauthenticated user can access auth callback', async ({ page }) => {
-    // The callback page is public but redirects based on token params
     await page.goto('/auth/callback');
     await expect(page).toHaveURL(/\/auth\/callback|\/login/);
   });
 
-  // Note: Full RBAC testing with different roles requires a test helper
-  // that creates users and logs in via API. Adding a helper pattern:
   test.describe('with authenticated USUARIO', () => {
     test.skip(true, 'Requires running backend with test data');
-
-    // These tests would use a beforeEach that:
-    // 1. Creates a user via API (POST /auth/register)
-    // 2. Logs in via API (POST /auth/login)
-    // 3. Sets auth tokens in localStorage to bypass the login UI
-    //
-    // Example helper:
-    //   async function loginAs(page: Page, role: 'ADMIN' | 'USUARIO') {
-    //     const res = await page.request.post('http://localhost:3000/auth/login', {
-    //       data: { email: `test-${role}@example.com`, password: 'test1234' },
-    //     });
-    //     const { accessToken, refreshToken, user } = await res.json();
-    //     await page.evaluate(({ accessToken, refreshToken, user }) => {
-    //       localStorage.setItem('accessToken', accessToken);
-    //       localStorage.setItem('refreshToken', refreshToken);
-    //       localStorage.setItem('user', JSON.stringify(user));
-    //     }, { accessToken, refreshToken, user });
-    //   }
 
     test('USUARIO can access dashboard', async ({ page }) => {
       await page.goto('/');

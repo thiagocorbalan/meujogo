@@ -1,4 +1,4 @@
-export default defineNuxtRouteMiddleware((to) => {
+export default defineNuxtRouteMiddleware(async (to) => {
   const publicRoutes = [
     '/login',
     '/esqueceu-senha',
@@ -12,7 +12,6 @@ export default defineNuxtRouteMiddleware((to) => {
   try {
     authStore = useAuthStore()
   } catch {
-    // Store might not be initialized yet (SSR cold start)
     if (!isPublic) {
       return navigateTo('/login')
     }
@@ -20,7 +19,7 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   if (!authStore.isAuthenticated) {
-    authStore.hydrateFromStorage()
+    await authStore.hydrateFromStorage()
   }
 
   if (isPublic) {

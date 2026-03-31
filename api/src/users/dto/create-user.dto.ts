@@ -4,6 +4,7 @@ import {
   IsNotEmpty,
   IsString,
   Matches,
+  MaxLength,
   MinLength,
 } from 'class-validator';
 import { UserRole } from '@prisma/client';
@@ -11,12 +12,15 @@ import { UserRole } from '@prisma/client';
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
+  @MaxLength(100)
   name: string;
 
   @IsEmail()
+  @MaxLength(255)
   email: string;
 
   @IsString()
+  @MaxLength(128)
   @MinLength(12, {
     message: 'A senha deve ter no mínimo 12 caracteres',
   })

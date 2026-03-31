@@ -1,10 +1,12 @@
-import { IsString, Matches, MinLength } from 'class-validator';
+import { IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class ResetPasswordDto {
   @IsString()
+  @MaxLength(512)
   token: string;
 
   @IsString()
+  @MaxLength(128)
   @MinLength(12, {
     message: 'A senha deve ter no mínimo 12 caracteres',
   })

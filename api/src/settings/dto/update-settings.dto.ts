@@ -6,6 +6,7 @@ import {
   IsArray,
   ValidateNested,
   IsString,
+  MaxLength,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -16,9 +17,11 @@ export enum DrawMode {
 
 export class VestDto {
   @IsString()
+  @MaxLength(100)
   name: string;
 
   @IsString()
+  @MaxLength(50)
   color: string;
 }
 

@@ -1,6 +1,14 @@
-import { Controller, Get, Param, Res, StreamableFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Res,
+  StreamableFile,
+  UseGuards,
+} from '@nestjs/common';
 import { createReadStream } from 'fs';
 import { join, extname } from 'path';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 
 const UPLOADS_ROOT = '/app/uploads';
 
@@ -12,6 +20,7 @@ const MIME_TYPES: Record<string, string> = {
 };
 
 @Controller('uploads')
+@UseGuards(JwtAuthGuard)
 export class UploadsController {
   @Get('champions/:filename')
   serveChampionPhoto(

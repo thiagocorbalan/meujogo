@@ -1,6 +1,6 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
-  devtools: { enabled: true },
+  devtools: { enabled: process.env.NODE_ENV !== 'production' },
 
   modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss', 'shadcn-nuxt'],
 

@@ -97,6 +97,17 @@ export class AuthController {
       maxAge: 15 * 60 * 1000,
     });
 
+    // Set rotated refresh token cookie
+    if (result.refreshToken) {
+      res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: isProduction(),
+        path: '/auth/refresh',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+    }
+
     return { message: 'Token atualizado com sucesso' };
   }
 
@@ -142,6 +153,11 @@ export class AuthController {
     @Res({ passthrough: true }) res: express.Response,
   ) {
     const token = crypto.randomBytes(32).toString('hex');
+    const secret = process.env.JWT_SECRET || '';
+    const signature = crypto
+      .createHmac('sha256', secret)
+      .update(token)
+      .digest('hex');
 
     res.cookie('XSRF-TOKEN', token, {
       httpOnly: false,
@@ -151,7 +167,7 @@ export class AuthController {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    return { csrfToken: token };
+    return { csrfToken: signature };
   }
 
   @Get('google')

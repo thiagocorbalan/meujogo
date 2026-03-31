@@ -42,7 +42,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     };
 
     if (
-      process.env.NODE_ENV !== 'production' &&
+      process.env.NODE_ENV === 'development' &&
       exception instanceof Error
     ) {
       responseBody.stack = exception.stack;

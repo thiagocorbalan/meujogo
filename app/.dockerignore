@@ -1,0 +1,13 @@
+node_modules
+dist
+.output
+.nuxt
+.git
+.env
+.env.*
+!.env.production.example
+__tests__
+e2e
+coverage
+.vscode
+*.md

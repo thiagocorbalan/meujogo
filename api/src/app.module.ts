@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { LoggerModule } from 'nestjs-pino';
 import { CsrfGuard } from './common/guards/csrf.guard.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { HealthModule } from './health/health.module.js';
 import { SettingsModule } from './settings/settings.module.js';
 import { PlayersModule } from './players/players.module.js';
 import { UsersModule } from './users/users.module.js';
@@ -31,7 +33,24 @@ import { AuthModule } from './auth/auth.module.js';
         },
       ],
     }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? { target: 'pino-pretty', options: { colorize: true } }
+            : undefined,
+        level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+        redact: ['req.headers.cookie', 'req.headers.authorization'],
+        serializers: {
+          req: (req) => ({
+            method: req.method,
+            url: req.url,
+          }),
+        },
+      },
+    }),
     PrismaModule,
+    HealthModule,
     SettingsModule,
     PlayersModule,
     UsersModule,

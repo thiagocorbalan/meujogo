@@ -83,7 +83,7 @@ function onLinkClick() {
 }
 
 async function handleLogout() {
-  authStore.logout()
+  await authStore.logout()
   emit('close')
   await navigateTo('/login')
 }

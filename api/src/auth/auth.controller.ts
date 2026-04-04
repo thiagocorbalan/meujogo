@@ -58,6 +58,7 @@ function clearTokenCookies(res: express.Response) {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @SkipCsrf()
   @Throttle({ default: { ttl: 900000, limit: 5 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -125,6 +126,7 @@ export class AuthController {
     return { message: 'Logout realizado com sucesso' };
   }
 
+  @SkipCsrf()
   @Throttle({ default: { ttl: 3600000, limit: 3 } })
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
@@ -133,6 +135,7 @@ export class AuthController {
     return { message: 'Se o email existir, enviaremos um link de recuperação' };
   }
 
+  @SkipCsrf()
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body() dto: ResetPasswordDto) {

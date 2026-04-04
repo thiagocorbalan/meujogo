@@ -3,7 +3,7 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile.dev
-    container_name: matchsoccer-api
+    container_name: meujogo-api
     ports:
       - '3000:3000'
     env_file: .env
@@ -17,17 +17,18 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - matchsoccer-network
+      - meujogo-network
 
   app:
     build:
       context: ./app
       dockerfile: Dockerfile.dev
-    container_name: matchsoccer-app
+    container_name: meujogo-app
     ports:
       - '4000:4000'
     env_file: .env
     environment:
+      PORT: 4000
       API_BASE_URL: ${API_BASE_URL:-http://api:3000}
       PUBLIC_API_BASE_URL: ${PUBLIC_API_BASE_URL:-http://localhost:3000}
     volumes:
@@ -37,30 +38,30 @@ services:
     depends_on:
       - api
     networks:
-      - matchsoccer-network
+      - meujogo-network
 
   postgres:
     image: postgres:16-alpine
-    container_name: matchsoccer-postgres
+    container_name: meujogo-postgres
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-matchsoccer}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-matchsoccer}
-      POSTGRES_DB: ${POSTGRES_DB:-matchsoccer}
+      POSTGRES_USER: ${POSTGRES_USER:-meujogo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-meujogo}
+      POSTGRES_DB: ${POSTGRES_DB:-meujogo_db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-matchsoccer} -d ${POSTGRES_DB:-matchsoccer}']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-meujogo} -d ${POSTGRES_DB:-meujogo_db}']
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - matchsoccer-network
+      - meujogo-network
 
 volumes:
   postgres_data:
 
 networks:
-  matchsoccer-network:
+  meujogo-network:
     driver: bridge

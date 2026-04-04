@@ -9,6 +9,12 @@ vi.stubGlobal('useRuntimeConfig', () => ({
 
 vi.stubGlobal('$fetch', vi.fn());
 
+const mockApiFetch = vi.fn().mockResolvedValue(undefined);
+vi.stubGlobal('useApi', () => ({
+  baseURL: 'http://localhost:3000',
+  fetch: mockApiFetch,
+}));
+
 describe('Auth Store', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
@@ -23,6 +29,7 @@ describe('Auth Store', () => {
       removeItem: vi.fn(),
     });
     vi.mocked($fetch).mockReset();
+    mockApiFetch.mockReset().mockResolvedValue(undefined);
   });
 
   describe('initial state', () => {
@@ -70,29 +77,43 @@ describe('Auth Store', () => {
   });
 
   describe('logout()', () => {
-    it('should clear user and isAuthenticated', () => {
+    it('should call POST /auth/logout and clear user', async () => {
       const store = useAuthStore();
       store.login({
         user: { id: 1, name: 'Thiago', email: 'thiago@test.com', role: 'ADMIN' },
       });
 
-      store.logout();
+      await store.logout();
 
+      expect(mockApiFetch).toHaveBeenCalledWith('/auth/logout', { method: 'POST' });
       expect(store.user).toBeNull();
       expect(store.isAuthenticated).toBe(false);
     });
 
-    it('should remove user from localStorage and clean up legacy tokens', () => {
+    it('should remove user from localStorage and clean up legacy tokens', async () => {
       const store = useAuthStore();
       store.login({
         user: { id: 1, name: 'Thiago', email: 'thiago@test.com', role: 'ADMIN' },
       });
 
-      store.logout();
+      await store.logout();
 
       expect(localStorage.removeItem).toHaveBeenCalledWith('user');
       expect(localStorage.removeItem).toHaveBeenCalledWith('accessToken');
       expect(localStorage.removeItem).toHaveBeenCalledWith('refreshToken');
+    });
+
+    it('should still clear local state when API call fails', async () => {
+      mockApiFetch.mockRejectedValueOnce(new Error('Network error'));
+      const store = useAuthStore();
+      store.login({
+        user: { id: 1, name: 'Thiago', email: 'thiago@test.com', role: 'ADMIN' },
+      });
+
+      await store.logout();
+
+      expect(store.user).toBeNull();
+      expect(store.isAuthenticated).toBe(false);
     });
   });
 

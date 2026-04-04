@@ -23,7 +23,7 @@ const emit = defineEmits<{ 'toggle-sidebar': [] }>()
 const authStore = useAuthStore()
 
 async function handleLogout() {
-  authStore.logout()
+  await authStore.logout()
   await navigateTo('/login')
 }
 </script>

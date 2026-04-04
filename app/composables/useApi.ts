@@ -1,28 +1,15 @@
-
-function getCookie(name: string): string | null {
-  if (import.meta.server) return null
-  const match = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)'))
-  return match ? decodeURIComponent(match[1]) : null
-}
-
 const STATE_CHANGING_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
 
-let csrfToken: string | null = null
+let csrfSignature: string | null = null
 
 async function fetchCsrfToken(baseURL: string): Promise<string | null> {
-  const fromCookie = getCookie('csrf-token') || getCookie('XSRF-TOKEN')
-  if (fromCookie) {
-    csrfToken = fromCookie
-    return csrfToken
-  }
-
   try {
-    const result = await $fetch<{ token: string }>('/auth/csrf-token', {
+    const result = await $fetch<{ csrfToken: string }>('/auth/csrf-token', {
       baseURL,
       credentials: 'include',
     })
-    csrfToken = result.token
-    return csrfToken
+    csrfSignature = result.csrfToken
+    return csrfSignature
   } catch {
     return null
   }
@@ -41,10 +28,11 @@ export function useApi() {
       const method = ((opts?.method as string) || 'GET').toUpperCase()
 
       if (STATE_CHANGING_METHODS.includes(method)) {
-        const token = csrfToken || getCookie('csrf-token') || getCookie('XSRF-TOKEN')
-        if (token) {
-          headers['X-CSRF-Token'] = token
-          csrfToken = token
+        if (!csrfSignature) {
+          await fetchCsrfToken(baseURL)
+        }
+        if (csrfSignature) {
+          headers['X-CSRF-Token'] = csrfSignature
         }
       }
 

@@ -47,7 +47,7 @@ This starts all three services:
 
 ### Running without Docker
 
-**1. Start PostgreSQL** and create a database named `matchsoccer`.
+**1. Start PostgreSQL** and create a database named `meujogo`.
 
 **2. Backend**
 
@@ -93,7 +93,7 @@ cd app && npm run test:e2e
 ## Project Structure
 
 ```
-matchsoccer/
+meujogo/
 ├── api/                  # NestJS backend
 │   ├── src/
 │   │   ├── engines/      # Business logic (ELO, ranking, rotation)

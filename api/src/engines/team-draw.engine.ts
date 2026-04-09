@@ -27,7 +27,7 @@ function buildTeams(
 
   for (let i = 0; i < eligible.length; i++) {
     const teamIndex = Math.floor(i / playersPerTeam);
-    teams[teamIndex].push(eligible[i]);
+    teams[teamIndex]!.push(eligible[i]!);
   }
 
   return teams
@@ -69,7 +69,7 @@ export function drawTeamsBalanced(
     const positionInRound = i % numTeams;
     const teamIndex =
       round % 2 === 0 ? positionInRound : numTeams - 1 - positionInRound;
-    teams[teamIndex].push(eligible[i]);
+    teams[teamIndex]!.push(eligible[i]!);
   }
 
   return teams

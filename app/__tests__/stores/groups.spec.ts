@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 
+import { useGroupsStore } from '../../stores/groups';
+
 // Mock Nuxt auto-imports
 vi.stubGlobal('useRuntimeConfig', () => ({
   apiBaseUrl: 'http://localhost:3000',
@@ -22,8 +24,6 @@ vi.stubGlobal('useGroups', () => ({
   getGroups: mockGetGroups,
   createGroup: mockCreateGroup,
 }));
-
-import { useGroupsStore } from '../../stores/groups';
 
 describe('Groups Store', () => {
   let mockLocalStorage: Record<string, string>;

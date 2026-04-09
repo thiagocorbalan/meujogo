@@ -1,3 +1,9 @@
+<script setup lang="ts">
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+
+defineProps<{ players: any[]; loading: boolean }>()
+</script>
+
 <template>
   <div>
     <p v-if="loading" class="text-muted-foreground text-sm py-5">Carregando...</p>
@@ -32,9 +38,3 @@
     <p v-else class="text-muted-foreground text-sm py-5">Nenhum artilheiro registrado.</p>
   </div>
 </template>
-
-<script setup lang="ts">
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-
-defineProps<{ players: any[]; loading: boolean }>()
-</script>

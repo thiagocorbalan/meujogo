@@ -11,17 +11,18 @@ import {
 import { cn } from "@/lib/utils"
 import { SelectScrollDownButton, SelectScrollUpButton } from "."
 
-defineOptions({
-  inheritAttrs: false,
-})
-
 const props = withDefaults(
   defineProps<SelectContentProps & { class?: HTMLAttributes["class"] }>(),
   {
     position: "popper",
   },
 )
+
 const emits = defineEmits<SelectContentEmits>()
+
+defineOptions({
+  inheritAttrs: false,
+})
 
 const delegatedProps = reactiveOmit(props, "class")
 

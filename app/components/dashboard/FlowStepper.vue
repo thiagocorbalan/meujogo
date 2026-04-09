@@ -1,3 +1,20 @@
+<script setup lang="ts">
+const route = useRoute()
+
+const steps = [
+  { label: 'Jogadores', to: '/jogadores' },
+  { label: 'Confirmação', to: '/confirmacao' },
+  { label: 'Sorteio', to: '/sorteio' },
+  { label: 'Partida', to: '/partida' },
+  { label: 'Estatísticas', to: '/estatisticas' },
+  { label: 'Campeões', to: '/campeoes' },
+]
+
+function isActive(to: string) {
+  return route.path === to
+}
+</script>
+
 <template>
   <div class="flex items-center py-4 overflow-x-auto">
     <template v-for="(step, index) in steps" :key="step.to">
@@ -22,20 +39,3 @@
     </template>
   </div>
 </template>
-
-<script setup lang="ts">
-const route = useRoute()
-
-const steps = [
-  { label: 'Jogadores', to: '/jogadores' },
-  { label: 'Confirmação', to: '/confirmacao' },
-  { label: 'Sorteio', to: '/sorteio' },
-  { label: 'Partida', to: '/partida' },
-  { label: 'Estatísticas', to: '/estatisticas' },
-  { label: 'Campeões', to: '/campeoes' },
-]
-
-function isActive(to: string) {
-  return route.path === to
-}
-</script>

@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+import { useAuth } from '../../composables/useAuth';
+
 const mockFetch = vi.fn();
 
 vi.stubGlobal('useApi', () => ({
   fetch: mockFetch,
 }));
-
-import { useAuth } from '../../composables/useAuth';
 
 describe('useAuth composable', () => {
   beforeEach(() => {

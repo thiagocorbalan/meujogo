@@ -1,3 +1,91 @@
+<script setup lang="ts">
+import { Users, Calendar, MapPin, AlertCircle, UserX, Loader2 } from 'lucide-vue-next'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+
+definePageMeta({ layout: false })
+
+const route = useRoute()
+const authStore = useAuthStore()
+const groupsStore = useGroupsStore()
+const { getInviteInfo, joinGroup } = useGroups()
+
+const loading = ref(true)
+const joining = ref(false)
+const errorState = ref<'not-found' | 'full' | 'generic' | null>(null)
+const errorMessage = ref('')
+const inviteInfo = ref<any>(null)
+
+const code = computed(() => route.params.code as string)
+const linkPlayerId = computed(() => {
+  const val = route.query.linkPlayer
+  return val ? Number(val) : undefined
+})
+
+onMounted(async () => {
+  if (!authStore.isAuthenticated) {
+    await authStore.hydrateFromStorage()
+  }
+
+  await loadInviteInfo()
+})
+
+async function loadInviteInfo() {
+  loading.value = true
+  errorState.value = null
+
+  try {
+    inviteInfo.value = await getInviteInfo(code.value)
+  } catch (e: any) {
+    const status = e?.status || e?.statusCode || e?.data?.statusCode
+    if (status === 404) {
+      errorState.value = 'not-found'
+    } else if (status === 403) {
+      errorState.value = 'full'
+    } else {
+      errorState.value = 'generic'
+      errorMessage.value = e?.data?.message || e?.message || ''
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+async function handleJoin() {
+  if (!authStore.isAuthenticated) {
+    const redirectPath = linkPlayerId.value
+      ? `/convite/${code.value}?linkPlayer=${linkPlayerId.value}`
+      : `/convite/${code.value}`
+    return navigateTo(`/login?redirect=${encodeURIComponent(redirectPath)}`)
+  }
+
+  joining.value = true
+  try {
+    const result = await joinGroup(code.value, linkPlayerId.value) as any
+    const groupId = result?.groupId || result?.group?.id || result?.id
+    if (groupId) {
+      await groupsStore.fetchGroups()
+      groupsStore.switchGroup(groupId)
+    }
+    await navigateTo('/')
+  } catch (e: any) {
+    const status = e?.status || e?.statusCode || e?.data?.statusCode
+    if (status === 409) {
+      // Already a member, redirect home
+      await navigateTo('/')
+    } else if (status === 403) {
+      errorState.value = 'full'
+      inviteInfo.value = null
+    } else {
+      errorState.value = 'generic'
+      errorMessage.value = e?.data?.message || e?.message || 'Erro ao entrar no grupo.'
+      inviteInfo.value = null
+    }
+  } finally {
+    joining.value = false
+  }
+}
+</script>
+
 <template>
   <div class="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
     <!-- Loading state -->
@@ -106,91 +194,3 @@
     </Card>
   </div>
 </template>
-
-<script setup lang="ts">
-import { Users, Calendar, MapPin, AlertCircle, UserX, Loader2 } from 'lucide-vue-next'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-
-definePageMeta({ layout: false })
-
-const route = useRoute()
-const authStore = useAuthStore()
-const groupsStore = useGroupsStore()
-const { getInviteInfo, joinGroup } = useGroups()
-
-const loading = ref(true)
-const joining = ref(false)
-const errorState = ref<'not-found' | 'full' | 'generic' | null>(null)
-const errorMessage = ref('')
-const inviteInfo = ref<any>(null)
-
-const code = computed(() => route.params.code as string)
-const linkPlayerId = computed(() => {
-  const val = route.query.linkPlayer
-  return val ? Number(val) : undefined
-})
-
-onMounted(async () => {
-  if (!authStore.isAuthenticated) {
-    await authStore.hydrateFromStorage()
-  }
-
-  await loadInviteInfo()
-})
-
-async function loadInviteInfo() {
-  loading.value = true
-  errorState.value = null
-
-  try {
-    inviteInfo.value = await getInviteInfo(code.value)
-  } catch (e: any) {
-    const status = e?.status || e?.statusCode || e?.data?.statusCode
-    if (status === 404) {
-      errorState.value = 'not-found'
-    } else if (status === 403) {
-      errorState.value = 'full'
-    } else {
-      errorState.value = 'generic'
-      errorMessage.value = e?.data?.message || e?.message || ''
-    }
-  } finally {
-    loading.value = false
-  }
-}
-
-async function handleJoin() {
-  if (!authStore.isAuthenticated) {
-    const redirectPath = linkPlayerId.value
-      ? `/convite/${code.value}?linkPlayer=${linkPlayerId.value}`
-      : `/convite/${code.value}`
-    return navigateTo(`/login?redirect=${encodeURIComponent(redirectPath)}`)
-  }
-
-  joining.value = true
-  try {
-    const result = await joinGroup(code.value, linkPlayerId.value) as any
-    const groupId = result?.groupId || result?.group?.id || result?.id
-    if (groupId) {
-      await groupsStore.fetchGroups()
-      groupsStore.switchGroup(groupId)
-    }
-    await navigateTo('/')
-  } catch (e: any) {
-    const status = e?.status || e?.statusCode || e?.data?.statusCode
-    if (status === 409) {
-      // Already a member, redirect home
-      await navigateTo('/')
-    } else if (status === 403) {
-      errorState.value = 'full'
-      inviteInfo.value = null
-    } else {
-      errorState.value = 'generic'
-      errorMessage.value = e?.data?.message || e?.message || 'Erro ao entrar no grupo.'
-      inviteInfo.value = null
-    }
-  } finally {
-    joining.value = false
-  }
-}
-</script>

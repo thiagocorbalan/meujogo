@@ -1,47 +1,3 @@
-<template>
-  <div class="bg-white rounded-xl shadow-md overflow-hidden">
-<div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-6 py-5 bg-slate-800 text-white">
-      <div class="flex items-center gap-2">
-        <span class="inline-block w-3.5 h-3.5 rounded-full shrink-0" :style="{ backgroundColor: teamAColor }" />
-        <span class="text-base font-semibold">{{ teamAResolved?.name ?? match.teamA?.name ?? 'Time A' }}</span>
-      </div>
-      <div class="text-4xl font-extrabold tracking-wider flex items-center gap-2.5 text-slate-100">
-        {{ match.scoreA ?? 0 }} <span class="text-2xl font-normal text-slate-400">&times;</span> {{ match.scoreB ?? 0 }}
-      </div>
-      <div class="flex items-center gap-2 justify-end">
-        <span class="text-base font-semibold">{{ teamBResolved?.name ?? match.teamB?.name ?? 'Time B' }}</span>
-        <span class="inline-block w-3.5 h-3.5 rounded-full shrink-0" :style="{ backgroundColor: teamBColor }" />
-      </div>
-    </div>
-<div class="grid grid-cols-2 gap-px bg-border">
-      <div class="bg-white p-4 flex flex-col gap-1.5">
-        <p class="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Jogadores</p>
-        <MatchesGoalButton
-          v-for="player in playersA"
-          :key="player.id"
-          :player="player"
-          :team-id="teamAResolved?.id ?? match.teamA?.id"
-          :disabled="disabled"
-          @goal="(pid: number, tid: number) => emit('goal', pid, tid)"
-        />
-        <p v-if="!playersA.length" class="text-sm text-muted-foreground italic">Nenhum jogador</p>
-      </div>
-      <div class="bg-white p-4 flex flex-col gap-1.5">
-        <p class="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Jogadores</p>
-        <MatchesGoalButton
-          v-for="player in playersB"
-          :key="player.id"
-          :player="player"
-          :team-id="teamBResolved?.id ?? match.teamB?.id"
-          :disabled="disabled"
-          @goal="(pid: number, tid: number) => emit('goal', pid, tid)"
-        />
-        <p v-if="!playersB.length" class="text-sm text-muted-foreground italic">Nenhum jogador</p>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { computed } from 'vue'
 
@@ -89,3 +45,47 @@ function normalizePlayers(rawPlayers: any[]): { id: number; name: string }[] {
 const playersA = computed(() => normalizePlayers(teamAResolved.value?.players ?? []))
 const playersB = computed(() => normalizePlayers(teamBResolved.value?.players ?? []))
 </script>
+
+<template>
+  <div class="bg-white rounded-xl shadow-md overflow-hidden">
+<div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-6 py-5 bg-slate-800 text-white">
+      <div class="flex items-center gap-2">
+        <span class="inline-block w-3.5 h-3.5 rounded-full shrink-0" :style="{ backgroundColor: teamAColor }" />
+        <span class="text-base font-semibold">{{ teamAResolved?.name ?? match.teamA?.name ?? 'Time A' }}</span>
+      </div>
+      <div class="text-4xl font-extrabold tracking-wider flex items-center gap-2.5 text-slate-100">
+        {{ match.scoreA ?? 0 }} <span class="text-2xl font-normal text-slate-400">&times;</span> {{ match.scoreB ?? 0 }}
+      </div>
+      <div class="flex items-center gap-2 justify-end">
+        <span class="text-base font-semibold">{{ teamBResolved?.name ?? match.teamB?.name ?? 'Time B' }}</span>
+        <span class="inline-block w-3.5 h-3.5 rounded-full shrink-0" :style="{ backgroundColor: teamBColor }" />
+      </div>
+    </div>
+<div class="grid grid-cols-2 gap-px bg-border">
+      <div class="bg-white p-4 flex flex-col gap-1.5">
+        <p class="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Jogadores</p>
+        <MatchesGoalButton
+          v-for="player in playersA"
+          :key="player.id"
+          :player="player"
+          :team-id="teamAResolved?.id ?? match.teamA?.id"
+          :disabled="disabled"
+          @goal="(pid: number, tid: number) => emit('goal', pid, tid)"
+        />
+        <p v-if="!playersA.length" class="text-sm text-muted-foreground italic">Nenhum jogador</p>
+      </div>
+      <div class="bg-white p-4 flex flex-col gap-1.5">
+        <p class="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Jogadores</p>
+        <MatchesGoalButton
+          v-for="player in playersB"
+          :key="player.id"
+          :player="player"
+          :team-id="teamBResolved?.id ?? match.teamB?.id"
+          :disabled="disabled"
+          @goal="(pid: number, tid: number) => emit('goal', pid, tid)"
+        />
+        <p v-if="!playersB.length" class="text-sm text-muted-foreground italic">Nenhum jogador</p>
+      </div>
+    </div>
+  </div>
+</template>

@@ -1,3 +1,51 @@
+<script setup lang="ts">
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Users as UsersIcon, Calendar as CalendarIcon, MapPin as MapPinIcon } from 'lucide-vue-next'
+
+const groupsStore = useGroupsStore()
+const error = ref<string | null>(null)
+
+const DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
+
+function dayLabel(day: number | null | undefined): string {
+  if (day == null || day < 0 || day > 6) return ''
+  return DAYS[day]
+}
+
+function roleLabel(role: string): string {
+  switch (role) {
+    case 'DONO': return 'Dono'
+    case 'ADMIN': return 'Admin'
+    case 'JOGADOR': return 'Jogador'
+    default: return role
+  }
+}
+
+function roleBadgeClass(role: string): string {
+  switch (role) {
+    case 'DONO': return 'bg-purple-600 text-white border-transparent hover:bg-purple-600/80'
+    case 'ADMIN': return 'bg-blue-600 text-white border-transparent hover:bg-blue-600/80'
+    case 'JOGADOR': return 'bg-gray-500 text-white border-transparent hover:bg-gray-500/80'
+    default: return ''
+  }
+}
+
+async function onSelectGroup(group: any) {
+  groupsStore.switchGroup(group.id)
+  await navigateTo('/')
+}
+
+onMounted(async () => {
+  try {
+    await groupsStore.fetchGroups()
+  } catch (e: any) {
+    error.value = e?.data?.message || e?.message || 'Erro ao carregar grupos.'
+  }
+})
+</script>
+
 <template>
   <div class="max-w-[1100px] mx-auto p-6">
     <div class="flex items-center justify-between mb-5">
@@ -52,51 +100,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Users as UsersIcon, Calendar as CalendarIcon, MapPin as MapPinIcon } from 'lucide-vue-next'
-
-const groupsStore = useGroupsStore()
-const error = ref<string | null>(null)
-
-const DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
-
-function dayLabel(day: number | null | undefined): string {
-  if (day == null || day < 0 || day > 6) return ''
-  return DAYS[day]
-}
-
-function roleLabel(role: string): string {
-  switch (role) {
-    case 'DONO': return 'Dono'
-    case 'ADMIN': return 'Admin'
-    case 'JOGADOR': return 'Jogador'
-    default: return role
-  }
-}
-
-function roleBadgeClass(role: string): string {
-  switch (role) {
-    case 'DONO': return 'bg-purple-600 text-white border-transparent hover:bg-purple-600/80'
-    case 'ADMIN': return 'bg-blue-600 text-white border-transparent hover:bg-blue-600/80'
-    case 'JOGADOR': return 'bg-gray-500 text-white border-transparent hover:bg-gray-500/80'
-    default: return ''
-  }
-}
-
-async function onSelectGroup(group: any) {
-  groupsStore.switchGroup(group.id)
-  await navigateTo('/')
-}
-
-onMounted(async () => {
-  try {
-    await groupsStore.fetchGroups()
-  } catch (e: any) {
-    error.value = e?.data?.message || e?.message || 'Erro ao carregar grupos.'
-  }
-})
-</script>

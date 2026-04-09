@@ -34,11 +34,11 @@ export function getNextMatch(
   if (teams.length < 2) return null;
 
   if (matchHistory.length === 0) {
-    return { teamA: teams[0], teamB: teams[1] };
+    return { teamA: teams[0]!, teamB: teams[1]! };
   }
 
   const sorted = [...matchHistory].sort((a, b) => b.matchOrder - a.matchOrder);
-  const last = sorted[0];
+  const last = sorted[0]!;
 
   const winnerId = last.winnerId;
   const loserId =
@@ -53,15 +53,16 @@ export function getNextMatch(
   const waiting = teams.filter((t) => !playingIds.has(t.id));
 
   const winnerTeam = teams.find((t) => t.id === winnerId) ?? null;
-  const loserTeam = loserId !== null ? (teams.find((t) => t.id === loserId) ?? null) : null;
+  const loserTeam =
+    loserId !== null ? (teams.find((t) => t.id === loserId) ?? null) : null;
 
   const stayingTeam =
     winnerId === null
-      ? teams.find((t) => t.id === last.teamAId) ?? null
+      ? (teams.find((t) => t.id === last.teamAId) ?? null)
       : winnerTeam;
   const rotatingOutTeam =
     winnerId === null
-      ? teams.find((t) => t.id === last.teamBId) ?? null
+      ? (teams.find((t) => t.id === last.teamBId) ?? null)
       : loserTeam;
 
   const queue: Team[] = [
@@ -75,10 +76,10 @@ export function getNextMatch(
   ) {
     const fullQueue: Team[] = [...queue, stayingTeam];
     if (fullQueue.length < 2) return null;
-    return { teamA: fullQueue[0], teamB: fullQueue[1] };
+    return { teamA: fullQueue[0]!, teamB: fullQueue[1]! };
   }
 
   if (!stayingTeam || queue.length === 0) return null;
 
-  return { teamA: stayingTeam, teamB: queue[0] };
+  return { teamA: stayingTeam, teamB: queue[0]! };
 }

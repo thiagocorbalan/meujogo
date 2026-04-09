@@ -1,3 +1,16 @@
+<script setup lang="ts">
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+defineProps<{
+  team: {
+    name: string
+    color: string
+    players: { id: number; name: string; elo?: number }[]
+    avgElo?: number
+  }
+}>()
+</script>
+
 <template>
   <Card class="overflow-hidden">
     <div class="h-1.5 w-full" :style="{ backgroundColor: team.color }" />
@@ -19,16 +32,3 @@
     </CardContent>
   </Card>
 </template>
-
-<script setup lang="ts">
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
-defineProps<{
-  team: {
-    name: string
-    color: string
-    players: { id: number; name: string; elo?: number }[]
-    avgElo?: number
-  }
-}>()
-</script>

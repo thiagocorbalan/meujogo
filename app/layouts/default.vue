@@ -1,3 +1,7 @@
+<script setup>
+const sidebarOpen = ref(false)
+</script>
+
 <template>
   <div class="flex min-h-screen">
     <AppHeader @toggle-sidebar="sidebarOpen = !sidebarOpen" />
@@ -7,7 +11,3 @@
     </main>
   </div>
 </template>
-
-<script setup>
-const sidebarOpen = ref(false)
-</script>

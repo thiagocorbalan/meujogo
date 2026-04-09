@@ -1,3 +1,44 @@
+<script setup lang="ts">
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+
+withDefaults(defineProps<{
+  players: any[]
+  loading: boolean
+  showActions?: boolean
+}>(), {
+  showActions: false,
+})
+
+const emit = defineEmits<{
+  edit: [player: any]
+  delete: [player: any]
+}>()
+
+function positionLabel(position: string) {
+  return position === 'GOLEIRO' ? 'Goleiro' : 'Linha'
+}
+
+function statusLabel(status: string) {
+  switch (status) {
+    case 'ATIVO': return 'Ativo'
+    case 'LESIONADO': return 'Lesionado'
+    case 'AUSENTE': return 'Ausente'
+    case 'RESERVA': return 'Reserva'
+    default: return status
+  }
+}
+
+function statusClass(status: string) {
+  switch (status) {
+    case 'ATIVO': return 'text-green-600 font-medium'
+    case 'LESIONADO': return 'text-red-600 font-medium'
+    case 'AUSENTE': return 'text-amber-600 font-medium'
+    case 'RESERVA': return 'text-blue-600 font-medium'
+    default: return ''
+  }
+}
+</script>
+
 <template>
   <div class="w-full">
     <div v-if="loading" class="text-muted-foreground p-6 text-center text-sm">Carregando jogadores...</div>
@@ -57,44 +98,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-
-withDefaults(defineProps<{
-  players: any[]
-  loading: boolean
-  showActions?: boolean
-}>(), {
-  showActions: false,
-})
-
-const emit = defineEmits<{
-  edit: [player: any]
-  delete: [player: any]
-}>()
-
-function positionLabel(position: string) {
-  return position === 'GOLEIRO' ? 'Goleiro' : 'Linha'
-}
-
-function statusLabel(status: string) {
-  switch (status) {
-    case 'ATIVO': return 'Ativo'
-    case 'LESIONADO': return 'Lesionado'
-    case 'AUSENTE': return 'Ausente'
-    case 'RESERVA': return 'Reserva'
-    default: return status
-  }
-}
-
-function statusClass(status: string) {
-  switch (status) {
-    case 'ATIVO': return 'text-green-600 font-medium'
-    case 'LESIONADO': return 'text-red-600 font-medium'
-    case 'AUSENTE': return 'text-amber-600 font-medium'
-    case 'RESERVA': return 'text-blue-600 font-medium'
-    default: return ''
-  }
-}
-</script>

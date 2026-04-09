@@ -1,3 +1,105 @@
+<script setup lang="ts">
+import { Eye, EyeOff } from 'lucide-vue-next'
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+
+definePageMeta({ layout: false })
+
+const router = useRouter()
+const route = useRoute()
+const config = useRuntimeConfig()
+const authStore = useAuthStore()
+const { register } = useAuth()
+
+const form = ref({
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+})
+
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
+const isLoading = ref(false)
+const errorMessage = ref('')
+
+const errors = ref<{ name?: string; email?: string; password?: string; confirmPassword?: string }>({})
+
+function validate(): boolean {
+  errors.value = {}
+
+  if (!form.value.name.trim()) {
+    errors.value.name = 'O nome é obrigatório.'
+  } else if (form.value.name.trim().length < 2) {
+    errors.value.name = 'O nome deve ter no mínimo 2 caracteres.'
+  }
+
+  if (!form.value.email) {
+    errors.value.email = 'O email é obrigatório.'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    errors.value.email = 'Formato de email inválido.'
+  }
+
+  if (!form.value.password) {
+    errors.value.password = 'A senha é obrigatória.'
+  } else if (form.value.password.length < 12) {
+    errors.value.password = 'A senha deve ter no mínimo 12 caracteres.'
+  } else if (!/[A-Z]/.test(form.value.password)) {
+    errors.value.password = 'A senha deve conter pelo menos uma letra maiúscula.'
+  } else if (!/[a-z]/.test(form.value.password)) {
+    errors.value.password = 'A senha deve conter pelo menos uma letra minúscula.'
+  } else if (!/[0-9]/.test(form.value.password)) {
+    errors.value.password = 'A senha deve conter pelo menos um número.'
+  } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(form.value.password)) {
+    errors.value.password = 'A senha deve conter pelo menos um caractere especial.'
+  }
+
+  if (!form.value.confirmPassword) {
+    errors.value.confirmPassword = 'Confirme sua senha.'
+  } else if (form.value.password !== form.value.confirmPassword) {
+    errors.value.confirmPassword = 'As senhas não coincidem.'
+  }
+
+  return Object.keys(errors.value).length === 0
+}
+
+async function handleRegister() {
+  errorMessage.value = ''
+
+  if (!validate()) return
+
+  isLoading.value = true
+  try {
+    const result = await register({
+      name: form.value.name.trim(),
+      email: form.value.email,
+      password: form.value.password,
+    }) as any
+
+    authStore.login({
+      user: result.user,
+    })
+
+    const redirect = route.query.redirect as string || '/onboarding'
+    await router.push(redirect)
+  } catch (e: any) {
+    errorMessage.value =
+      e?.data?.message || e?.message || 'Erro ao criar conta. Tente novamente.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+function registerWithGoogle() {
+  window.location.href = `${config.public.apiBaseUrl}/auth/google`
+}
+
+function registerWithApple() {
+  window.location.href = `${config.public.apiBaseUrl}/auth/apple`
+}
+</script>
+
 <template>
   <div class="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
     <Card class="w-full max-w-md">
@@ -20,7 +122,7 @@
           {{ errorMessage }}
         </div>
 
-        <form @submit.prevent="handleRegister" class="flex flex-col gap-4">
+        <form class="flex flex-col gap-4" @submit.prevent="handleRegister">
           <div class="flex flex-col gap-1.5">
             <Label for="name">Nome</Label>
             <Input
@@ -164,105 +266,3 @@
     </Card>
   </div>
 </template>
-
-<script setup lang="ts">
-import { Eye, EyeOff } from 'lucide-vue-next'
-import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-
-definePageMeta({ layout: false })
-
-const router = useRouter()
-const route = useRoute()
-const config = useRuntimeConfig()
-const authStore = useAuthStore()
-const { register } = useAuth()
-
-const form = ref({
-  name: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
-})
-
-const showPassword = ref(false)
-const showConfirmPassword = ref(false)
-const isLoading = ref(false)
-const errorMessage = ref('')
-
-const errors = ref<{ name?: string; email?: string; password?: string; confirmPassword?: string }>({})
-
-function validate(): boolean {
-  errors.value = {}
-
-  if (!form.value.name.trim()) {
-    errors.value.name = 'O nome é obrigatório.'
-  } else if (form.value.name.trim().length < 2) {
-    errors.value.name = 'O nome deve ter no mínimo 2 caracteres.'
-  }
-
-  if (!form.value.email) {
-    errors.value.email = 'O email é obrigatório.'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
-    errors.value.email = 'Formato de email inválido.'
-  }
-
-  if (!form.value.password) {
-    errors.value.password = 'A senha é obrigatória.'
-  } else if (form.value.password.length < 12) {
-    errors.value.password = 'A senha deve ter no mínimo 12 caracteres.'
-  } else if (!/[A-Z]/.test(form.value.password)) {
-    errors.value.password = 'A senha deve conter pelo menos uma letra maiúscula.'
-  } else if (!/[a-z]/.test(form.value.password)) {
-    errors.value.password = 'A senha deve conter pelo menos uma letra minúscula.'
-  } else if (!/[0-9]/.test(form.value.password)) {
-    errors.value.password = 'A senha deve conter pelo menos um número.'
-  } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(form.value.password)) {
-    errors.value.password = 'A senha deve conter pelo menos um caractere especial.'
-  }
-
-  if (!form.value.confirmPassword) {
-    errors.value.confirmPassword = 'Confirme sua senha.'
-  } else if (form.value.password !== form.value.confirmPassword) {
-    errors.value.confirmPassword = 'As senhas não coincidem.'
-  }
-
-  return Object.keys(errors.value).length === 0
-}
-
-async function handleRegister() {
-  errorMessage.value = ''
-
-  if (!validate()) return
-
-  isLoading.value = true
-  try {
-    const result = await register({
-      name: form.value.name.trim(),
-      email: form.value.email,
-      password: form.value.password,
-    }) as any
-
-    authStore.login({
-      user: result.user,
-    })
-
-    const redirect = route.query.redirect as string || '/onboarding'
-    await router.push(redirect)
-  } catch (e: any) {
-    errorMessage.value =
-      e?.data?.message || e?.message || 'Erro ao criar conta. Tente novamente.'
-  } finally {
-    isLoading.value = false
-  }
-}
-
-function registerWithGoogle() {
-  window.location.href = `${config.public.apiBaseUrl}/auth/google`
-}
-
-function registerWithApple() {
-  window.location.href = `${config.public.apiBaseUrl}/auth/apple`
-}
-</script>

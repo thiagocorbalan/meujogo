@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+import { useGroups } from '../../composables/useGroups';
+
 const mockFetch = vi.fn();
 
 vi.stubGlobal('useApi', () => ({
   fetch: mockFetch,
 }));
-
-import { useGroups } from '../../composables/useGroups';
 
 describe('useGroups composable', () => {
   beforeEach(() => {

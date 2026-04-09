@@ -75,7 +75,7 @@ export class ChampionsService {
       );
     }
 
-    const bestTeam = ranking[0];
+    const bestTeam = ranking[0]!;
 
     return this.prisma.champion.create({
       data: {

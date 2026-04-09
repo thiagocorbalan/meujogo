@@ -1,78 +1,3 @@
-<template>
-  <div class="max-w-[1100px] mx-auto p-6">
-    <h1 class="text-3xl font-bold text-foreground mb-5">Estatísticas</h1>
-<div v-if="errorMessage" class="mb-4 px-4 py-3 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm flex items-center justify-between">
-      <span>{{ errorMessage }}</span>
-      <button class="ml-3 text-red-600 hover:text-red-800 font-bold" @click="errorMessage = null">&times;</button>
-    </div>
-
-    <div v-if="initialLoading" class="text-muted-foreground text-base py-10 text-center">Carregando...</div>
-
-    <template v-else>
-      <Tabs v-model="tab" class="mb-5">
-        <TabsList>
-          <TabsTrigger value="sessao">Sessão</TabsTrigger>
-          <TabsTrigger value="temporada">Temporada</TabsTrigger>
-          <TabsTrigger value="artilheiros">Artilheiros</TabsTrigger>
-          <TabsTrigger value="elo">Melhor ELO</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="sessao">
-          <div v-if="sessions.length" class="flex items-center gap-3 mb-4">
-            <label class="text-sm font-semibold text-foreground">Sessão:</label>
-            <select v-model="selectedSessionId" class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[280px] ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" @change="loadSessionRanking">
-              <option v-for="s in sessions" :key="s.id" :value="s.id">
-                #{{ s.id }} — {{ formatDate(s.createdAt) }} ({{ s.status }})
-              </option>
-            </select>
-          </div>
-          <div v-else class="text-muted-foreground text-sm py-5">Nenhuma sessão disponível.</div>
-          <RankingTable v-if="sessions.length" :ranking="sessionRanking" :loading="loading" />
-        </TabsContent>
-
-        <TabsContent value="temporada">
-          <div v-if="seasons.length" class="flex items-center gap-3 mb-4">
-            <label class="text-sm font-semibold text-foreground">Temporada:</label>
-            <select v-model="selectedSeasonId" class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[280px] ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" @change="loadSeasonRanking">
-              <option v-for="s in seasons" :key="s.id" :value="s.id">
-                {{ s.name ?? `Temporada ${s.year}` }} ({{ s.isClosed ? 'Encerrada' : 'Ativa' }})
-              </option>
-            </select>
-          </div>
-          <div v-else class="text-muted-foreground text-sm py-5">Nenhuma temporada disponível.</div>
-          <RankingTable v-if="seasons.length" :ranking="seasonRanking" :loading="loading" />
-        </TabsContent>
-
-        <TabsContent value="artilheiros">
-          <div v-if="seasons.length" class="flex items-center gap-3 mb-4">
-            <label class="text-sm font-semibold text-foreground">Temporada:</label>
-            <select v-model="scorersSeasonId" class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[280px] ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" @change="loadTopScorers">
-              <option :value="null">Todas</option>
-              <option v-for="s in seasons" :key="s.id" :value="s.id">
-                {{ s.name ?? `Temporada ${s.year}` }}
-              </option>
-            </select>
-          </div>
-          <RankingTopScorersTable :players="topScorers" :loading="loading" />
-        </TabsContent>
-
-        <TabsContent value="elo">
-          <div v-if="seasons.length" class="flex items-center gap-3 mb-4">
-            <label class="text-sm font-semibold text-foreground">Temporada:</label>
-            <select v-model="eloSeasonId" class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[280px] ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" @change="loadTopElo">
-              <option :value="null">Todas</option>
-              <option v-for="s in seasons" :key="s.id" :value="s.id">
-                {{ s.name ?? `Temporada ${s.year}` }}
-              </option>
-            </select>
-          </div>
-          <RankingTopEloTable :players="topElo" :loading="loading" />
-        </TabsContent>
-      </Tabs>
-    </template>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
@@ -204,3 +129,78 @@ function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('pt-BR')
 }
 </script>
+
+<template>
+  <div class="max-w-[1100px] mx-auto p-6">
+    <h1 class="text-3xl font-bold text-foreground mb-5">Estatísticas</h1>
+<div v-if="errorMessage" class="mb-4 px-4 py-3 rounded-md bg-red-50 border border-red-200 text-red-800 text-sm flex items-center justify-between">
+      <span>{{ errorMessage }}</span>
+      <button class="ml-3 text-red-600 hover:text-red-800 font-bold" @click="errorMessage = null">&times;</button>
+    </div>
+
+    <div v-if="initialLoading" class="text-muted-foreground text-base py-10 text-center">Carregando...</div>
+
+    <template v-else>
+      <Tabs v-model="tab" class="mb-5">
+        <TabsList>
+          <TabsTrigger value="sessao">Sessão</TabsTrigger>
+          <TabsTrigger value="temporada">Temporada</TabsTrigger>
+          <TabsTrigger value="artilheiros">Artilheiros</TabsTrigger>
+          <TabsTrigger value="elo">Melhor ELO</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="sessao">
+          <div v-if="sessions.length" class="flex items-center gap-3 mb-4">
+            <label class="text-sm font-semibold text-foreground">Sessão:</label>
+            <select v-model="selectedSessionId" class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[280px] ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" @change="loadSessionRanking">
+              <option v-for="s in sessions" :key="s.id" :value="s.id">
+                #{{ s.id }} — {{ formatDate(s.createdAt) }} ({{ s.status }})
+              </option>
+            </select>
+          </div>
+          <div v-else class="text-muted-foreground text-sm py-5">Nenhuma sessão disponível.</div>
+          <RankingTable v-if="sessions.length" :ranking="sessionRanking" :loading="loading" />
+        </TabsContent>
+
+        <TabsContent value="temporada">
+          <div v-if="seasons.length" class="flex items-center gap-3 mb-4">
+            <label class="text-sm font-semibold text-foreground">Temporada:</label>
+            <select v-model="selectedSeasonId" class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[280px] ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" @change="loadSeasonRanking">
+              <option v-for="s in seasons" :key="s.id" :value="s.id">
+                {{ s.name ?? `Temporada ${s.year}` }} ({{ s.isClosed ? 'Encerrada' : 'Ativa' }})
+              </option>
+            </select>
+          </div>
+          <div v-else class="text-muted-foreground text-sm py-5">Nenhuma temporada disponível.</div>
+          <RankingTable v-if="seasons.length" :ranking="seasonRanking" :loading="loading" />
+        </TabsContent>
+
+        <TabsContent value="artilheiros">
+          <div v-if="seasons.length" class="flex items-center gap-3 mb-4">
+            <label class="text-sm font-semibold text-foreground">Temporada:</label>
+            <select v-model="scorersSeasonId" class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[280px] ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" @change="loadTopScorers">
+              <option :value="null">Todas</option>
+              <option v-for="s in seasons" :key="s.id" :value="s.id">
+                {{ s.name ?? `Temporada ${s.year}` }}
+              </option>
+            </select>
+          </div>
+          <RankingTopScorersTable :players="topScorers" :loading="loading" />
+        </TabsContent>
+
+        <TabsContent value="elo">
+          <div v-if="seasons.length" class="flex items-center gap-3 mb-4">
+            <label class="text-sm font-semibold text-foreground">Temporada:</label>
+            <select v-model="eloSeasonId" class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[280px] ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" @change="loadTopElo">
+              <option :value="null">Todas</option>
+              <option v-for="s in seasons" :key="s.id" :value="s.id">
+                {{ s.name ?? `Temporada ${s.year}` }}
+              </option>
+            </select>
+          </div>
+          <RankingTopEloTable :players="topElo" :loading="loading" />
+        </TabsContent>
+      </Tabs>
+    </template>
+  </div>
+</template>

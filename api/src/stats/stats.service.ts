@@ -8,7 +8,15 @@ export class StatsService {
   async getTopScorers(groupId: number, limit = 10, seasonId?: number) {
     if (!seasonId) {
       return this.prisma.player.findMany({
-        where: { groupId, isActive: true, goals: { gt: 0 } },
+        where: {
+          groupId,
+          isActive: true,
+          goals: { gt: 0 },
+          OR: [
+            { membership: { isNot: null } },
+            { type: 'CONVIDADO' },
+          ],
+        },
         orderBy: { goals: 'desc' },
         take: limit,
         select: {
@@ -62,7 +70,14 @@ export class StatsService {
 
   async getTopElo(groupId: number, limit = 10, _seasonId?: number) {
     return this.prisma.player.findMany({
-      where: { groupId, isActive: true },
+      where: {
+        groupId,
+        isActive: true,
+        OR: [
+          { membership: { isNot: null } },
+          { type: 'CONVIDADO' },
+        ],
+      },
       orderBy: { elo: 'desc' },
       take: limit,
       select: {

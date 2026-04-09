@@ -1,168 +1,3 @@
-<template>
-  <div class="max-w-[800px] mx-auto p-6">
-    <h1 class="text-3xl font-bold text-foreground mb-6">Informações do Grupo</h1>
-
-    <div v-if="error" class="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive text-sm mb-4">
-      <p>{{ error }}</p>
-    </div>
-
-    <div v-if="success" class="rounded-lg border border-green-500 bg-green-50 p-4 text-green-700 text-sm mb-4">
-      <p>{{ success }}</p>
-    </div>
-
-    <div v-if="loading" class="text-muted-foreground text-base py-10 text-center">Carregando...</div>
-
-    <template v-else>
-      <!-- Local e Horário -->
-      <Card class="mb-6">
-        <CardHeader>
-          <div class="flex items-center justify-between">
-            <CardTitle>Local e Horário</CardTitle>
-            <BaseButton
-              v-if="canEditSettings()"
-              variant="secondary"
-              size="sm"
-              @click="openLocationDialog"
-            >
-              Editar
-            </BaseButton>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div class="flex flex-col gap-2 text-sm">
-            <div>
-              <span class="text-muted-foreground">Endereço:</span>
-              <span class="ml-2 text-foreground">{{ group?.address || 'Não informado' }}</span>
-            </div>
-            <div>
-              <span class="text-muted-foreground">Dia:</span>
-              <span class="ml-2 text-foreground">{{ dayLabel(group?.dayOfWeek) || 'Não informado' }}</span>
-            </div>
-            <div>
-              <span class="text-muted-foreground">Horário:</span>
-              <span class="ml-2 text-foreground">{{ group?.defaultTime || 'Não informado' }}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <!-- Regras do Futebol -->
-      <Card class="mb-6">
-        <CardHeader>
-          <div class="flex items-center justify-between">
-            <CardTitle>Regras do Futebol</CardTitle>
-            <BaseButton
-              v-if="canEditSettings()"
-              variant="secondary"
-              size="sm"
-              @click="openRulesDialog"
-            >
-              Editar
-            </BaseButton>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p
-            v-if="settings?.rules"
-            class="text-sm text-foreground whitespace-pre-line"
-          >{{ settings.rules }}</p>
-          <p v-else class="text-sm text-muted-foreground italic">Nenhuma regra definida.</p>
-        </CardContent>
-      </Card>
-
-      <!-- Informações de Pagamento -->
-      <Card class="mb-6">
-        <CardHeader>
-          <div class="flex items-center justify-between">
-            <CardTitle>Informações de Pagamento</CardTitle>
-            <BaseButton
-              v-if="canEditSettings()"
-              variant="secondary"
-              size="sm"
-              @click="openPaymentDialog"
-            >
-              Editar
-            </BaseButton>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p
-            v-if="settings?.paymentInfo"
-            class="text-sm text-foreground whitespace-pre-line"
-          >{{ settings.paymentInfo }}</p>
-          <p v-else class="text-sm text-muted-foreground italic">Nenhuma informação de pagamento definida.</p>
-        </CardContent>
-      </Card>
-    </template>
-
-    <!-- Edit Location Dialog -->
-    <BaseModal :show="showLocationDialog" title="Editar Local e Horário" @close="closeLocationDialog">
-      <form @submit.prevent="onSaveLocation" class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1">
-          <Label>Endereço</Label>
-          <Input v-model="locationForm.address" type="text" placeholder="Ex: Quadra da Escola Municipal" />
-        </div>
-        <div class="flex flex-col gap-1">
-          <Label>Dia da Semana</Label>
-          <select
-            v-model.number="locationForm.dayOfWeek"
-            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <option :value="null">Não definido</option>
-            <option v-for="(day, i) in DAYS" :key="i" :value="i">{{ day }}</option>
-          </select>
-        </div>
-        <div class="flex flex-col gap-1">
-          <Label>Horário</Label>
-          <Input v-model="locationForm.defaultTime" type="text" placeholder="Ex: 19:00" />
-        </div>
-      </form>
-      <template #footer>
-        <BaseButton variant="secondary" @click="closeLocationDialog">Cancelar</BaseButton>
-        <BaseButton :loading="savingLocation" @click="onSaveLocation">Salvar</BaseButton>
-      </template>
-    </BaseModal>
-
-    <!-- Edit Rules Dialog -->
-    <BaseModal :show="showRulesDialog" title="Editar Regras" @close="closeRulesDialog">
-      <form @submit.prevent="onSaveRules" class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1">
-          <Label>Regras do Futebol</Label>
-          <textarea
-            v-model="rulesForm.rules"
-            rows="8"
-            class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            placeholder="Escreva as regras do grupo..."
-          />
-        </div>
-      </form>
-      <template #footer>
-        <BaseButton variant="secondary" @click="closeRulesDialog">Cancelar</BaseButton>
-        <BaseButton :loading="savingRules" @click="onSaveRules">Salvar</BaseButton>
-      </template>
-    </BaseModal>
-
-    <!-- Edit Payment Info Dialog -->
-    <BaseModal :show="showPaymentDialog" title="Editar Informações de Pagamento" @close="closePaymentDialog">
-      <form @submit.prevent="onSavePayment" class="flex flex-col gap-4">
-        <div class="flex flex-col gap-1">
-          <Label>Informações de Pagamento</Label>
-          <textarea
-            v-model="paymentForm.paymentInfo"
-            rows="6"
-            class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            placeholder="PIX, valor mensal, etc..."
-          />
-        </div>
-      </form>
-      <template #footer>
-        <BaseButton variant="secondary" @click="closePaymentDialog">Cancelar</BaseButton>
-        <BaseButton :loading="savingPayment" @click="onSavePayment">Salvar</BaseButton>
-      </template>
-    </BaseModal>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -321,3 +156,168 @@ async function onSavePayment() {
   }
 }
 </script>
+
+<template>
+  <div class="max-w-[800px] mx-auto p-6">
+    <h1 class="text-3xl font-bold text-foreground mb-6">Informações do Grupo</h1>
+
+    <div v-if="error" class="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive text-sm mb-4">
+      <p>{{ error }}</p>
+    </div>
+
+    <div v-if="success" class="rounded-lg border border-green-500 bg-green-50 p-4 text-green-700 text-sm mb-4">
+      <p>{{ success }}</p>
+    </div>
+
+    <div v-if="loading" class="text-muted-foreground text-base py-10 text-center">Carregando...</div>
+
+    <template v-else>
+      <!-- Local e Horário -->
+      <Card class="mb-6">
+        <CardHeader>
+          <div class="flex items-center justify-between">
+            <CardTitle>Local e Horário</CardTitle>
+            <BaseButton
+              v-if="canEditSettings()"
+              variant="secondary"
+              size="sm"
+              @click="openLocationDialog"
+            >
+              Editar
+            </BaseButton>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div class="flex flex-col gap-2 text-sm">
+            <div>
+              <span class="text-muted-foreground">Endereço:</span>
+              <span class="ml-2 text-foreground">{{ group?.address || 'Não informado' }}</span>
+            </div>
+            <div>
+              <span class="text-muted-foreground">Dia:</span>
+              <span class="ml-2 text-foreground">{{ dayLabel(group?.dayOfWeek) || 'Não informado' }}</span>
+            </div>
+            <div>
+              <span class="text-muted-foreground">Horário:</span>
+              <span class="ml-2 text-foreground">{{ group?.defaultTime || 'Não informado' }}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <!-- Regras do Futebol -->
+      <Card class="mb-6">
+        <CardHeader>
+          <div class="flex items-center justify-between">
+            <CardTitle>Regras do Futebol</CardTitle>
+            <BaseButton
+              v-if="canEditSettings()"
+              variant="secondary"
+              size="sm"
+              @click="openRulesDialog"
+            >
+              Editar
+            </BaseButton>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p
+            v-if="settings?.rules"
+            class="text-sm text-foreground whitespace-pre-line"
+          >{{ settings.rules }}</p>
+          <p v-else class="text-sm text-muted-foreground italic">Nenhuma regra definida.</p>
+        </CardContent>
+      </Card>
+
+      <!-- Informações de Pagamento -->
+      <Card class="mb-6">
+        <CardHeader>
+          <div class="flex items-center justify-between">
+            <CardTitle>Informações de Pagamento</CardTitle>
+            <BaseButton
+              v-if="canEditSettings()"
+              variant="secondary"
+              size="sm"
+              @click="openPaymentDialog"
+            >
+              Editar
+            </BaseButton>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p
+            v-if="settings?.paymentInfo"
+            class="text-sm text-foreground whitespace-pre-line"
+          >{{ settings.paymentInfo }}</p>
+          <p v-else class="text-sm text-muted-foreground italic">Nenhuma informação de pagamento definida.</p>
+        </CardContent>
+      </Card>
+    </template>
+
+    <!-- Edit Location Dialog -->
+    <BaseModal :show="showLocationDialog" title="Editar Local e Horário" @close="closeLocationDialog">
+      <form class="flex flex-col gap-4" @submit.prevent="onSaveLocation">
+        <div class="flex flex-col gap-1">
+          <Label>Endereço</Label>
+          <Input v-model="locationForm.address" type="text" placeholder="Ex: Quadra da Escola Municipal" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <Label>Dia da Semana</Label>
+          <select
+            v-model.number="locationForm.dayOfWeek"
+            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <option :value="null">Não definido</option>
+            <option v-for="(day, i) in DAYS" :key="i" :value="i">{{ day }}</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1">
+          <Label>Horário</Label>
+          <Input v-model="locationForm.defaultTime" type="text" placeholder="Ex: 19:00" />
+        </div>
+      </form>
+      <template #footer>
+        <BaseButton variant="secondary" @click="closeLocationDialog">Cancelar</BaseButton>
+        <BaseButton :loading="savingLocation" @click="onSaveLocation">Salvar</BaseButton>
+      </template>
+    </BaseModal>
+
+    <!-- Edit Rules Dialog -->
+    <BaseModal :show="showRulesDialog" title="Editar Regras" @close="closeRulesDialog">
+      <form class="flex flex-col gap-4" @submit.prevent="onSaveRules">
+        <div class="flex flex-col gap-1">
+          <Label>Regras do Futebol</Label>
+          <textarea
+            v-model="rulesForm.rules"
+            rows="8"
+            class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            placeholder="Escreva as regras do grupo..."
+          />
+        </div>
+      </form>
+      <template #footer>
+        <BaseButton variant="secondary" @click="closeRulesDialog">Cancelar</BaseButton>
+        <BaseButton :loading="savingRules" @click="onSaveRules">Salvar</BaseButton>
+      </template>
+    </BaseModal>
+
+    <!-- Edit Payment Info Dialog -->
+    <BaseModal :show="showPaymentDialog" title="Editar Informações de Pagamento" @close="closePaymentDialog">
+      <form class="flex flex-col gap-4" @submit.prevent="onSavePayment">
+        <div class="flex flex-col gap-1">
+          <Label>Informações de Pagamento</Label>
+          <textarea
+            v-model="paymentForm.paymentInfo"
+            rows="6"
+            class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            placeholder="PIX, valor mensal, etc..."
+          />
+        </div>
+      </form>
+      <template #footer>
+        <BaseButton variant="secondary" @click="closePaymentDialog">Cancelar</BaseButton>
+        <BaseButton :loading="savingPayment" @click="onSavePayment">Salvar</BaseButton>
+      </template>
+    </BaseModal>
+  </div>
+</template>

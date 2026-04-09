@@ -111,14 +111,65 @@ export class GroupsController {
   async listMembers(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
     const groupId = req.groupContext.groupId;
 
+    const playerSelect = {
+      id: true,
+      name: true,
+      position: true,
+      type: true,
+      status: true,
+      elo: true,
+      goals: true,
+      games: true,
+    };
+
     // Get registered members (with user accounts)
     const members = await this.prisma.groupMember.findMany({
       where: { groupId, isActive: true },
       include: {
-        player: true,
-        user: { select: { email: true, name: true } },
+        player: { select: playerSelect },
+        user: { select: { name: true, email: true } },
       },
     });
+
+    // Auto-create players for members that don't have one yet (legacy data fix)
+    const membersWithoutPlayer = members.filter(
+      (m: any) => m.playerId == null,
+    );
+    if (membersWithoutPlayer.length > 0) {
+      const settings = await this.prisma.settings.findFirst({
+        where: { groupId },
+        select: { defaultElo: true },
+      });
+      const defaultElo = settings?.defaultElo ?? 1200;
+
+      for (const m of membersWithoutPlayer) {
+        const player = await this.prisma.player.create({
+          data: {
+            name: (m as any).user?.name ?? 'Jogador',
+            position: 'LINHA',
+            type: 'FIXO',
+            elo: defaultElo,
+            groupId,
+            userId: m.userId,
+          },
+        });
+        await this.prisma.groupMember.update({
+          where: { id: m.id },
+          data: { playerId: player.id },
+        });
+        (m as any).playerId = player.id;
+        (m as any).player = {
+          id: player.id,
+          name: player.name,
+          position: player.position,
+          type: player.type,
+          status: player.status,
+          elo: player.elo,
+          goals: player.goals,
+          games: player.games,
+        };
+      }
+    }
 
     // Get guest players (CONVIDADO type, no userId, not already linked to a member)
     const memberPlayerIds = members
@@ -133,6 +184,7 @@ export class GroupsController {
         userId: null,
         id: { notIn: memberPlayerIds.length > 0 ? memberPlayerIds : [0] },
       },
+      select: playerSelect,
     });
 
     // Map guest players to a member-like structure for the frontend
@@ -143,8 +195,6 @@ export class GroupsController {
       playerId: player.id,
       role: 'JOGADOR',
       isActive: true,
-      createdAt: player.createdAt,
-      updatedAt: player.updatedAt,
       player,
       user: null,
     }));

@@ -1,3 +1,53 @@
+<script setup lang="ts">
+import { PlusCircle, Link2, ArrowRight } from 'lucide-vue-next'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+
+definePageMeta({ layout: false })
+
+const inviteInput = ref('')
+const inviteError = ref('')
+
+function parseInviteCode(input: string): string | null {
+  const trimmed = input.trim()
+  if (!trimmed) return null
+
+  // Try to parse as full URL: meujogo.app/convite/XXXXX or localhost:4000/convite/XXXXX
+  try {
+    const url = new URL(trimmed)
+    const match = url.pathname.match(/\/convite\/([^/]+)/)
+    if (match) return match[1]
+  } catch {
+    // Not a valid URL, continue
+  }
+
+  // Try to match partial URL pattern (without protocol)
+  const pathMatch = trimmed.match(/\/convite\/([^/\s]+)/)
+  if (pathMatch) return pathMatch[1]
+
+  // If no slashes, treat the whole thing as a raw code
+  if (!trimmed.includes('/')) return trimmed
+
+  // Last resort: try to get last path segment
+  const segments = trimmed.split('/').filter(Boolean)
+  if (segments.length > 0) return segments[segments.length - 1]
+
+  return null
+}
+
+function handleInvite() {
+  inviteError.value = ''
+  const code = parseInviteCode(inviteInput.value)
+
+  if (!code) {
+    inviteError.value = 'Informe um código ou link de convite válido.'
+    return
+  }
+
+  navigateTo('/convite/' + code)
+}
+</script>
+
 <template>
   <div class="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
     <div class="w-full max-w-2xl">
@@ -78,53 +128,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { PlusCircle, Link2, ArrowRight } from 'lucide-vue-next'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-
-definePageMeta({ layout: false })
-
-const inviteInput = ref('')
-const inviteError = ref('')
-
-function parseInviteCode(input: string): string | null {
-  const trimmed = input.trim()
-  if (!trimmed) return null
-
-  // Try to parse as full URL: meujogo.app/convite/XXXXX or localhost:4000/convite/XXXXX
-  try {
-    const url = new URL(trimmed)
-    const match = url.pathname.match(/\/convite\/([^/]+)/)
-    if (match) return match[1]
-  } catch {
-    // Not a valid URL, continue
-  }
-
-  // Try to match partial URL pattern (without protocol)
-  const pathMatch = trimmed.match(/\/convite\/([^/\s]+)/)
-  if (pathMatch) return pathMatch[1]
-
-  // If no slashes, treat the whole thing as a raw code
-  if (!trimmed.includes('/')) return trimmed
-
-  // Last resort: try to get last path segment
-  const segments = trimmed.split('/').filter(Boolean)
-  if (segments.length > 0) return segments[segments.length - 1]
-
-  return null
-}
-
-function handleInvite() {
-  inviteError.value = ''
-  const code = parseInviteCode(inviteInput.value)
-
-  if (!code) {
-    inviteError.value = 'Informe um código ou link de convite válido.'
-    return
-  }
-
-  navigateTo('/convite/' + code)
-}
-</script>

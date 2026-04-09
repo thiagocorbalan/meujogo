@@ -1,19 +1,3 @@
-<template>
-  <DialogRoot :open="show" @update:open="onOpenChange">
-    <DialogContent class="sm:max-w-[520px]">
-      <DialogHeader>
-        <DialogTitle>{{ title }}</DialogTitle>
-      </DialogHeader>
-      <div>
-        <slot />
-      </div>
-      <DialogFooter v-if="$slots.footer">
-        <slot name="footer" />
-      </DialogFooter>
-    </DialogContent>
-  </DialogRoot>
-</template>
-
 <script setup lang="ts">
 import { DialogRoot } from 'reka-ui'
 import {
@@ -34,3 +18,19 @@ function onOpenChange(val: boolean) {
   if (!val) emit('close')
 }
 </script>
+
+<template>
+  <DialogRoot :open="show" @update:open="onOpenChange">
+    <DialogContent class="sm:max-w-[520px]">
+      <DialogHeader>
+        <DialogTitle>{{ title }}</DialogTitle>
+      </DialogHeader>
+      <div>
+        <slot />
+      </div>
+      <DialogFooter v-if="$slots.footer">
+        <slot name="footer" />
+      </DialogFooter>
+    </DialogContent>
+  </DialogRoot>
+</template>

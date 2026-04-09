@@ -174,7 +174,7 @@ export class SessionsService {
 
       let champion: any = null;
       if (ranking.length > 0) {
-        const bestTeam = ranking[0];
+        const bestTeam = ranking[0]!;
         champion = await tx.champion.create({
           data: {
             sessionId: id,

@@ -13,7 +13,14 @@ export class DashboardService {
     });
 
     const activePlayersCount = await this.prisma.player.count({
-      where: { groupId, isActive: true },
+      where: {
+        groupId,
+        isActive: true,
+        OR: [
+          { membership: { isNot: null } },
+          { type: 'CONVIDADO' },
+        ],
+      },
     });
 
     const confirmedCount = currentSession
@@ -29,12 +36,26 @@ export class DashboardService {
       : 0;
 
     const topScorer = await this.prisma.player.findFirst({
-      where: { groupId, isActive: true },
+      where: {
+        groupId,
+        isActive: true,
+        OR: [
+          { membership: { isNot: null } },
+          { type: 'CONVIDADO' },
+        ],
+      },
       orderBy: { goals: 'desc' },
     });
 
     const highestElo = await this.prisma.player.findFirst({
-      where: { groupId, isActive: true },
+      where: {
+        groupId,
+        isActive: true,
+        OR: [
+          { membership: { isNot: null } },
+          { type: 'CONVIDADO' },
+        ],
+      },
       orderBy: { elo: 'desc' },
     });
 

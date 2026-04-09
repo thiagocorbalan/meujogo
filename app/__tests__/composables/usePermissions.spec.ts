@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+import { usePermissions } from '../../composables/usePermissions';
+
 function createMockAuthStore(overrides: Record<string, any> = {}) {
   const defaults = {
     user: null,
@@ -45,8 +47,6 @@ vi.stubGlobal('useGroupsStore', () => {
   }
   return mockGroupsStoreValue;
 });
-
-import { usePermissions } from '../../composables/usePermissions';
 
 describe('usePermissions composable', () => {
   beforeEach(() => {

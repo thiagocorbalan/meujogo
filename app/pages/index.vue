@@ -1,3 +1,38 @@
+<script setup lang="ts">
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+
+const groupsStore = useGroupsStore()
+const activeGroupName = computed(() => {
+  const ag = groupsStore.activeGroup
+  return ag?.group?.name ?? ag?.name ?? ''
+})
+
+const { getDashboard } = useDashboard()
+
+const loading = ref(true)
+const error = ref<string | null>(null)
+const data = ref<any>(null)
+
+async function loadDashboard() {
+  loading.value = true
+  error.value = null
+  try {
+    data.value = await getDashboard()
+  } catch (e: any) {
+    error.value = e?.data?.message || e?.message || 'Não foi possível carregar os dados do dashboard.'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => loadDashboard())
+
+function formatDate(dateStr: string) {
+  if (!dateStr) return '—'
+  return new Date(dateStr).toLocaleDateString('pt-BR')
+}
+</script>
+
 <template>
   <div class="max-w-[1100px] mx-auto p-6">
     <div class="flex items-center justify-between mb-6">
@@ -64,38 +99,3 @@
 
   </div>
 </template>
-
-<script setup lang="ts">
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-
-const groupsStore = useGroupsStore()
-const activeGroupName = computed(() => {
-  const ag = groupsStore.activeGroup
-  return ag?.group?.name ?? ag?.name ?? ''
-})
-
-const { getDashboard } = useDashboard()
-
-const loading = ref(true)
-const error = ref<string | null>(null)
-const data = ref<any>(null)
-
-async function loadDashboard() {
-  loading.value = true
-  error.value = null
-  try {
-    data.value = await getDashboard()
-  } catch (e: any) {
-    error.value = e?.data?.message || e?.message || 'Não foi possível carregar os dados do dashboard.'
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => loadDashboard())
-
-function formatDate(dateStr: string) {
-  if (!dateStr) return '—'
-  return new Date(dateStr).toLocaleDateString('pt-BR')
-}
-</script>

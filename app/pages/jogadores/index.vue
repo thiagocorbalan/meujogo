@@ -1,22 +1,33 @@
 <script setup lang="ts">
-const store = usePlayersStore()
+const groupsStore = useGroupsStore()
+const { getMembers } = useGroups()
 const search = ref('')
 const error = ref<string | null>(null)
+const players = ref<any[]>([])
+const loading = ref(false)
 
 const filtered = computed(() => {
-  if (!search.value) return store.players
+  if (!search.value) return players.value
   const q = search.value.toLowerCase()
-  return store.players.filter((p: any) =>
+  return players.value.filter((p: any) =>
     p.name?.toLowerCase().includes(q) ||
     p.position?.toLowerCase().includes(q)
   )
 })
 
 onMounted(async () => {
+  const groupId = groupsStore.activeGroupId
+  if (!groupId) return
+  loading.value = true
   try {
-    await store.fetchPlayers()
+    const members = (await getMembers(groupId)) as any[]
+    players.value = members
+      .filter((m: any) => m.player)
+      .map((m: any) => m.player)
   } catch (e: any) {
     error.value = e?.data?.message || e?.message || 'Erro ao carregar jogadores.'
+  } finally {
+    loading.value = false
   }
 })
 </script>
@@ -33,6 +44,6 @@ onMounted(async () => {
       <SearchInput v-model="search" placeholder="Buscar jogador..." />
     </div>
 
-    <PlayersPlayerTable :players="filtered" :loading="store.loading" :show-actions="false" />
+    <PlayersPlayerTable :players="filtered" :loading="loading" :show-actions="false" />
   </div>
 </template>

@@ -1,28 +1,3 @@
-<template>
-  <div class="max-h-80 overflow-y-auto py-1">
-    <p v-if="!events || events.length === 0" class="text-center text-muted-foreground text-sm py-4">
-      Nenhum evento registrado.
-    </p>
-    <ul v-else class="list-none m-0 p-0 flex flex-col gap-1.5">
-      <li
-        v-for="(event, index) in sortedEvents"
-        :key="index"
-        :class="[
-          'flex items-center gap-2 px-3 py-2 rounded-md text-sm text-foreground',
-          event.type === 'GOAL_SCORED' ? 'bg-green-50' : '',
-          event.type === 'MATCH_STARTED' ? 'bg-green-50' : '',
-          event.type === 'MATCH_ENDED' ? 'bg-red-50' : '',
-          !['GOAL_SCORED', 'MATCH_STARTED', 'MATCH_ENDED'].includes(event.type) ? 'bg-muted' : '',
-        ]"
-      >
-        <span class="text-base shrink-0">{{ iconFor(event.type) }}</span>
-        <span class="flex-1">{{ labelFor(event) }}</span>
-        <span class="text-xs text-muted-foreground whitespace-nowrap shrink-0">{{ formatTime(event.timestamp) }}</span>
-      </li>
-    </ul>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { computed } from 'vue'
 
@@ -79,3 +54,28 @@ function formatTime(ts: string): string {
   return new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 }
 </script>
+
+<template>
+  <div class="max-h-80 overflow-y-auto py-1">
+    <p v-if="!events || events.length === 0" class="text-center text-muted-foreground text-sm py-4">
+      Nenhum evento registrado.
+    </p>
+    <ul v-else class="list-none m-0 p-0 flex flex-col gap-1.5">
+      <li
+        v-for="(event, index) in sortedEvents"
+        :key="index"
+        :class="[
+          'flex items-center gap-2 px-3 py-2 rounded-md text-sm text-foreground',
+          event.type === 'GOAL_SCORED' ? 'bg-green-50' : '',
+          event.type === 'MATCH_STARTED' ? 'bg-green-50' : '',
+          event.type === 'MATCH_ENDED' ? 'bg-red-50' : '',
+          !['GOAL_SCORED', 'MATCH_STARTED', 'MATCH_ENDED'].includes(event.type) ? 'bg-muted' : '',
+        ]"
+      >
+        <span class="text-base shrink-0">{{ iconFor(event.type) }}</span>
+        <span class="flex-1">{{ labelFor(event) }}</span>
+        <span class="text-xs text-muted-foreground whitespace-nowrap shrink-0">{{ formatTime(event.timestamp) }}</span>
+      </li>
+    </ul>
+  </div>
+</template>

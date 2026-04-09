@@ -1,3 +1,163 @@
+<script setup lang="ts">
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+
+const groupsStore = useGroupsStore()
+const authStore = useAuthStore()
+const { getMe, updateMyProfile } = usePlayers()
+
+const loading = ref(true)
+const error = ref<string | null>(null)
+const successMessage = ref<string | null>(null)
+const player = ref<any>(null)
+const recentAttendance = ref<any[]>([])
+const editing = ref(false)
+const saving = ref(false)
+
+const form = ref({
+  name: '',
+  position: '',
+  status: '',
+})
+
+const activeGroupId = computed(() => groupsStore.activeGroupId)
+const userEmail = computed(() => authStore.user?.email ?? null)
+
+onMounted(async () => {
+  if (!activeGroupId.value) {
+    error.value = 'Nenhum grupo selecionado.'
+    loading.value = false
+    return
+  }
+  await fetchProfile()
+})
+
+async function fetchProfile() {
+  loading.value = true
+  error.value = null
+  try {
+    const data = await getMe() as any
+    player.value = data
+    if (data?.id) {
+      await fetchRecentAttendance(data.id)
+    }
+  } catch (e: any) {
+    error.value = e?.data?.message || e?.message || 'Erro ao carregar perfil.'
+  } finally {
+    loading.value = false
+  }
+}
+
+async function fetchRecentAttendance(playerId: number) {
+  try {
+    const { fetch } = useApi()
+    const data = (await fetch(`/attendance/player/${playerId}?limit=5`)) as any[]
+    recentAttendance.value = Array.isArray(data) ? data : []
+  } catch {
+    // Attendance endpoint may not exist yet — silently ignore
+    recentAttendance.value = []
+  }
+}
+
+function startEditing() {
+  form.value = {
+    name: player.value?.name ?? '',
+    position: player.value?.position ?? 'LINHA',
+    status: player.value?.status ?? 'ATIVO',
+  }
+  successMessage.value = null
+  editing.value = true
+}
+
+function cancelEditing() {
+  editing.value = false
+  error.value = null
+}
+
+async function saveProfile() {
+  saving.value = true
+  error.value = null
+  successMessage.value = null
+  try {
+    await updateMyProfile({
+      name: form.value.name,
+      position: form.value.position,
+      status: form.value.status,
+    })
+    editing.value = false
+    successMessage.value = 'Perfil atualizado com sucesso!'
+    await fetchProfile()
+    // Auto-dismiss success message after 4 seconds
+    setTimeout(() => {
+      successMessage.value = null
+    }, 4000)
+  } catch (e: any) {
+    error.value = e?.data?.message || e?.message || 'Erro ao salvar perfil.'
+  } finally {
+    saving.value = false
+  }
+}
+
+function positionLabel(position: string): string {
+  switch (position) {
+    case 'LINHA': return 'Linha'
+    case 'GOLEIRO': return 'Goleiro'
+    default: return position ?? '—'
+  }
+}
+
+function statusLabel(status: string): string {
+  switch (status) {
+    case 'ATIVO': return 'Ativo'
+    case 'LESIONADO': return 'Lesionado'
+    case 'AUSENTE': return 'Ausente'
+    default: return status ?? '—'
+  }
+}
+
+function statusBadgeClass(status: string): string {
+  switch (status) {
+    case 'ATIVO': return 'bg-green-600 text-white border-transparent hover:bg-green-600/80'
+    case 'LESIONADO': return 'bg-red-500 text-white border-transparent hover:bg-red-500/80'
+    case 'AUSENTE': return 'bg-yellow-500 text-white border-transparent hover:bg-yellow-500/80'
+    default: return ''
+  }
+}
+
+function formatDate(dateStr: string) {
+  if (!dateStr) return '—'
+  return new Date(dateStr).toLocaleDateString('pt-BR')
+}
+
+function attendanceLabel(status: string): string {
+  switch (status) {
+    case 'ATIVO': return 'Presente'
+    case 'AUSENTE': return 'Ausente'
+    case 'PENDENTE': return 'Pendente'
+    default: return status ?? '—'
+  }
+}
+
+function attendanceBadgeClass(status: string): string {
+  switch (status) {
+    case 'ATIVO': return 'bg-green-600 text-white border-transparent hover:bg-green-600/80'
+    case 'AUSENTE': return 'bg-red-500 text-white border-transparent hover:bg-red-500/80'
+    case 'PENDENTE': return 'bg-yellow-500 text-white border-transparent hover:bg-yellow-500/80'
+    default: return ''
+  }
+}
+</script>
+
 <template>
   <div class="max-w-[800px] mx-auto p-6">
     <h1 class="text-3xl font-bold text-foreground mb-6">Meu Perfil</h1>
@@ -162,163 +322,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-
-const groupsStore = useGroupsStore()
-const authStore = useAuthStore()
-const { getMe, updateMyProfile } = usePlayers()
-
-const loading = ref(true)
-const error = ref<string | null>(null)
-const successMessage = ref<string | null>(null)
-const player = ref<any>(null)
-const recentAttendance = ref<any[]>([])
-const editing = ref(false)
-const saving = ref(false)
-
-const form = ref({
-  name: '',
-  position: '',
-  status: '',
-})
-
-const activeGroupId = computed(() => groupsStore.activeGroupId)
-const userEmail = computed(() => authStore.user?.email ?? null)
-
-onMounted(async () => {
-  if (!activeGroupId.value) {
-    error.value = 'Nenhum grupo selecionado.'
-    loading.value = false
-    return
-  }
-  await fetchProfile()
-})
-
-async function fetchProfile() {
-  loading.value = true
-  error.value = null
-  try {
-    const data = await getMe() as any
-    player.value = data
-    if (data?.id) {
-      await fetchRecentAttendance(data.id)
-    }
-  } catch (e: any) {
-    error.value = e?.data?.message || e?.message || 'Erro ao carregar perfil.'
-  } finally {
-    loading.value = false
-  }
-}
-
-async function fetchRecentAttendance(playerId: number) {
-  try {
-    const { fetch } = useApi()
-    const data = (await fetch(`/attendance/player/${playerId}?limit=5`)) as any[]
-    recentAttendance.value = Array.isArray(data) ? data : []
-  } catch {
-    // Attendance endpoint may not exist yet — silently ignore
-    recentAttendance.value = []
-  }
-}
-
-function startEditing() {
-  form.value = {
-    name: player.value?.name ?? '',
-    position: player.value?.position ?? 'LINHA',
-    status: player.value?.status ?? 'ATIVO',
-  }
-  successMessage.value = null
-  editing.value = true
-}
-
-function cancelEditing() {
-  editing.value = false
-  error.value = null
-}
-
-async function saveProfile() {
-  saving.value = true
-  error.value = null
-  successMessage.value = null
-  try {
-    await updateMyProfile({
-      name: form.value.name,
-      position: form.value.position,
-      status: form.value.status,
-    })
-    editing.value = false
-    successMessage.value = 'Perfil atualizado com sucesso!'
-    await fetchProfile()
-    // Auto-dismiss success message after 4 seconds
-    setTimeout(() => {
-      successMessage.value = null
-    }, 4000)
-  } catch (e: any) {
-    error.value = e?.data?.message || e?.message || 'Erro ao salvar perfil.'
-  } finally {
-    saving.value = false
-  }
-}
-
-function positionLabel(position: string): string {
-  switch (position) {
-    case 'LINHA': return 'Linha'
-    case 'GOLEIRO': return 'Goleiro'
-    default: return position ?? '—'
-  }
-}
-
-function statusLabel(status: string): string {
-  switch (status) {
-    case 'ATIVO': return 'Ativo'
-    case 'LESIONADO': return 'Lesionado'
-    case 'AUSENTE': return 'Ausente'
-    default: return status ?? '—'
-  }
-}
-
-function statusBadgeClass(status: string): string {
-  switch (status) {
-    case 'ATIVO': return 'bg-green-600 text-white border-transparent hover:bg-green-600/80'
-    case 'LESIONADO': return 'bg-red-500 text-white border-transparent hover:bg-red-500/80'
-    case 'AUSENTE': return 'bg-yellow-500 text-white border-transparent hover:bg-yellow-500/80'
-    default: return ''
-  }
-}
-
-function formatDate(dateStr: string) {
-  if (!dateStr) return '—'
-  return new Date(dateStr).toLocaleDateString('pt-BR')
-}
-
-function attendanceLabel(status: string): string {
-  switch (status) {
-    case 'ATIVO': return 'Presente'
-    case 'AUSENTE': return 'Ausente'
-    case 'PENDENTE': return 'Pendente'
-    default: return status ?? '—'
-  }
-}
-
-function attendanceBadgeClass(status: string): string {
-  switch (status) {
-    case 'ATIVO': return 'bg-green-600 text-white border-transparent hover:bg-green-600/80'
-    case 'AUSENTE': return 'bg-red-500 text-white border-transparent hover:bg-red-500/80'
-    case 'PENDENTE': return 'bg-yellow-500 text-white border-transparent hover:bg-yellow-500/80'
-    default: return ''
-  }
-}
-</script>

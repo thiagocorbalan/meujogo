@@ -29,6 +29,10 @@ export class AttendanceService {
         player: {
           isActive: true,
           groupId,
+          OR: [
+            { membership: { isNot: null } },
+            { type: 'CONVIDADO' },
+          ],
           ...(search
             ? { name: { contains: search, mode: 'insensitive' as const } }
             : {}),
@@ -47,7 +51,7 @@ export class AttendanceService {
     const existingIds = new Set(existing.map((a) => a.playerId));
 
     const fixoPlayers = await this.prisma.player.findMany({
-      where: { isActive: true, type: 'FIXO', groupId },
+      where: { isActive: true, type: 'FIXO', groupId, membership: { isNot: null } },
       select: { id: true },
     });
 

@@ -1,3 +1,19 @@
+<script setup lang="ts">
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+
+defineProps<{
+  columns: { key: string; label: string }[]
+  data?: any[]
+}>()
+</script>
+
 <template>
   <div class="w-full overflow-x-auto rounded-lg border">
     <Table>
@@ -24,19 +40,3 @@
     </Table>
   </div>
 </template>
-
-<script setup lang="ts">
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-
-defineProps<{
-  columns: { key: string; label: string }[]
-  data?: any[]
-}>()
-</script>

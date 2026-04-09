@@ -1,92 +1,3 @@
-<template>
-  <div class="max-w-[960px] mx-auto py-8 px-4">
-    <h1 class="text-3xl font-bold text-foreground mb-6">Sorteio de Times</h1>
-
-    <p v-if="pageLoading" class="text-muted-foreground text-sm py-5">Carregando...</p>
-
-    <div v-else-if="!sessionId" class="p-8 text-center bg-muted rounded-lg text-muted-foreground">
-      <p>Nenhuma sessão ativa. Crie ou inicie uma sessão antes de realizar o sorteio.</p>
-    </div>
-
-    <template v-else-if="sessionId">
-<div
-        v-if="errorMessage"
-        class="flex items-start gap-3 p-4 mb-6 bg-red-50 border border-red-200 rounded-lg text-red-800"
-        role="alert"
-      >
-        <svg class="w-5 h-5 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fill-rule="evenodd"
-            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        <div class="flex-1">
-          <p class="text-sm font-medium">{{ errorMessage }}</p>
-        </div>
-        <button
-          class="text-red-500 hover:text-red-700 shrink-0"
-          aria-label="Fechar"
-          @click="errorMessage = ''"
-        >
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fill-rule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </button>
-      </div>
-<div v-if="canManageMatch()" class="flex flex-wrap items-center gap-4 bg-white border rounded-lg p-5 mb-6">
-        <fieldset class="border-none p-0 m-0 flex items-center gap-4">
-          <legend class="text-sm font-semibold text-foreground mr-2 float-left">Modo de sorteio</legend>
-          <label class="flex items-center gap-1.5 text-sm text-foreground cursor-pointer">
-            <input v-model="mode" type="radio" value="ALEATORIO" class="accent-primary" />
-            Aleatório
-          </label>
-          <label class="flex items-center gap-1.5 text-sm text-foreground cursor-pointer">
-            <input v-model="mode" type="radio" value="EQUILIBRADO" class="accent-primary" />
-            Equilibrado (ELO)
-          </label>
-        </fieldset>
-
-        <BaseButton
-          variant="primary"
-          size="md"
-          :loading="loading"
-          :disabled="loading || sessionInProgress"
-          @click="handleDraw"
-        >
-          Sortear Times
-        </BaseButton>
-
-        <p v-if="sessionInProgress" class="text-sm text-muted-foreground">
-          Sorteio bloqueado: partida em andamento.
-        </p>
-      </div>
-
-      <p class="text-xs text-muted-foreground mb-6">
-        Apenas jogadores de linha confirmados participam do sorteio. Goleiros são excluídos automaticamente.
-      </p>
-<div v-if="teams.length > 0" class="mt-2">
-        <h2 class="text-xl font-semibold text-foreground mb-4">Times sorteados</h2>
-        <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-4 mb-6">
-          <TeamsTeamCard v-for="team in teams" :key="team.id" :team="team" />
-        </div>
-
-        <div class="flex gap-3">
-          <NuxtLink to="/partida">
-            <BaseButton variant="secondary" size="md">Ir para Partida ao Vivo</BaseButton>
-          </NuxtLink>
-        </div>
-      </div>
-
-      <p v-else-if="!loading" class="text-sm text-muted-foreground">Nenhum time sorteado ainda.</p>
-    </template>
-  </div>
-</template>
-
 <script setup lang="ts">
 const { canManageMatch } = usePermissions()
 const { getSessions } = useSessions()
@@ -181,3 +92,92 @@ async function handleDraw() {
   }
 }
 </script>
+
+<template>
+  <div class="max-w-[960px] mx-auto py-8 px-4">
+    <h1 class="text-3xl font-bold text-foreground mb-6">Sorteio de Times</h1>
+
+    <p v-if="pageLoading" class="text-muted-foreground text-sm py-5">Carregando...</p>
+
+    <div v-else-if="!sessionId" class="p-8 text-center bg-muted rounded-lg text-muted-foreground">
+      <p>Nenhuma sessão ativa. Crie ou inicie uma sessão antes de realizar o sorteio.</p>
+    </div>
+
+    <template v-else-if="sessionId">
+<div
+        v-if="errorMessage"
+        class="flex items-start gap-3 p-4 mb-6 bg-red-50 border border-red-200 rounded-lg text-red-800"
+        role="alert"
+      >
+        <svg class="w-5 h-5 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fill-rule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <div class="flex-1">
+          <p class="text-sm font-medium">{{ errorMessage }}</p>
+        </div>
+        <button
+          class="text-red-500 hover:text-red-700 shrink-0"
+          aria-label="Fechar"
+          @click="errorMessage = ''"
+        >
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+<div v-if="canManageMatch()" class="flex flex-wrap items-center gap-4 bg-white border rounded-lg p-5 mb-6">
+        <fieldset class="border-none p-0 m-0 flex items-center gap-4">
+          <legend class="text-sm font-semibold text-foreground mr-2 float-left">Modo de sorteio</legend>
+          <label class="flex items-center gap-1.5 text-sm text-foreground cursor-pointer">
+            <input v-model="mode" type="radio" value="ALEATORIO" class="accent-primary" >
+            Aleatório
+          </label>
+          <label class="flex items-center gap-1.5 text-sm text-foreground cursor-pointer">
+            <input v-model="mode" type="radio" value="EQUILIBRADO" class="accent-primary" >
+            Equilibrado (ELO)
+          </label>
+        </fieldset>
+
+        <BaseButton
+          variant="primary"
+          size="md"
+          :loading="loading"
+          :disabled="loading || sessionInProgress"
+          @click="handleDraw"
+        >
+          Sortear Times
+        </BaseButton>
+
+        <p v-if="sessionInProgress" class="text-sm text-muted-foreground">
+          Sorteio bloqueado: partida em andamento.
+        </p>
+      </div>
+
+      <p class="text-xs text-muted-foreground mb-6">
+        Apenas jogadores de linha confirmados participam do sorteio. Goleiros são excluídos automaticamente.
+      </p>
+<div v-if="teams.length > 0" class="mt-2">
+        <h2 class="text-xl font-semibold text-foreground mb-4">Times sorteados</h2>
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-4 mb-6">
+          <TeamsTeamCard v-for="team in teams" :key="team.id" :team="team" />
+        </div>
+
+        <div class="flex gap-3">
+          <NuxtLink to="/partida">
+            <BaseButton variant="secondary" size="md">Ir para Partida ao Vivo</BaseButton>
+          </NuxtLink>
+        </div>
+      </div>
+
+      <p v-else-if="!loading" class="text-sm text-muted-foreground">Nenhum time sorteado ainda.</p>
+    </template>
+  </div>
+</template>

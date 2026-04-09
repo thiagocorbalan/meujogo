@@ -1,3 +1,79 @@
+<script setup lang="ts">
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { ArrowLeft as ArrowLeftIcon } from 'lucide-vue-next'
+
+const groupsStore = useGroupsStore()
+const { createGroup } = useGroups()
+
+const error = ref<string | null>(null)
+const submitting = ref(false)
+
+const form = ref({
+  name: '',
+  description: '',
+  dayOfWeek: undefined as string | undefined,
+  time: '',
+  address: '',
+})
+
+const days = [
+  { value: '0', label: 'Domingo' },
+  { value: '1', label: 'Segunda' },
+  { value: '2', label: 'Terça' },
+  { value: '3', label: 'Quarta' },
+  { value: '4', label: 'Quinta' },
+  { value: '5', label: 'Sexta' },
+  { value: '6', label: 'Sábado' },
+]
+
+async function onSubmit() {
+  if (!form.value.name.trim()) return
+
+  submitting.value = true
+  error.value = null
+
+  try {
+    const payload: Record<string, any> = {
+      name: form.value.name.trim(),
+    }
+
+    if (form.value.description.trim()) {
+      payload.description = form.value.description.trim()
+    }
+
+    if (form.value.dayOfWeek != null) {
+      payload.dayOfWeek = Number(form.value.dayOfWeek)
+    }
+
+    if (form.value.time) {
+      payload.time = form.value.time
+    }
+
+    if (form.value.address.trim()) {
+      payload.address = form.value.address.trim()
+    }
+
+    const newGroup = (await createGroup(payload)) as any
+    groupsStore.switchGroup(newGroup.id)
+    await navigateTo('/')
+  } catch (e: any) {
+    error.value = e?.data?.message || e?.message || 'Erro ao criar grupo.'
+  } finally {
+    submitting.value = false
+  }
+}
+</script>
+
 <template>
   <div class="max-w-[600px] mx-auto p-6">
     <div class="flex items-center gap-3 mb-6">
@@ -86,79 +162,3 @@
     </form>
   </div>
 </template>
-
-<script setup lang="ts">
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { ArrowLeft as ArrowLeftIcon } from 'lucide-vue-next'
-
-const groupsStore = useGroupsStore()
-const { createGroup } = useGroups()
-
-const error = ref<string | null>(null)
-const submitting = ref(false)
-
-const form = ref({
-  name: '',
-  description: '',
-  dayOfWeek: undefined as string | undefined,
-  time: '',
-  address: '',
-})
-
-const days = [
-  { value: '0', label: 'Domingo' },
-  { value: '1', label: 'Segunda' },
-  { value: '2', label: 'Terça' },
-  { value: '3', label: 'Quarta' },
-  { value: '4', label: 'Quinta' },
-  { value: '5', label: 'Sexta' },
-  { value: '6', label: 'Sábado' },
-]
-
-async function onSubmit() {
-  if (!form.value.name.trim()) return
-
-  submitting.value = true
-  error.value = null
-
-  try {
-    const payload: Record<string, any> = {
-      name: form.value.name.trim(),
-    }
-
-    if (form.value.description.trim()) {
-      payload.description = form.value.description.trim()
-    }
-
-    if (form.value.dayOfWeek != null) {
-      payload.dayOfWeek = Number(form.value.dayOfWeek)
-    }
-
-    if (form.value.time) {
-      payload.time = form.value.time
-    }
-
-    if (form.value.address.trim()) {
-      payload.address = form.value.address.trim()
-    }
-
-    const newGroup = (await createGroup(payload)) as any
-    groupsStore.switchGroup(newGroup.id)
-    await navigateTo('/')
-  } catch (e: any) {
-    error.value = e?.data?.message || e?.message || 'Erro ao criar grupo.'
-  } finally {
-    submitting.value = false
-  }
-}
-</script>

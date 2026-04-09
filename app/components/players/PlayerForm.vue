@@ -1,6 +1,23 @@
+<script setup lang="ts">
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+
+const props = defineProps<{ player: any | null; show: boolean }>()
+const emit = defineEmits<{ save: [data: any]; close: [] }>()
+
+const form = ref({ name: '', position: 'LINHA', type: 'FIXO', status: 'ATIVO' })
+
+watch(() => props.player, (p) => {
+  if (p) { form.value = { name: p.name, position: p.position, type: p.type, status: p.status } }
+  else { form.value = { name: '', position: 'LINHA', type: 'FIXO', status: 'ATIVO' } }
+}, { immediate: true })
+
+function onSave() { emit('save', { ...form.value }) }
+</script>
+
 <template>
   <BaseModal :show="show" :title="player ? 'Editar Jogador' : 'Novo Jogador'" @close="$emit('close')">
-    <form @submit.prevent="onSave" class="flex flex-col gap-4">
+    <form class="flex flex-col gap-4" @submit.prevent="onSave">
       <div class="flex flex-col gap-1">
         <Label>Nome</Label>
         <Input v-model="form.name" type="text" required />
@@ -35,20 +52,3 @@
     </template>
   </BaseModal>
 </template>
-
-<script setup lang="ts">
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-
-const props = defineProps<{ player: any | null; show: boolean }>()
-const emit = defineEmits<{ save: [data: any]; close: [] }>()
-
-const form = ref({ name: '', position: 'LINHA', type: 'FIXO', status: 'ATIVO' })
-
-watch(() => props.player, (p) => {
-  if (p) { form.value = { name: p.name, position: p.position, type: p.type, status: p.status } }
-  else { form.value = { name: '', position: 'LINHA', type: 'FIXO', status: 'ATIVO' } }
-}, { immediate: true })
-
-function onSave() { emit('save', { ...form.value }) }
-</script>

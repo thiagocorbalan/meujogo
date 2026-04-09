@@ -13,6 +13,12 @@ enum UserRole {
   USUARIO
 }
 
+enum GroupRole {
+  DONO
+  ADMIN
+  JOGADOR
+}
+
 enum PlayerPosition {
   LINHA
   GOLEIRO
@@ -63,7 +69,52 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  memberships GroupMember[]
+  players     Player[]
+
   @@map("users")
+}
+
+model Group {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  description String?
+  dayOfWeek   Int?
+  defaultTime String?
+  address     String?
+  inviteCode  String   @unique
+  isActive    Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members  GroupMember[]
+  players  Player[]
+  sessions Session[]
+  seasons  Season[]
+  settings Settings?
+
+  @@map("groups")
+}
+
+model GroupMember {
+  id       Int       @id @default(autoincrement())
+  groupId  Int
+  userId   Int
+  playerId Int?      @unique
+  role     GroupRole  @default(JOGADOR)
+  isActive Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  group  Group   @relation(fields: [groupId], references: [id])
+  user   User    @relation(fields: [userId], references: [id])
+  player Player? @relation(fields: [playerId], references: [id])
+
+  @@unique([groupId, userId])
+  @@map("group_members")
 }
 
 model Player {
@@ -76,13 +127,18 @@ model Player {
   isActive Boolean        @default(true)
   goals    Int            @default(0)
   games    Int            @default(0)
+  groupId  Int?
+  userId   Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  group       Group?        @relation(fields: [groupId], references: [id])
+  user        User?         @relation(fields: [userId], references: [id])
   teamPlayers TeamPlayer[]
   goalEvents  Goal[]
   attendances Attendance[]
+  membership  GroupMember?
 
   @@map("players")
 }
@@ -93,10 +149,12 @@ model Season {
   startDate DateTime
   endDate   DateTime?
   isClosed  Boolean   @default(false)
+  groupId   Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  group    Group?    @relation(fields: [groupId], references: [id])
   sessions Session[]
 
   @@map("seasons")
@@ -109,10 +167,12 @@ model Session {
   matchDurationMinutes Int
   totalMatches         Int
   status               SessionStatus @default(PENDING)
+  groupId              Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  group       Group?       @relation(fields: [groupId], references: [id])
   season      Season       @relation(fields: [seasonId], references: [id])
   teams       Team[]
   matches     Match[]
@@ -237,7 +297,8 @@ model Attendance {
 }
 
 model Settings {
-  id                  Int      @id @default(1)
+  id                  Int      @id @default(autoincrement())
+  groupId             Int?     @unique
   maxTeams            Int      @default(4)
   playersPerTeam      Int      @default(5)
   sessionDurationMin  Int      @default(60)
@@ -246,8 +307,12 @@ model Settings {
   defaultElo          Float    @default(1200)
   kFactor             Float    @default(32)
   maxConsecutiveGames Int      @default(2)
+  rules               String?
+  paymentInfo         String?
   updatedAt           DateTime @updatedAt
-  vests               Vest[]
+
+  group Group?  @relation(fields: [groupId], references: [id])
+  vests Vest[]
 
   @@map("settings")
 }
@@ -256,7 +321,7 @@ model Vest {
   id         Int      @id @default(autoincrement())
   name       String
   color      String
-  settingsId Int      @default(1)
+  settingsId Int
   settings   Settings @relation(fields: [settingsId], references: [id])
 
   @@map("vests")

@@ -1,12 +1,3 @@
-<template>
-  <Input
-    type="text"
-    :model-value="modelValue"
-    @input="onInput"
-    :placeholder="placeholder"
-  />
-</template>
-
 <script setup lang="ts">
 import { Input } from '@/components/ui/input'
 
@@ -22,3 +13,12 @@ function onInput(e: Event) {
   timer = setTimeout(() => emit('update:modelValue', (e.target as HTMLInputElement).value), 300)
 }
 </script>
+
+<template>
+  <Input
+    type="text"
+    :model-value="modelValue"
+    :placeholder="placeholder"
+    @input="onInput"
+  />
+</template>

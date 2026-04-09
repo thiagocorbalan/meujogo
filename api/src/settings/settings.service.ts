@@ -6,15 +6,15 @@ import { UpdateSettingsDto } from './dto/update-settings.dto.js';
 export class SettingsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getSettings() {
+  async getSettings(groupId: number) {
     let settings = await this.prisma.settings.findUnique({
-      where: { id: 1 },
+      where: { groupId },
       include: { vests: true },
     });
 
     if (!settings) {
       settings = await this.prisma.settings.create({
-        data: { id: 1 },
+        data: { groupId },
         include: { vests: true },
       });
     }
@@ -22,15 +22,26 @@ export class SettingsService {
     return settings;
   }
 
-  async updateSettings(dto: UpdateSettingsDto) {
+  async updateSettings(dto: UpdateSettingsDto, groupId: number) {
     const { vests, ...rest } = dto;
+
+    // Ensure settings exist for this group
+    let settings = await this.prisma.settings.findUnique({
+      where: { groupId },
+    });
+
+    if (!settings) {
+      settings = await this.prisma.settings.create({
+        data: { groupId },
+      });
+    }
 
     if (vests !== undefined) {
       return this.prisma.$transaction(async (tx) => {
-        await tx.vest.deleteMany({ where: { settingsId: 1 } });
+        await tx.vest.deleteMany({ where: { settingsId: settings.id } });
 
         return tx.settings.update({
-          where: { id: 1 },
+          where: { id: settings.id },
           data: {
             ...rest,
             vests: {
@@ -43,24 +54,24 @@ export class SettingsService {
     }
 
     return this.prisma.settings.update({
-      where: { id: 1 },
+      where: { id: settings.id },
       data: rest,
       include: { vests: true },
     });
   }
 
-  async resetData() {
+  async resetData(groupId: number) {
     await this.prisma.$transaction(async (tx) => {
-      await tx.goal.deleteMany();
-      await tx.matchEvent.deleteMany();
-      await tx.match.deleteMany();
-      await tx.champion.deleteMany();
-      await tx.teamPlayer.deleteMany();
-      await tx.team.deleteMany();
-      await tx.attendance.deleteMany();
-      await tx.session.deleteMany();
-      await tx.season.deleteMany();
-      await tx.player.deleteMany();
+      await tx.goal.deleteMany({ where: { match: { session: { groupId } } } });
+      await tx.matchEvent.deleteMany({ where: { match: { session: { groupId } } } });
+      await tx.match.deleteMany({ where: { session: { groupId } } });
+      await tx.champion.deleteMany({ where: { session: { groupId } } });
+      await tx.teamPlayer.deleteMany({ where: { team: { session: { groupId } } } });
+      await tx.team.deleteMany({ where: { session: { groupId } } });
+      await tx.attendance.deleteMany({ where: { session: { groupId } } });
+      await tx.session.deleteMany({ where: { groupId } });
+      await tx.season.deleteMany({ where: { groupId } });
+      await tx.player.deleteMany({ where: { groupId } });
     });
 
     return { message: 'Dados resetados com sucesso.' };

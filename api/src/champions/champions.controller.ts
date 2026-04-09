@@ -11,46 +11,47 @@ import {
   FileTypeValidator,
   BadRequestException,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { ChampionsService } from './champions.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
-import { RolesGuard } from '../common/guards/roles.guard.js';
-import { Roles } from '../common/decorators/roles.decorator.js';
-import { UserRole } from '@prisma/client';
+import { GroupRolesGuard } from '../common/guards/group-roles.guard.js';
+import { GroupRoles } from '../common/decorators/group-roles.decorator.js';
+import { GroupRole } from '@prisma/client';
 
 const UPLOAD_DIR = '/app/uploads/champions';
 
 @Controller()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, GroupRolesGuard)
 export class ChampionsController {
   constructor(private readonly championsService: ChampionsService) {}
 
   @Get('champions')
-  findAll() {
-    return this.championsService.findAll();
+  findAll(@Req() req: any) {
+    return this.championsService.findAll(req.groupContext.groupId);
   }
 
   @Get('champions/:id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.championsService.findOne(id);
+  findOne(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.championsService.findOne(id, req.groupContext.groupId);
   }
 
   @Get('sessions/:sessionId/champion')
-  findBySession(@Param('sessionId', ParseIntPipe) sessionId: number) {
-    return this.championsService.findBySession(sessionId);
+  findBySession(@Req() req: any, @Param('sessionId', ParseIntPipe) sessionId: number) {
+    return this.championsService.findBySession(sessionId, req.groupContext.groupId);
   }
 
   @Post('sessions/:sessionId/champion')
-  @Roles(UserRole.MODERADOR, UserRole.ADMIN)
-  create(@Param('sessionId', ParseIntPipe) sessionId: number) {
-    return this.championsService.create(sessionId);
+  @GroupRoles(GroupRole.DONO, GroupRole.ADMIN)
+  create(@Req() req: any, @Param('sessionId', ParseIntPipe) sessionId: number) {
+    return this.championsService.create(sessionId, req.groupContext.groupId);
   }
 
   @Post('champions/:id/photo')
-  @Roles(UserRole.MODERADOR, UserRole.ADMIN)
+  @GroupRoles(GroupRole.DONO, GroupRole.ADMIN)
   @UseInterceptors(
     FileInterceptor('photo', {
       storage: diskStorage({
@@ -77,6 +78,7 @@ export class ChampionsController {
     }),
   )
   uploadPhoto(
+    @Req() req: any,
     @Param('id', ParseIntPipe) id: number,
     @UploadedFile(
       new ParseFilePipe({
@@ -91,6 +93,6 @@ export class ChampionsController {
     file: any,
   ) {
     const photoUrl = `/uploads/champions/${file.filename}`;
-    return this.championsService.uploadPhoto(id, photoUrl);
+    return this.championsService.uploadPhoto(id, photoUrl, req.groupContext.groupId);
   }
 }

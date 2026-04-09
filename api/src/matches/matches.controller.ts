@@ -1,52 +1,55 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { MatchesService } from './matches.service';
 import { StartMatchDto } from './dto/start-match.dto';
 import { RegisterGoalDto } from './dto/register-goal.dto';
 import { EndMatchDto } from './dto/end-match.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
-import { RolesGuard } from '../common/guards/roles.guard.js';
-import { Roles } from '../common/decorators/roles.decorator.js';
-import { UserRole } from '@prisma/client';
+import { GroupRolesGuard } from '../common/guards/group-roles.guard.js';
+import { GroupRoles } from '../common/decorators/group-roles.decorator.js';
+import { GroupRole } from '@prisma/client';
 
 @Controller()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, GroupRolesGuard)
 export class MatchesController {
   constructor(private readonly matchesService: MatchesService) {}
 
   @Get('sessions/:sessionId/matches')
-  findBySession(@Param('sessionId', ParseIntPipe) sessionId: number) {
-    return this.matchesService.findBySession(sessionId);
+  findBySession(@Req() req: any, @Param('sessionId', ParseIntPipe) sessionId: number) {
+    return this.matchesService.findBySession(sessionId, req.groupContext.groupId);
   }
 
   @Post('sessions/:sessionId/matches/start')
-  @Roles(UserRole.MODERADOR, UserRole.ADMIN)
+  @GroupRoles(GroupRole.DONO, GroupRole.ADMIN)
   start(
+    @Req() req: any,
     @Param('sessionId', ParseIntPipe) sessionId: number,
     @Body() dto: StartMatchDto,
   ) {
-    return this.matchesService.start(sessionId, dto);
+    return this.matchesService.start(sessionId, dto, req.groupContext.groupId);
   }
 
   @Patch('matches/:id/goal')
-  @Roles(UserRole.MODERADOR, UserRole.ADMIN)
+  @GroupRoles(GroupRole.DONO, GroupRole.ADMIN)
   registerGoal(
+    @Req() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: RegisterGoalDto,
   ) {
-    return this.matchesService.registerGoal(id, dto);
+    return this.matchesService.registerGoal(id, dto, req.groupContext.groupId);
   }
 
   @Patch('matches/:id/end')
-  @Roles(UserRole.MODERADOR, UserRole.ADMIN)
+  @GroupRoles(GroupRole.DONO, GroupRole.ADMIN)
   end(
+    @Req() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: EndMatchDto,
   ) {
-    return this.matchesService.end(id, dto);
+    return this.matchesService.end(id, dto, req.groupContext.groupId);
   }
 
   @Get('sessions/:sessionId/matches/next')
-  getNextMatch(@Param('sessionId', ParseIntPipe) sessionId: number) {
-    return this.matchesService.getNextMatch(sessionId);
+  getNextMatch(@Req() req: any, @Param('sessionId', ParseIntPipe) sessionId: number) {
+    return this.matchesService.getNextMatch(sessionId, req.groupContext.groupId);
   }
 }

@@ -11,7 +11,7 @@
     <template v-else>
       <Tabs v-model="tab" class="mb-5">
         <TabsList>
-          <TabsTrigger value="sessao">Sessao</TabsTrigger>
+          <TabsTrigger value="sessao">Sessão</TabsTrigger>
           <TabsTrigger value="temporada">Temporada</TabsTrigger>
           <TabsTrigger value="artilheiros">Artilheiros</TabsTrigger>
           <TabsTrigger value="elo">Melhor ELO</TabsTrigger>
@@ -19,14 +19,14 @@
 
         <TabsContent value="sessao">
           <div v-if="sessions.length" class="flex items-center gap-3 mb-4">
-            <label class="text-sm font-semibold text-foreground">Sessao:</label>
+            <label class="text-sm font-semibold text-foreground">Sessão:</label>
             <select v-model="selectedSessionId" class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[280px] ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" @change="loadSessionRanking">
               <option v-for="s in sessions" :key="s.id" :value="s.id">
                 #{{ s.id }} — {{ formatDate(s.createdAt) }} ({{ s.status }})
               </option>
             </select>
           </div>
-          <div v-else class="text-muted-foreground text-sm py-5">Nenhuma sessao disponivel.</div>
+          <div v-else class="text-muted-foreground text-sm py-5">Nenhuma sessão disponível.</div>
           <RankingTable v-if="sessions.length" :ranking="sessionRanking" :loading="loading" />
         </TabsContent>
 
@@ -39,7 +39,7 @@
               </option>
             </select>
           </div>
-          <div v-else class="text-muted-foreground text-sm py-5">Nenhuma temporada disponivel.</div>
+          <div v-else class="text-muted-foreground text-sm py-5">Nenhuma temporada disponível.</div>
           <RankingTable v-if="seasons.length" :ranking="seasonRanking" :loading="loading" />
         </TabsContent>
 

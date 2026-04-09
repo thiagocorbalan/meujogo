@@ -7,16 +7,16 @@ import { UpdatePlayerDto } from './dto/update-player.dto';
 export class PlayersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
+  findAll(groupId: number) {
     return this.prisma.player.findMany({
-      where: { isActive: true },
+      where: { groupId, isActive: true },
       orderBy: { name: 'asc' },
     });
   }
 
-  async findOne(id: number) {
-    const player = await this.prisma.player.findUnique({
-      where: { id },
+  async findOne(id: number, groupId: number) {
+    const player = await this.prisma.player.findFirst({
+      where: { id, groupId },
       include: {
         goalEvents: true,
         attendances: true,
@@ -30,9 +30,46 @@ export class PlayersService {
     return player;
   }
 
-  async create(dto: CreatePlayerDto) {
-    const settings = await this.prisma.settings.findUnique({
-      where: { id: 1 },
+  async findMe(userId: number, groupId: number) {
+    const player = await this.prisma.player.findFirst({
+      where: { userId, groupId, isActive: true },
+    });
+
+    if (!player) {
+      throw new NotFoundException(
+        'No player profile found for this user in the current group',
+      );
+    }
+
+    return player;
+  }
+
+  async updateMe(
+    userId: number,
+    groupId: number,
+    dto: { name?: string; position?: string; status?: string },
+  ) {
+    const player = await this.prisma.player.findFirst({
+      where: { userId, groupId },
+    });
+
+    if (!player) {
+      throw new NotFoundException('Perfil não encontrado neste grupo');
+    }
+
+    return this.prisma.player.update({
+      where: { id: player.id },
+      data: {
+        name: dto.name,
+        position: dto.position as any,
+        status: dto.status as any,
+      },
+    });
+  }
+
+  async create(dto: CreatePlayerDto, groupId: number) {
+    const settings = await this.prisma.settings.findFirst({
+      where: { groupId },
     });
     const defaultElo = settings?.defaultElo ?? 1200;
 
@@ -45,12 +82,15 @@ export class PlayersService {
         elo: defaultElo,
         goals: 0,
         games: 0,
+        groupId,
       },
     });
   }
 
-  async update(id: number, dto: UpdatePlayerDto) {
-    const player = await this.prisma.player.findUnique({ where: { id } });
+  async update(id: number, dto: UpdatePlayerDto, groupId: number) {
+    const player = await this.prisma.player.findFirst({
+      where: { id, groupId },
+    });
 
     if (!player || !player.isActive) {
       throw new NotFoundException(`Player #${id} not found`);
@@ -67,8 +107,10 @@ export class PlayersService {
     });
   }
 
-  async remove(id: number) {
-    const player = await this.prisma.player.findUnique({ where: { id } });
+  async remove(id: number, groupId: number) {
+    const player = await this.prisma.player.findFirst({
+      where: { id, groupId },
+    });
 
     if (!player || !player.isActive) {
       throw new NotFoundException(`Player #${id} not found`);

@@ -10,10 +10,10 @@
     <template v-else-if="champion">
 <div class="text-center mb-8">
         <span class="text-6xl block mb-3">&#127942;</span>
-        <h1 class="text-4xl font-extrabold text-foreground mb-2">Campeao!</h1>
+        <h1 class="text-4xl font-extrabold text-foreground mb-2">Campeão!</h1>
         <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-lg font-bold" :style="{ background: champion.team?.color + '22', color: champion.team?.color, border: `2px solid ${champion.team?.color}` }">
           <span class="w-4 h-4 rounded-full" :style="{ background: champion.team?.color }"></span>
-          {{ champion.team?.name || 'Time Campeao' }}
+          {{ champion.team?.name || 'Time Campeão' }}
         </div>
       </div>
 <div v-if="teamPlayers.length" class="mb-8">
@@ -29,11 +29,11 @@
         </div>
       </div>
 <div v-if="ranking.length" class="mb-8">
-        <h2 class="text-lg font-semibold text-foreground mb-3">Classificacao Final</h2>
+        <h2 class="text-lg font-semibold text-foreground mb-3">Classificação Final</h2>
         <RankingTable :ranking="ranking" :loading="false" />
       </div>
 <div class="mb-8 bg-white border rounded-lg p-6">
-        <h2 class="text-lg font-semibold text-foreground mb-3">Foto do Campeao</h2>
+        <h2 class="text-lg font-semibold text-foreground mb-3">Foto do Campeão</h2>
 
         <div v-if="canCreate('champions') && !photoFile && !champion.photoUrl" class="border-2 border-dashed border-muted-foreground/30 rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors" @click="triggerFileInput" @dragover.prevent @drop.prevent="onDrop">
           <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" @change="onFileSelect" />
@@ -49,7 +49,7 @@
         </div>
 
         <div v-else-if="champion.photoUrl" class="mt-4">
-          <img :src="resolvePhotoUrl(champion.photoUrl)" alt="Foto do campeao" class="max-h-[240px] rounded-lg mx-auto object-cover" />
+          <img :src="resolvePhotoUrl(champion.photoUrl)" alt="Foto do campeão" class="max-h-[240px] rounded-lg mx-auto object-cover" />
         </div>
       </div>
 <div class="flex justify-center gap-4">
@@ -63,9 +63,9 @@
     </template>
 
     <div v-else class="py-10 text-center bg-muted rounded-lg text-muted-foreground">
-      <p>Nenhum campeao encontrado para esta sessao.</p>
+      <p>Nenhum campeão encontrado para esta sessão.</p>
       <NuxtLink to="/campeoes">
-        <BaseButton variant="secondary" size="md" class="mt-3">Ver Galeria de Campeoes</BaseButton>
+        <BaseButton variant="secondary" size="md" class="mt-3">Ver Galeria de Campeões</BaseButton>
       </NuxtLink>
     </div>
   </div>
@@ -119,8 +119,8 @@ onMounted(async () => {
     champion.value = champ
     ranking.value = Array.isArray(rank) ? rank : []
   } catch (e) {
-    console.error('Erro ao carregar campeao:', e)
-    errorMessage.value = 'Erro ao carregar dados do campeao.'
+    console.error('Erro ao carregar campeão:', e)
+    errorMessage.value = 'Erro ao carregar dados do campeão.'
   } finally {
     loading.value = false
   }
@@ -142,11 +142,11 @@ function onDrop(event: DragEvent) {
 
 function setPhoto(file: File) {
   if (file.size > 5 * 1024 * 1024) {
-    errorMessage.value = 'Arquivo muito grande. Maximo 5MB.'
+    errorMessage.value = 'Arquivo muito grande. Máximo 5MB.'
     return
   }
   if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
-    errorMessage.value = 'Formato invalido. Use JPG, PNG ou WebP.'
+    errorMessage.value = 'Formato inválido. Use JPG, PNG ou WebP.'
     return
   }
   photoFile.value = file
@@ -170,7 +170,7 @@ async function handleSave() {
     navigateTo('/campeoes')
   } catch (e) {
     console.error('Erro ao salvar foto:', e)
-    errorMessage.value = 'Erro ao salvar foto do campeao. Tente novamente.'
+    errorMessage.value = 'Erro ao salvar foto do campeão. Tente novamente.'
   } finally {
     saving.value = false
   }

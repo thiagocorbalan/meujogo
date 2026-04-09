@@ -2,7 +2,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: process.env.NODE_ENV !== 'production' },
 
-  modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss', 'shadcn-nuxt', '@sentry/nuxt/module'],
+  modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss', 'shadcn-nuxt', '@sentry/nuxt/module', '@nuxt/eslint'],
 
   sentry: {
     dsn: process.env.SENTRY_DSN || '',

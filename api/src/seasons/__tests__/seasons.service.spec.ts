@@ -6,6 +6,8 @@ describe('SeasonsService', () => {
   let service: SeasonsService;
   let prisma: PrismaService;
 
+  const groupId = 1;
+
   const mockTx = {
     season: {
       findFirst: jest.fn(),
@@ -24,6 +26,7 @@ describe('SeasonsService', () => {
             $transaction: jest.fn((cb: (tx: typeof mockTx) => Promise<any>) => cb(mockTx)),
             season: {
               findMany: jest.fn(),
+              findFirst: jest.fn(),
               findUnique: jest.fn(),
               create: jest.fn(),
               update: jest.fn(),
@@ -48,7 +51,7 @@ describe('SeasonsService', () => {
       mockTx.season.findFirst.mockResolvedValue(null);
       mockTx.season.create.mockResolvedValue(newSeason);
 
-      await service.closeAndCreateNew();
+      await service.closeAndCreateNew(groupId);
       expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     });
 
@@ -58,9 +61,9 @@ describe('SeasonsService', () => {
       mockTx.season.update.mockResolvedValue({ ...openSeason, isClosed: true });
       mockTx.season.create.mockResolvedValue(newSeason);
 
-      const result = await service.closeAndCreateNew();
+      const result = await service.closeAndCreateNew(groupId);
 
-      expect(mockTx.season.findFirst).toHaveBeenCalledWith({ where: { isClosed: false } });
+      expect(mockTx.season.findFirst).toHaveBeenCalledWith({ where: { isClosed: false, groupId } });
       expect(mockTx.season.update).toHaveBeenCalledWith({
         where: { id: 1 },
         data: {
@@ -73,6 +76,7 @@ describe('SeasonsService', () => {
           year: expect.any(Number),
           startDate: expect.any(Date),
           isClosed: false,
+          groupId,
         },
       });
       expect(result).toEqual(newSeason);
@@ -82,9 +86,9 @@ describe('SeasonsService', () => {
       mockTx.season.findFirst.mockResolvedValue(null);
       mockTx.season.create.mockResolvedValue(newSeason);
 
-      const result = await service.closeAndCreateNew();
+      const result = await service.closeAndCreateNew(groupId);
 
-      expect(mockTx.season.findFirst).toHaveBeenCalledWith({ where: { isClosed: false } });
+      expect(mockTx.season.findFirst).toHaveBeenCalledWith({ where: { isClosed: false, groupId } });
       expect(mockTx.season.update).not.toHaveBeenCalled();
       expect(mockTx.season.create).toHaveBeenCalledTimes(1);
       expect(result).toEqual(newSeason);
@@ -92,7 +96,7 @@ describe('SeasonsService', () => {
 
     it('should propagate error if transaction fails', async () => {
       (prisma.$transaction as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
-      await expect(service.closeAndCreateNew()).rejects.toThrow('DB error');
+      await expect(service.closeAndCreateNew(groupId)).rejects.toThrow('DB error');
     });
   });
 });

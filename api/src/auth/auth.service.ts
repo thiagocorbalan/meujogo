@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -8,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { RegisterDto } from './dto/register.dto.js';
 
 @Injectable()
 export class AuthService {
@@ -154,6 +156,36 @@ export class AuthService {
         resetTokenExpiry: null,
       },
     });
+  }
+
+  async register(dto: RegisterDto) {
+    const existing = await this.usersService.findByEmail(dto.email);
+    if (existing) {
+      throw new ConflictException('Email ja cadastrado');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+    const user = await this.prisma.user.create({
+      data: {
+        name: dto.name,
+        email: dto.email,
+        password: hashedPassword,
+        role: 'USUARIO',
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        googleId: true,
+        appleId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return this.login(user, false);
   }
 
   async validateOAuthUser(

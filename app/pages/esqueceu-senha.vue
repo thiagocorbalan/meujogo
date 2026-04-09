@@ -27,7 +27,7 @@
           class="rounded-lg border border-green-500 bg-green-500/10 p-3 text-green-600 text-sm"
           role="status"
         >
-          Se o email existir em nossa base, enviaremos um link de recuperacao.
+          Se o email existir em nossa base, enviaremos um link de recuperação.
         </div>
 
         <form v-if="!sent" @submit.prevent="handleSubmit" class="flex flex-col gap-4">
@@ -50,7 +50,7 @@
             :disabled="isLoading"
             class="w-full"
           >
-            Enviar link de recuperacao
+            Enviar link de recuperação
           </BaseButton>
         </form>
 <div class="text-center">
@@ -85,12 +85,12 @@ function validate(): boolean {
   emailError.value = ''
 
   if (!email.value) {
-    emailError.value = 'O email e obrigatorio.'
+    emailError.value = 'O email é obrigatório.'
     return false
   }
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-    emailError.value = 'Formato de email invalido.'
+    emailError.value = 'Formato de email inválido.'
     return false
   }
 

@@ -7,7 +7,6 @@
           <TableRow>
             <TableHead>Nome</TableHead>
             <TableHead>Posição</TableHead>
-            <TableHead>Tipo</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>ELO</TableHead>
             <TableHead>Gols</TableHead>
@@ -17,10 +16,27 @@
         </TableHeader>
         <TableBody>
           <TableRow v-for="player in players" :key="player.id">
-            <TableCell>{{ player.name }}</TableCell>
-            <TableCell>{{ player.position }}</TableCell>
-            <TableCell>{{ player.type }}</TableCell>
-            <TableCell>{{ player.status }}</TableCell>
+            <TableCell>
+              <div class="flex items-center gap-2">
+                <span>{{ player.name }}</span>
+                <span
+                  v-if="player.type === 'CONVIDADO'"
+                  class="inline-flex items-center rounded-full bg-orange-500 text-white px-2 py-0.5 text-[11px] font-semibold"
+                >
+                  Avulso
+                </span>
+                <span
+                  v-if="player.status === 'AUSENTE'"
+                  class="inline-flex items-center rounded-full bg-amber-500 text-white px-2 py-0.5 text-[11px] font-semibold"
+                >
+                  Suspenso
+                </span>
+              </div>
+            </TableCell>
+            <TableCell>{{ positionLabel(player.position) }}</TableCell>
+            <TableCell>
+              <span :class="statusClass(player.status)">{{ statusLabel(player.status) }}</span>
+            </TableCell>
             <TableCell>{{ player.elo ?? '—' }}</TableCell>
             <TableCell>{{ player.goals ?? 0 }}</TableCell>
             <TableCell>{{ player.games ?? 0 }}</TableCell>
@@ -32,7 +48,7 @@
             </TableCell>
           </TableRow>
           <TableRow v-if="!players.length">
-            <TableCell :colspan="showActions ? 8 : 7" class="text-center text-muted-foreground p-6 text-sm">
+            <TableCell :colspan="showActions ? 7 : 6" class="text-center text-muted-foreground p-6 text-sm">
               Nenhum jogador encontrado.
             </TableCell>
           </TableRow>
@@ -50,11 +66,35 @@ withDefaults(defineProps<{
   loading: boolean
   showActions?: boolean
 }>(), {
-  showActions: true,
+  showActions: false,
 })
 
 const emit = defineEmits<{
   edit: [player: any]
   delete: [player: any]
 }>()
+
+function positionLabel(position: string) {
+  return position === 'GOLEIRO' ? 'Goleiro' : 'Linha'
+}
+
+function statusLabel(status: string) {
+  switch (status) {
+    case 'ATIVO': return 'Ativo'
+    case 'LESIONADO': return 'Lesionado'
+    case 'AUSENTE': return 'Ausente'
+    case 'RESERVA': return 'Reserva'
+    default: return status
+  }
+}
+
+function statusClass(status: string) {
+  switch (status) {
+    case 'ATIVO': return 'text-green-600 font-medium'
+    case 'LESIONADO': return 'text-red-600 font-medium'
+    case 'AUSENTE': return 'text-amber-600 font-medium'
+    case 'RESERVA': return 'text-blue-600 font-medium'
+    default: return ''
+  }
+}
 </script>

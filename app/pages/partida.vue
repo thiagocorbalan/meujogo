@@ -15,7 +15,7 @@
     <template v-else>
 <div v-if="session" class="mb-6 flex flex-wrap items-center gap-4 bg-slate-50 border border-slate-200 rounded-lg px-5 py-3 text-sm text-slate-700">
         <span>
-          <strong>Sessao:</strong> {{ session.durationMinutes }} min total
+          <strong>Sessão:</strong> {{ session.durationMinutes }} min total
         </span>
         <span class="text-slate-300">|</span>
         <span>
@@ -68,10 +68,10 @@
           </template>
 <template v-else>
             <div v-if="loadingNextMatch" class="text-center py-4 text-muted-foreground text-sm">
-              Carregando proxima partida...
+              Carregando próxima partida...
             </div>
             <template v-else-if="nextMatchSuggestion">
-              <p class="text-sm text-muted-foreground mb-1">Proxima partida sugerida pelo rodizio:</p>
+              <p class="text-sm text-muted-foreground mb-1">Próxima partida sugerida pelo rodízio:</p>
               <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-4 rounded-md bg-blue-50 text-blue-800">
                 <span class="text-lg font-semibold text-right">{{ nextMatchSuggestion.teamA?.name ?? teamName(nextMatchSuggestion.teamA?.id ?? nextMatchSuggestion.teamAId) }}</span>
                 <span class="text-sm font-bold text-blue-500 text-center">vs</span>
@@ -87,7 +87,7 @@
               </BaseButton>
             </template>
             <div v-else class="text-center py-4 text-muted-foreground text-sm">
-              <p>Nao foi possivel obter a proxima partida automaticamente.</p>
+              <p>Não foi possível obter a próxima partida automaticamente.</p>
               <p class="text-xs mt-1">Selecione manualmente abaixo:</p>
               <div class="grid grid-cols-2 gap-4 mt-3 text-left">
                 <div class="flex flex-col gap-1.5">
@@ -168,7 +168,7 @@
       </section>
 <section v-if="finishedMatches.length > 0" class="mb-9">
         <h2 class="text-xl font-semibold text-foreground mb-4 pb-2 border-b-2 border-border">
-          Partidas Concluidas
+          Partidas Concluídas
           <span class="text-base font-normal text-muted-foreground ml-1">({{ finishedMatches.length }})</span>
         </h2>
         <div class="flex flex-col gap-2">
@@ -194,9 +194,9 @@
 <section v-if="!currentMatch && finishedMatches.length > 0 && canManageMatch()" class="mb-9 pt-4 border-t border-border">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-lg font-semibold text-foreground">Encerrar Sessao</h2>
+            <h2 class="text-lg font-semibold text-foreground">Encerrar Sessão</h2>
             <p class="text-sm text-muted-foreground mt-0.5">
-              Finaliza a sessao, salva os resultados, atualiza ELO e estatisticas dos jogadores.
+              Finaliza a sessão, salva os resultados, atualiza ELO e estatísticas dos jogadores.
             </p>
           </div>
           <BaseButton
@@ -205,14 +205,14 @@
             :loading="loading"
             @click="showFinalizeModal = true"
           >
-            Encerrar Sessao
+            Encerrar Sessão
           </BaseButton>
         </div>
       </section>
     </template>
 <BaseModal :show="showWinnerModal" title="Empate -- Escolha o vencedor" @close="showWinnerModal = false">
       <p class="text-foreground text-sm mb-4">
-        A primeira partida terminou em empate. Escolha o time vencedor para fins de rodizio (ambos os times recebem 1 ponto):
+        A primeira partida terminou em empate. Escolha o time vencedor para fins de rodízio (ambos os times recebem 1 ponto):
       </p>
       <div class="flex gap-3 justify-center">
         <BaseButton
@@ -242,9 +242,9 @@
         </BaseButton>
       </template>
     </BaseModal>
-<BaseModal :show="showFinalizeModal" title="Encerrar Sessao" @close="showFinalizeModal = false">
+<BaseModal :show="showFinalizeModal" title="Encerrar Sessão" @close="showFinalizeModal = false">
       <p class="text-foreground text-sm">
-        Deseja realmente encerrar a sessao? Essa acao vai salvar todos os resultados, atualizar o ELO dos jogadores e finalizar a sessao.
+        Deseja realmente encerrar a sessão? Essa ação vai salvar todos os resultados, atualizar o ELO dos jogadores e finalizar a sessão.
       </p>
       <template #footer>
         <BaseButton variant="secondary" size="sm" @click="showFinalizeModal = false">Cancelar</BaseButton>
@@ -407,7 +407,7 @@ async function fetchNextMatch() {
       nextMatchSuggestion.value = result
     }
   } catch (e) {
-    console.error('Erro ao buscar proxima partida:', e)
+    console.error('Erro ao buscar próxima partida:', e)
     nextMatchSuggestion.value = null
   } finally {
     loadingNextMatch.value = false
@@ -430,24 +430,36 @@ onMounted(async () => {
     if (!currentMatch.value && finishedMatches.value.length > 0) {
       await fetchNextMatch()
     }
-
-    pollInterval = setInterval(fetchAll, 5000)
   } catch (e) {
     console.error('Erro ao inicializar:', e)
-    showError('Erro ao carregar dados da sessao. Verifique sua conexao e tente novamente.')
+    showError('Erro ao carregar dados da sessão. Verifique sua conexão e tente novamente.')
   }
 })
+
+function startPolling() {
+  if (pollInterval) return
+  pollInterval = setInterval(fetchAll, 5000)
+}
+
+function stopPolling() {
+  if (pollInterval) {
+    clearInterval(pollInterval)
+    pollInterval = null
+  }
+}
 
 watch(currentMatch, (match) => {
   if (match) {
     startTimer()
+    startPolling()
   } else {
     stopTimer()
+    stopPolling()
   }
 }, { immediate: true })
 
 onUnmounted(() => {
-  if (pollInterval) clearInterval(pollInterval)
+  stopPolling()
   stopTimer()
 })
 
@@ -550,8 +562,8 @@ async function handleFinalizeSession() {
     const championId = result?.champion?.id
     navigateTo(`/campeoes/registrar?sessionId=${sessionId.value}${championId ? `&championId=${championId}` : ''}`)
   } catch (e) {
-    console.error('Erro ao encerrar sessao:', e)
-    showError('Erro ao encerrar sessao: ' + extractErrorMessage(e))
+    console.error('Erro ao encerrar sessão:', e)
+    showError('Erro ao encerrar sessão: ' + extractErrorMessage(e))
   } finally {
     loading.value = false
   }

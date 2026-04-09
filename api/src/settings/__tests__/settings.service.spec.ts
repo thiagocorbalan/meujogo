@@ -6,6 +6,8 @@ describe('SettingsService', () => {
   let service: SettingsService;
   let prisma: PrismaService;
 
+  const groupId = 1;
+
   const mockTx = {
     goal: { deleteMany: jest.fn() },
     matchEvent: { deleteMany: jest.fn() },
@@ -48,12 +50,12 @@ describe('SettingsService', () => {
 
   describe('resetData', () => {
     it('should call $transaction', async () => {
-      await service.resetData();
+      await service.resetData(groupId);
       expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     });
 
     it('should delete from all 10 tables in correct FK order', async () => {
-      await service.resetData();
+      await service.resetData(groupId);
 
       const callOrder: string[] = [];
       for (const [table, mock] of Object.entries(mockTx)) {
@@ -77,7 +79,7 @@ describe('SettingsService', () => {
     });
 
     it('should call deleteMany for each of the 10 tables', async () => {
-      await service.resetData();
+      await service.resetData(groupId);
 
       expect(mockTx.goal.deleteMany).toHaveBeenCalledTimes(1);
       expect(mockTx.matchEvent.deleteMany).toHaveBeenCalledTimes(1);
@@ -92,7 +94,7 @@ describe('SettingsService', () => {
     });
 
     it('should NOT delete User, Settings, or Vest tables', async () => {
-      await service.resetData();
+      await service.resetData(groupId);
 
       const deletedTables = Object.keys(mockTx);
       expect(deletedTables).not.toContain('user');
@@ -101,13 +103,13 @@ describe('SettingsService', () => {
     });
 
     it('should return success message', async () => {
-      const result = await service.resetData();
+      const result = await service.resetData(groupId);
       expect(result).toEqual({ message: 'Dados resetados com sucesso.' });
     });
 
     it('should propagate error if transaction fails', async () => {
       (prisma.$transaction as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
-      await expect(service.resetData()).rejects.toThrow('DB error');
+      await expect(service.resetData(groupId)).rejects.toThrow('DB error');
     });
   });
 });

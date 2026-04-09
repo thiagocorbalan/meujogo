@@ -43,7 +43,7 @@
                 id="password"
                 v-model="form.password"
                 :type="showPassword ? 'text' : 'password'"
-                placeholder="Minimo 8 caracteres"
+                placeholder="Mínimo 8 caracteres"
                 autocomplete="new-password"
                 aria-label="Nova senha"
                 class="pr-10"
@@ -137,7 +137,7 @@ const errors = ref<{ password?: string; confirmPassword?: string }>({})
 
 onMounted(() => {
   if (!token.value) {
-    tokenError.value = 'Token de redefinicao ausente ou invalido. Solicite um novo link de recuperacao.'
+    tokenError.value = 'Token de redefinição ausente ou inválido. Solicite um novo link de recuperação.'
   }
 })
 
@@ -145,15 +145,15 @@ function validate(): boolean {
   errors.value = {}
 
   if (!form.value.password) {
-    errors.value.password = 'A senha e obrigatoria.'
+    errors.value.password = 'A senha é obrigatória.'
   } else if (form.value.password.length < 8) {
-    errors.value.password = 'A senha deve ter no minimo 8 caracteres.'
+    errors.value.password = 'A senha deve ter no mínimo 8 caracteres.'
   }
 
   if (!form.value.confirmPassword) {
     errors.value.confirmPassword = 'Confirme sua nova senha.'
   } else if (form.value.password !== form.value.confirmPassword) {
-    errors.value.confirmPassword = 'As senhas nao coincidem.'
+    errors.value.confirmPassword = 'As senhas não coincidem.'
   }
 
   return Object.keys(errors.value).length === 0
@@ -173,12 +173,12 @@ async function handleSubmit() {
 
     await router.push({
       path: '/login',
-      query: { success: 'Senha redefinida com sucesso! Faca login com sua nova senha.' },
+      query: { success: 'Senha redefinida com sucesso! Faça login com sua nova senha.' },
     })
   } catch (e: any) {
     const message = e?.data?.message || e?.message || ''
     if (message.toLowerCase().includes('token') || message.toLowerCase().includes('expirad')) {
-      tokenError.value = 'O link de redefinicao expirou ou e invalido. Solicite um novo link.'
+      tokenError.value = 'O link de redefinição expirou ou é inválido. Solicite um novo link.'
     } else {
       errorMessage.value = message || 'Erro ao redefinir senha. Tente novamente.'
     }

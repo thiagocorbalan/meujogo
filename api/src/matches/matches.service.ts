@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { StartMatchDto } from './dto/start-match.dto';
 import { RegisterGoalDto } from './dto/register-goal.dto';
@@ -9,7 +9,15 @@ import { getNextMatch } from '../engines/match-rotation.engine';
 export class MatchesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findBySession(sessionId: number) {
+  async findBySession(sessionId: number, groupId: number) {
+    // Verify session belongs to group
+    const session = await this.prisma.session.findFirst({
+      where: { id: sessionId, groupId },
+    });
+    if (!session) {
+      throw new NotFoundException(`Session #${sessionId} not found`);
+    }
+
     return this.prisma.match.findMany({
       where: { sessionId },
       include: {
@@ -23,7 +31,15 @@ export class MatchesService {
     });
   }
 
-  async start(sessionId: number, dto: StartMatchDto) {
+  async start(sessionId: number, dto: StartMatchDto, groupId: number) {
+    // Verify session belongs to group
+    const session = await this.prisma.session.findFirst({
+      where: { id: sessionId, groupId },
+    });
+    if (!session) {
+      throw new NotFoundException(`Session #${sessionId} not found`);
+    }
+
     const activeMatch = await this.prisma.match.findFirst({
       where: {
         sessionId,
@@ -38,8 +54,7 @@ export class MatchesService {
       );
     }
 
-    const session = await this.prisma.session.findUnique({ where: { id: sessionId } });
-    if (session?.status === 'PENDING') {
+    if (session.status === 'PENDING') {
       await this.prisma.session.update({
         where: { id: sessionId },
         data: { status: 'IN_PROGRESS' },
@@ -67,11 +82,15 @@ export class MatchesService {
     return match;
   }
 
-  async registerGoal(matchId: number, dto: RegisterGoalDto) {
-    const match = await this.prisma.match.findUniqueOrThrow({
-      where: { id: matchId },
+  async registerGoal(matchId: number, dto: RegisterGoalDto, groupId: number) {
+    const match = await this.prisma.match.findFirst({
+      where: { id: matchId, session: { groupId } },
       include: { events: true },
     });
+
+    if (!match) {
+      throw new NotFoundException(`Match #${matchId} not found`);
+    }
 
     const hasStarted = match.events.some((e) => e.type === 'MATCH_STARTED');
     const hasEnded = match.events.some((e) => e.type === 'MATCH_ENDED');
@@ -127,15 +146,19 @@ export class MatchesService {
     });
   }
 
-  async end(matchId: number, dto: EndMatchDto) {
-    const match = await this.prisma.match.findUniqueOrThrow({
-      where: { id: matchId },
+  async end(matchId: number, dto: EndMatchDto, groupId: number) {
+    const match = await this.prisma.match.findFirst({
+      where: { id: matchId, session: { groupId } },
       include: {
         teamA: { include: { players: true } },
         teamB: { include: { players: true } },
         events: true,
       },
     });
+
+    if (!match) {
+      throw new NotFoundException(`Match #${matchId} not found`);
+    }
 
     const alreadyEnded = match.events.some((e) => e.type === 'MATCH_ENDED');
     if (alreadyEnded) {
@@ -195,8 +218,16 @@ export class MatchesService {
     return updated;
   }
 
-  async getNextMatch(sessionId: number) {
-    const settings = await this.prisma.settings.findUnique({ where: { id: 1 } });
+  async getNextMatch(sessionId: number, groupId: number) {
+    // Verify session belongs to group
+    const session = await this.prisma.session.findFirst({
+      where: { id: sessionId, groupId },
+    });
+    if (!session) {
+      throw new NotFoundException(`Session #${sessionId} not found`);
+    }
+
+    const settings = await this.prisma.settings.findUnique({ where: { groupId } });
     const maxConsecutiveGames = settings?.maxConsecutiveGames ?? 2;
 
     const teams = await this.prisma.team.findMany({

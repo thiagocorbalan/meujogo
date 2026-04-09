@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 import { CsrfGuard } from './common/guards/csrf.guard.js';
+import { GroupContextMiddleware } from './common/middleware/group-context.middleware.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { PrismaModule } from './prisma/prisma.module.js';
@@ -21,6 +22,7 @@ import { DashboardModule } from './dashboard/dashboard.module.js';
 import { UploadsModule } from './uploads/uploads.module.js';
 import { StatsModule } from './stats/stats.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { GroupsModule } from './groups/groups.module.js';
 
 @Module({
   imports: [
@@ -29,7 +31,7 @@ import { AuthModule } from './auth/auth.module.js';
         {
           name: 'default',
           ttl: 60000,
-          limit: 100,
+          limit: process.env.NODE_ENV === 'production' ? 100 : 1000,
         },
       ],
     }),
@@ -65,6 +67,7 @@ import { AuthModule } from './auth/auth.module.js';
     UploadsModule,
     StatsModule,
     AuthModule,
+    GroupsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -79,4 +82,15 @@ import { AuthModule } from './auth/auth.module.js';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(GroupContextMiddleware)
+      .exclude(
+        { path: 'auth/(.*)', method: RequestMethod.ALL },
+        { path: 'health', method: RequestMethod.ALL },
+        { path: 'groups/invite/(.*)', method: RequestMethod.GET },
+      )
+      .forRoutes('*');
+  }
+}

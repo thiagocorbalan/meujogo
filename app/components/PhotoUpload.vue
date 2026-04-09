@@ -85,12 +85,12 @@ function handleFile(file: File) {
   error.value = null
 
   if (!ALLOWED_TYPES.includes(file.type)) {
-    error.value = 'Formato invalido. Use JPG, PNG ou WebP.'
+    error.value = 'Formato inválido. Use JPG, PNG ou WebP.'
     return
   }
 
   if (file.size > MAX_SIZE) {
-    error.value = 'Arquivo muito grande. Tamanho maximo: 5MB.'
+    error.value = 'Arquivo muito grande. Tamanho máximo: 5MB.'
     return
   }
 

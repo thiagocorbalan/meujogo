@@ -59,6 +59,14 @@ export class UpdateSettingsDto {
   maxConsecutiveGames?: number;
 
   @IsOptional()
+  @IsString()
+  rules?: string;
+
+  @IsOptional()
+  @IsString()
+  paymentInfo?: string;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => VestDto)

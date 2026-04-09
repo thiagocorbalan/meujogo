@@ -37,7 +37,7 @@ const errorMessage = ref('')
 onMounted(async () => {
   if (route.query.error) {
     errorMessage.value =
-      (route.query.error as string) || 'Erro durante a autenticacao. Tente novamente.'
+      (route.query.error as string) || 'Erro durante a autenticação. Tente novamente.'
     return
   }
 
@@ -53,10 +53,10 @@ onMounted(async () => {
       authStore.setUser(user)
       await router.push('/')
     } else {
-      errorMessage.value = 'Nao foi possivel autenticar. Tente novamente.'
+      errorMessage.value = 'Não foi possível autenticar. Tente novamente.'
     }
   } catch {
-    errorMessage.value = 'Erro ao processar autenticacao. Tente novamente.'
+    errorMessage.value = 'Erro ao processar autenticação. Tente novamente.'
     setTimeout(() => {
       router.push('/login')
     }, 3000)

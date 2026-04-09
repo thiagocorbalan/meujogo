@@ -6,9 +6,9 @@ import { drawTeamsRandom, drawTeamsBalanced } from '../engines/team-draw.engine.
 export class TeamsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findBySession(sessionId: number) {
+  async findBySession(sessionId: number, groupId: number) {
     return this.prisma.team.findMany({
-      where: { sessionId },
+      where: { sessionId, session: { groupId } },
       include: {
         players: {
           include: { player: true },
@@ -17,9 +17,9 @@ export class TeamsService {
     });
   }
 
-  async draw(sessionId: number, mode?: string) {
-    const session = await this.prisma.session.findUnique({
-      where: { id: sessionId },
+  async draw(sessionId: number, groupId: number, mode?: string) {
+    const session = await this.prisma.session.findFirst({
+      where: { id: sessionId, groupId },
       include: {
         matches: {
           include: { events: true },
@@ -61,7 +61,7 @@ export class TeamsService {
     });
 
     const settings = await this.prisma.settings.findUnique({
-      where: { id: 1 },
+      where: { groupId },
       include: { vests: true },
     });
 

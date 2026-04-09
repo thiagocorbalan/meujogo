@@ -124,6 +124,18 @@
             Entrar com Apple
           </button>
         </div>
+
+        <div class="text-center">
+          <p class="text-sm text-muted-foreground">
+            Não tem uma conta?
+            <NuxtLink
+              :to="route.query.redirect ? `/cadastro?redirect=${encodeURIComponent(route.query.redirect as string)}` : '/cadastro'"
+              class="text-primary hover:underline font-medium"
+            >
+              Cadastre-se
+            </NuxtLink>
+          </p>
+        </div>
       </CardContent>
     </Card>
   </div>
@@ -166,13 +178,13 @@ function validate(): boolean {
   errors.value = {}
 
   if (!form.value.email) {
-    errors.value.email = 'O email e obrigatorio.'
+    errors.value.email = 'O email é obrigatório.'
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
-    errors.value.email = 'Formato de email invalido.'
+    errors.value.email = 'Formato de email inválido.'
   }
 
   if (!form.value.password) {
-    errors.value.password = 'A senha e obrigatoria.'
+    errors.value.password = 'A senha é obrigatória.'
   }
 
   return Object.keys(errors.value).length === 0
@@ -196,7 +208,8 @@ async function handleLogin() {
       user: result.user,
     })
 
-    await router.push('/')
+    const redirectTo = (route.query.redirect as string) || '/'
+    await router.push(redirectTo)
   } catch (e: any) {
     errorMessage.value =
       e?.data?.message || e?.message || 'Erro ao fazer login. Verifique suas credenciais.'

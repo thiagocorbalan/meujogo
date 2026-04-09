@@ -37,7 +37,7 @@ describe('REQ-SEC-03: CORS Whitelist', () => {
     app.enableCors({
       origin: allowedOrigins,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Group-Id'],
       credentials: true,
       maxAge: 3600,
     });

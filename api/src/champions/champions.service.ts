@@ -6,8 +6,9 @@ import { calculateRanking, MatchResult } from '../engines/ranking.engine';
 export class ChampionsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
+  findAll(groupId: number) {
     return this.prisma.champion.findMany({
+      where: { session: { groupId } },
       include: {
         team: {
           include: {
@@ -22,9 +23,9 @@ export class ChampionsService {
     });
   }
 
-  async findOne(id: number) {
-    const champion = await this.prisma.champion.findUnique({
-      where: { id },
+  async findOne(id: number, groupId: number) {
+    const champion = await this.prisma.champion.findFirst({
+      where: { id, session: { groupId } },
       include: {
         team: { include: { players: { include: { player: true } } } },
         session: true,
@@ -34,9 +35,9 @@ export class ChampionsService {
     return champion;
   }
 
-  async findBySession(sessionId: number) {
+  async findBySession(sessionId: number, groupId: number) {
     return this.prisma.champion.findFirst({
-      where: { sessionId },
+      where: { sessionId, session: { groupId } },
       include: {
         team: { include: { players: { include: { player: true } } } },
         session: true,
@@ -44,16 +45,17 @@ export class ChampionsService {
     });
   }
 
-  async create(sessionId: number) {
+  async create(sessionId: number, groupId: number) {
     const matches = await this.prisma.match.findMany({
       where: {
         sessionId,
+        session: { groupId },
         events: { some: { type: 'MATCH_ENDED' } },
       },
     });
 
     const teams = await this.prisma.team.findMany({
-      where: { sessionId },
+      where: { sessionId, session: { groupId } },
     });
 
     const matchResults: MatchResult[] = matches.map((m) => ({
@@ -84,7 +86,7 @@ export class ChampionsService {
     });
   }
 
-  uploadPhoto(id: number, photoUrl: string) {
+  uploadPhoto(id: number, photoUrl: string, groupId: number) {
     return this.prisma.champion.update({
       where: { id },
       data: { photoUrl },

@@ -1,7 +1,10 @@
 <template>
   <div class="max-w-[1100px] mx-auto p-6">
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-3xl font-bold text-foreground">Dashboard</h1>
+      <div>
+        <h1 class="text-3xl font-bold text-foreground">Dashboard</h1>
+        <p v-if="activeGroupName" class="text-sm text-muted-foreground mt-1">{{ activeGroupName }}</p>
+      </div>
     </div>
 
     <div v-if="loading" class="text-muted-foreground text-base py-10 text-center">Carregando...</div>
@@ -65,6 +68,12 @@
 <script setup lang="ts">
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
+const groupsStore = useGroupsStore()
+const activeGroupName = computed(() => {
+  const ag = groupsStore.activeGroup
+  return ag?.group?.name ?? ag?.name ?? ''
+})
+
 const { getDashboard } = useDashboard()
 
 const loading = ref(true)
@@ -77,7 +86,7 @@ async function loadDashboard() {
   try {
     data.value = await getDashboard()
   } catch (e: any) {
-    error.value = e?.data?.message || e?.message || 'Nao foi possivel carregar os dados do dashboard.'
+    error.value = e?.data?.message || e?.message || 'Não foi possível carregar os dados do dashboard.'
   } finally {
     loading.value = false
   }

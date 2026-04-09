@@ -5,10 +5,10 @@ import { PrismaService } from '../prisma/prisma.service';
 export class StatsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getTopScorers(limit = 10, seasonId?: number) {
+  async getTopScorers(groupId: number, limit = 10, seasonId?: number) {
     if (!seasonId) {
       return this.prisma.player.findMany({
-        where: { isActive: true, goals: { gt: 0 } },
+        where: { groupId, isActive: true, goals: { gt: 0 } },
         orderBy: { goals: 'desc' },
         take: limit,
         select: {
@@ -25,7 +25,7 @@ export class StatsService {
     const goalCounts = await this.prisma.goal.groupBy({
       by: ['playerId'],
       where: {
-        match: { session: { seasonId } },
+        match: { session: { seasonId, groupId } },
       },
       _count: { id: true },
       orderBy: { _count: { id: 'desc' } },
@@ -36,7 +36,7 @@ export class StatsService {
 
     const playerIds = goalCounts.map((g) => g.playerId);
     const players = await this.prisma.player.findMany({
-      where: { id: { in: playerIds }, isActive: true },
+      where: { id: { in: playerIds }, groupId, isActive: true },
       select: {
         id: true,
         name: true,
@@ -60,9 +60,9 @@ export class StatsService {
       .filter(Boolean);
   }
 
-  async getTopElo(limit = 10, _seasonId?: number) {
+  async getTopElo(groupId: number, limit = 10, _seasonId?: number) {
     return this.prisma.player.findMany({
-      where: { isActive: true },
+      where: { groupId, isActive: true },
       orderBy: { elo: 'desc' },
       take: limit,
       select: {

@@ -3,8 +3,10 @@ export function usePlayers() {
   return {
     getPlayers: () => fetch('/players'),
     getPlayer: (id: string | number) => fetch(`/players/${id}`),
+    getMe: () => fetch('/players/me'),
     createPlayer: (data: any) => fetch('/players', { method: 'POST', body: data }),
     updatePlayer: (id: string | number, data: any) => fetch(`/players/${id}`, { method: 'PATCH', body: data }),
     deletePlayer: (id: string | number) => fetch(`/players/${id}`, { method: 'DELETE' }),
+    updateMyProfile: (data: any) => fetch('/players/me/profile', { method: 'PATCH', body: data }),
   };
 }

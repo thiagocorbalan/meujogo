@@ -1,0 +1,268 @@
+<template>
+  <div class="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12">
+    <Card class="w-full max-w-md">
+      <CardHeader class="items-center text-center">
+        <div class="mb-2 flex items-center gap-2">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
+            MS
+          </div>
+          <span class="text-2xl font-bold text-foreground">Meu Jogo</span>
+        </div>
+        <CardDescription>Crie sua conta e comece a jogar</CardDescription>
+      </CardHeader>
+
+      <CardContent class="flex flex-col gap-4">
+        <div
+          v-if="errorMessage"
+          class="rounded-lg border border-destructive bg-destructive/10 p-3 text-destructive text-sm"
+          role="alert"
+        >
+          {{ errorMessage }}
+        </div>
+
+        <form @submit.prevent="handleRegister" class="flex flex-col gap-4">
+          <div class="flex flex-col gap-1.5">
+            <Label for="name">Nome</Label>
+            <Input
+              id="name"
+              v-model="form.name"
+              type="text"
+              placeholder="Seu nome"
+              autocomplete="name"
+              aria-label="Nome"
+              required
+            />
+            <p v-if="errors.name" class="text-xs text-destructive">{{ errors.name }}</p>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <Label for="email">Email</Label>
+            <Input
+              id="email"
+              v-model="form.email"
+              type="email"
+              placeholder="seu@email.com"
+              autocomplete="email"
+              aria-label="Endereço de email"
+              required
+            />
+            <p v-if="errors.email" class="text-xs text-destructive">{{ errors.email }}</p>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <Label for="password">Senha</Label>
+            <div class="relative">
+              <Input
+                id="password"
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="Mínimo 12 caracteres"
+                autocomplete="new-password"
+                aria-label="Senha"
+                class="pr-10"
+                required
+              />
+              <button
+                type="button"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                :aria-label="showPassword ? 'Ocultar senha' : 'Mostrar senha'"
+                @click="showPassword = !showPassword"
+              >
+                <EyeOff v-if="showPassword" class="h-4 w-4" />
+                <Eye v-else class="h-4 w-4" />
+              </button>
+            </div>
+            <p v-if="errors.password" class="text-xs text-destructive">{{ errors.password }}</p>
+            <p class="text-xs text-muted-foreground">
+              Mínimo 12 caracteres, 1 maiúscula, 1 minúscula, 1 número, 1 especial
+            </p>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <Label for="confirmPassword">Confirmar senha</Label>
+            <div class="relative">
+              <Input
+                id="confirmPassword"
+                v-model="form.confirmPassword"
+                :type="showConfirmPassword ? 'text' : 'password'"
+                placeholder="Repita sua senha"
+                autocomplete="new-password"
+                aria-label="Confirmar senha"
+                class="pr-10"
+                required
+              />
+              <button
+                type="button"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                :aria-label="showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'"
+                @click="showConfirmPassword = !showConfirmPassword"
+              >
+                <EyeOff v-if="showConfirmPassword" class="h-4 w-4" />
+                <Eye v-else class="h-4 w-4" />
+              </button>
+            </div>
+            <p v-if="errors.confirmPassword" class="text-xs text-destructive">{{ errors.confirmPassword }}</p>
+          </div>
+
+          <BaseButton
+            type="submit"
+            :loading="isLoading"
+            :disabled="isLoading"
+            class="w-full"
+          >
+            Criar conta
+          </BaseButton>
+        </form>
+
+        <div class="relative flex items-center">
+          <div class="flex-grow border-t border-border" />
+          <span class="mx-3 text-sm text-muted-foreground">ou</span>
+          <div class="flex-grow border-t border-border" />
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <button
+            type="button"
+            class="flex w-full items-center justify-center gap-3 rounded-md border border-input bg-background px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label="Cadastrar com Google"
+            @click="registerWithGoogle"
+          >
+            <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+            </svg>
+            Cadastrar com Google
+          </button>
+
+          <button
+            type="button"
+            class="flex w-full items-center justify-center gap-3 rounded-md bg-black px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-black/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label="Cadastrar com Apple"
+            @click="registerWithApple"
+          >
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+            </svg>
+            Cadastrar com Apple
+          </button>
+        </div>
+
+        <div class="text-center">
+          <p class="text-sm text-muted-foreground">
+            Já tem uma conta?
+            <NuxtLink
+              to="/login"
+              class="text-primary hover:underline font-medium"
+            >
+              Fazer login
+            </NuxtLink>
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { Eye, EyeOff } from 'lucide-vue-next'
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+
+definePageMeta({ layout: false })
+
+const router = useRouter()
+const route = useRoute()
+const config = useRuntimeConfig()
+const authStore = useAuthStore()
+const { register } = useAuth()
+
+const form = ref({
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+})
+
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
+const isLoading = ref(false)
+const errorMessage = ref('')
+
+const errors = ref<{ name?: string; email?: string; password?: string; confirmPassword?: string }>({})
+
+function validate(): boolean {
+  errors.value = {}
+
+  if (!form.value.name.trim()) {
+    errors.value.name = 'O nome é obrigatório.'
+  } else if (form.value.name.trim().length < 2) {
+    errors.value.name = 'O nome deve ter no mínimo 2 caracteres.'
+  }
+
+  if (!form.value.email) {
+    errors.value.email = 'O email é obrigatório.'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    errors.value.email = 'Formato de email inválido.'
+  }
+
+  if (!form.value.password) {
+    errors.value.password = 'A senha é obrigatória.'
+  } else if (form.value.password.length < 12) {
+    errors.value.password = 'A senha deve ter no mínimo 12 caracteres.'
+  } else if (!/[A-Z]/.test(form.value.password)) {
+    errors.value.password = 'A senha deve conter pelo menos uma letra maiúscula.'
+  } else if (!/[a-z]/.test(form.value.password)) {
+    errors.value.password = 'A senha deve conter pelo menos uma letra minúscula.'
+  } else if (!/[0-9]/.test(form.value.password)) {
+    errors.value.password = 'A senha deve conter pelo menos um número.'
+  } else if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(form.value.password)) {
+    errors.value.password = 'A senha deve conter pelo menos um caractere especial.'
+  }
+
+  if (!form.value.confirmPassword) {
+    errors.value.confirmPassword = 'Confirme sua senha.'
+  } else if (form.value.password !== form.value.confirmPassword) {
+    errors.value.confirmPassword = 'As senhas não coincidem.'
+  }
+
+  return Object.keys(errors.value).length === 0
+}
+
+async function handleRegister() {
+  errorMessage.value = ''
+
+  if (!validate()) return
+
+  isLoading.value = true
+  try {
+    const result = await register({
+      name: form.value.name.trim(),
+      email: form.value.email,
+      password: form.value.password,
+    }) as any
+
+    authStore.login({
+      user: result.user,
+    })
+
+    const redirect = route.query.redirect as string || '/onboarding'
+    await router.push(redirect)
+  } catch (e: any) {
+    errorMessage.value =
+      e?.data?.message || e?.message || 'Erro ao criar conta. Tente novamente.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+function registerWithGoogle() {
+  window.location.href = `${config.public.apiBaseUrl}/auth/google`
+}
+
+function registerWithApple() {
+  window.location.href = `${config.public.apiBaseUrl}/auth/apple`
+}
+</script>

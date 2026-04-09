@@ -10,16 +10,17 @@ import { CreateSeasonDto } from './dto/create-season.dto';
 export class SeasonsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
+  findAll(groupId: number) {
     return this.prisma.season.findMany({
+      where: { groupId },
       include: { sessions: true },
       orderBy: { year: 'desc' },
     });
   }
 
-  async findOne(id: number) {
-    const season = await this.prisma.season.findUnique({
-      where: { id },
+  async findOne(id: number, groupId: number) {
+    const season = await this.prisma.season.findFirst({
+      where: { id, groupId },
       include: { sessions: true },
     });
 
@@ -30,18 +31,21 @@ export class SeasonsService {
     return season;
   }
 
-  create(dto: CreateSeasonDto) {
+  create(dto: CreateSeasonDto, groupId: number) {
     return this.prisma.season.create({
       data: {
         year: dto.year,
         startDate: new Date(dto.startDate),
         isClosed: false,
+        groupId,
       },
     });
   }
 
-  async close(id: number) {
-    const season = await this.prisma.season.findUnique({ where: { id } });
+  async close(id: number, groupId: number) {
+    const season = await this.prisma.season.findFirst({
+      where: { id, groupId },
+    });
 
     if (!season) {
       throw new NotFoundException(`Season #${id} not found`);
@@ -60,10 +64,10 @@ export class SeasonsService {
     });
   }
 
-  async closeAndCreateNew() {
+  async closeAndCreateNew(groupId: number) {
     return this.prisma.$transaction(async (tx) => {
       const openSeason = await tx.season.findFirst({
-        where: { isClosed: false },
+        where: { isClosed: false, groupId },
       });
 
       if (openSeason) {
@@ -81,6 +85,7 @@ export class SeasonsService {
           year: new Date().getFullYear(),
           startDate: new Date(),
           isClosed: false,
+          groupId,
         },
       });
     });

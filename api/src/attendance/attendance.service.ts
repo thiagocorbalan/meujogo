@@ -1,9 +1,10 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { MatchEventType } from '@prisma/client';
+import { MatchEventType, PlayerStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 
@@ -11,22 +12,23 @@ import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 export class AttendanceService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findBySession(sessionId: number, search?: string) {
-    const session = await this.prisma.session.findUnique({
-      where: { id: sessionId },
+  async findBySession(sessionId: number, groupId: number, search?: string) {
+    const session = await this.prisma.session.findFirst({
+      where: { id: sessionId, groupId },
     });
 
     if (!session) {
       throw new NotFoundException(`Session #${sessionId} not found`);
     }
 
-    await this.syncMissingPlayers(sessionId);
+    await this.syncMissingPlayers(sessionId, groupId);
 
     return this.prisma.attendance.findMany({
       where: {
         sessionId,
         player: {
           isActive: true,
+          groupId,
           ...(search
             ? { name: { contains: search, mode: 'insensitive' as const } }
             : {}),
@@ -37,7 +39,7 @@ export class AttendanceService {
     });
   }
 
-  private async syncMissingPlayers(sessionId: number) {
+  private async syncMissingPlayers(sessionId: number, groupId: number) {
     const existing = await this.prisma.attendance.findMany({
       where: { sessionId },
       select: { playerId: true },
@@ -45,7 +47,7 @@ export class AttendanceService {
     const existingIds = new Set(existing.map((a) => a.playerId));
 
     const fixoPlayers = await this.prisma.player.findMany({
-      where: { isActive: true, type: 'FIXO' },
+      where: { isActive: true, type: 'FIXO', groupId },
       select: { id: true },
     });
 
@@ -62,7 +64,20 @@ export class AttendanceService {
     });
   }
 
-  async update(sessionId: number, playerId: number, dto: UpdateAttendanceDto) {
+  async update(
+    sessionId: number,
+    playerId: number,
+    dto: UpdateAttendanceDto,
+    groupId: number,
+  ) {
+    const session = await this.prisma.session.findFirst({
+      where: { id: sessionId, groupId },
+    });
+
+    if (!session) {
+      throw new NotFoundException(`Session #${sessionId} not found`);
+    }
+
     const liveMatch = await this.prisma.match.findFirst({
       where: {
         sessionId,
@@ -79,8 +94,8 @@ export class AttendanceService {
       );
     }
 
-    const player = await this.prisma.player.findUnique({
-      where: { id: playerId },
+    const player = await this.prisma.player.findFirst({
+      where: { id: playerId, groupId },
     });
 
     if (!player || !player.isActive) {
@@ -91,6 +106,61 @@ export class AttendanceService {
       where: { sessionId_playerId: { sessionId, playerId } },
       create: { sessionId, playerId, status: dto.status },
       update: { status: dto.status },
+    });
+  }
+
+  async updateOwnStatus(
+    sessionId: number,
+    userId: number,
+    groupId: number,
+    status: PlayerStatus,
+  ) {
+    if (status !== PlayerStatus.ATIVO && status !== PlayerStatus.AUSENTE) {
+      throw new BadRequestException(
+        'Self-service attendance only allows ATIVO or AUSENTE status',
+      );
+    }
+
+    const session = await this.prisma.session.findFirst({
+      where: { id: sessionId, groupId },
+    });
+
+    if (!session) {
+      throw new NotFoundException(`Session #${sessionId} not found`);
+    }
+
+    const liveMatch = await this.prisma.match.findFirst({
+      where: {
+        sessionId,
+        events: {
+          some: { type: MatchEventType.MATCH_STARTED },
+          none: { type: MatchEventType.MATCH_ENDED },
+        },
+      },
+    });
+
+    if (liveMatch) {
+      throw new ForbiddenException(
+        'Não é possível alterar presença durante partida ao vivo',
+      );
+    }
+
+    const player = await this.prisma.player.findFirst({
+      where: { userId, groupId, isActive: true },
+    });
+
+    if (!player) {
+      throw new NotFoundException(
+        'No player profile found for this user in the current group',
+      );
+    }
+
+    return this.prisma.attendance.upsert({
+      where: {
+        sessionId_playerId: { sessionId, playerId: player.id },
+      },
+      create: { sessionId, playerId: player.id, status },
+      update: { status },
     });
   }
 }

@@ -7,10 +7,10 @@
           <TableRow>
             <TableHead class="w-10">#</TableHead>
             <TableHead>Jogador</TableHead>
-            <TableHead>Posicao</TableHead>
+            <TableHead>Posição</TableHead>
             <TableHead>Gols</TableHead>
             <TableHead>Jogos</TableHead>
-            <TableHead>Media</TableHead>
+            <TableHead>Média</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

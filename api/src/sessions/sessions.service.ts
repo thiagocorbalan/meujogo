@@ -12,8 +12,9 @@ import { calculateRanking, MatchResult as RankingMatchResult } from '../engines/
 export class SessionsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
+  findAll(groupId: number) {
     return this.prisma.session.findMany({
+      where: { groupId },
       include: {
         season: true,
         teams: true,
@@ -23,9 +24,9 @@ export class SessionsService {
     });
   }
 
-  async findOne(id: number) {
-    const session = await this.prisma.session.findUnique({
-      where: { id },
+  async findOne(id: number, groupId: number) {
+    const session = await this.prisma.session.findFirst({
+      where: { id, groupId },
       include: {
         season: true,
         teams: true,
@@ -40,7 +41,7 @@ export class SessionsService {
     return session;
   }
 
-  async create(dto: CreateSessionDto) {
+  async create(dto: CreateSessionDto, groupId: number) {
     const totalMatches = Math.floor(dto.durationMinutes / dto.matchDurationMinutes);
 
     const session = await this.prisma.session.create({
@@ -50,11 +51,12 @@ export class SessionsService {
         matchDurationMinutes: dto.matchDurationMinutes,
         totalMatches,
         status: 'PENDING',
+        groupId,
       },
     });
 
     const fixoPlayers = await this.prisma.player.findMany({
-      where: { isActive: true, type: 'FIXO' },
+      where: { isActive: true, type: 'FIXO', groupId },
     });
 
     if (fixoPlayers.length > 0) {
@@ -70,8 +72,10 @@ export class SessionsService {
     return session;
   }
 
-  async start(id: number) {
-    const session = await this.prisma.session.findUnique({ where: { id } });
+  async start(id: number, groupId: number) {
+    const session = await this.prisma.session.findFirst({
+      where: { id, groupId },
+    });
 
     if (!session) {
       throw new NotFoundException(`Session #${id} not found`);
@@ -87,8 +91,10 @@ export class SessionsService {
     });
   }
 
-  async end(id: number) {
-    const session = await this.prisma.session.findUnique({ where: { id } });
+  async end(id: number, groupId: number) {
+    const session = await this.prisma.session.findFirst({
+      where: { id, groupId },
+    });
 
     if (!session) {
       throw new NotFoundException(`Session #${id} not found`);
@@ -104,7 +110,7 @@ export class SessionsService {
         data: { status: 'FINISHED' },
       });
 
-      const settings = await tx.settings.findUnique({ where: { id: 1 } });
+      const settings = await tx.settings.findFirst({ where: { groupId } });
       const kFactor = settings?.kFactor ?? 32;
 
       const matches = await tx.match.findMany({

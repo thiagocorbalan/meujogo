@@ -6,17 +6,18 @@ import { calculateRanking, MatchResult } from '../engines/ranking.engine';
 export class RankingService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getSessionRanking(sessionId: number) {
+  async getSessionRanking(sessionId: number, groupId: number) {
     const matches = await this.prisma.match.findMany({
       where: {
         sessionId,
+        session: { groupId },
         events: { some: { type: 'MATCH_ENDED' } },
       },
       include: { teamA: true, teamB: true },
     });
 
     const teams = await this.prisma.team.findMany({
-      where: { sessionId },
+      where: { sessionId, session: { groupId } },
     });
 
     const matchResults: MatchResult[] = matches.map((m) => ({
@@ -31,17 +32,17 @@ export class RankingService {
     return calculateRanking(matchResults, teams);
   }
 
-  async getSeasonRanking(seasonId: number) {
+  async getSeasonRanking(seasonId: number, groupId: number) {
     const matches = await this.prisma.match.findMany({
       where: {
-        session: { seasonId },
+        session: { seasonId, groupId },
         events: { some: { type: 'MATCH_ENDED' } },
       },
       include: { teamA: true, teamB: true },
     });
 
     const teams = await this.prisma.team.findMany({
-      where: { session: { seasonId } },
+      where: { session: { seasonId, groupId } },
     });
 
     const matchResults: MatchResult[] = matches.map((m) => ({

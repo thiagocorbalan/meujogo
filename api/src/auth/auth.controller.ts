@@ -18,6 +18,7 @@ import { AuthService } from './auth.service.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { SkipCsrf } from '../common/decorators/skip-csrf.decorator.js';
 import { LoginDto } from './dto/login.dto.js';
+import { RegisterDto } from './dto/register.dto.js';
 import { RefreshTokenDto } from './dto/refresh-token.dto.js';
 import { ForgotPasswordDto } from './dto/forgot-password.dto.js';
 import { ResetPasswordDto } from './dto/reset-password.dto.js';
@@ -57,6 +58,21 @@ function clearTokenCookies(res: express.Response) {
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @SkipCsrf()
+  @Throttle({ default: { ttl: 600000, limit: 3 } })
+  @Post('register')
+  @HttpCode(HttpStatus.CREATED)
+  async register(
+    @Body() dto: RegisterDto,
+    @Res({ passthrough: true }) res: express.Response,
+  ) {
+    const result = await this.authService.register(dto);
+
+    setTokenCookies(res, result.accessToken, result.refreshToken);
+
+    return { user: result.user };
+  }
 
   @SkipCsrf()
   @Throttle({ default: { ttl: 900000, limit: 5 } })

@@ -27,6 +27,18 @@ export function useApi() {
       const headers: Record<string, string> = {}
       const method = ((opts?.method as string) || 'GET').toUpperCase()
 
+      // Inject active group context for group-scoped API endpoints
+      if (import.meta.client) {
+        try {
+          const activeGroupId = localStorage.getItem('activeGroupId')
+          if (activeGroupId) {
+            headers['X-Group-Id'] = activeGroupId
+          }
+        } catch {
+          // localStorage may be unavailable (e.g. private browsing)
+        }
+      }
+
       if (STATE_CHANGING_METHODS.includes(method)) {
         if (!csrfSignature) {
           await fetchCsrfToken(baseURL)

@@ -1,41 +1,41 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { SessionsService } from './sessions.service';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
-import { RolesGuard } from '../common/guards/roles.guard.js';
-import { Roles } from '../common/decorators/roles.decorator.js';
-import { UserRole } from '@prisma/client';
+import { GroupRolesGuard } from '../common/guards/group-roles.guard.js';
+import { GroupRoles } from '../common/decorators/group-roles.decorator.js';
+import { GroupRole } from '@prisma/client';
 
 @Controller('sessions')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, GroupRolesGuard)
 export class SessionsController {
   constructor(private readonly sessionsService: SessionsService) {}
 
   @Get()
-  findAll() {
-    return this.sessionsService.findAll();
+  findAll(@Req() req: any) {
+    return this.sessionsService.findAll(req.groupContext.groupId);
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.sessionsService.findOne(id);
+  findOne(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.sessionsService.findOne(id, req.groupContext.groupId);
   }
 
   @Post()
-  @Roles(UserRole.MODERADOR, UserRole.ADMIN)
-  create(@Body() dto: CreateSessionDto) {
-    return this.sessionsService.create(dto);
+  @GroupRoles(GroupRole.DONO, GroupRole.ADMIN)
+  create(@Req() req: any, @Body() dto: CreateSessionDto) {
+    return this.sessionsService.create(dto, req.groupContext.groupId);
   }
 
   @Patch(':id/start')
-  @Roles(UserRole.MODERADOR, UserRole.ADMIN)
-  start(@Param('id', ParseIntPipe) id: number) {
-    return this.sessionsService.start(id);
+  @GroupRoles(GroupRole.DONO, GroupRole.ADMIN)
+  start(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.sessionsService.start(id, req.groupContext.groupId);
   }
 
   @Patch(':id/end')
-  @Roles(UserRole.MODERADOR, UserRole.ADMIN)
-  end(@Param('id', ParseIntPipe) id: number) {
-    return this.sessionsService.end(id);
+  @GroupRoles(GroupRole.DONO, GroupRole.ADMIN)
+  end(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.sessionsService.end(id, req.groupContext.groupId);
   }
 }

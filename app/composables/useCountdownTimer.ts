@@ -56,7 +56,7 @@ export function useCountdownTimer(
       stop()
       remainingSeconds.value = durationSeconds.value
     }
-  })
+  }, { immediate: true })
 
   onUnmounted(stop)
 

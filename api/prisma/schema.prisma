@@ -146,6 +146,7 @@ model Player {
 model Season {
   id        Int       @id @default(autoincrement())
   year      Int
+  name      String?
   startDate DateTime
   endDate   DateTime?
   isClosed  Boolean   @default(false)
@@ -307,6 +308,8 @@ model Settings {
   defaultElo          Float    @default(1200)
   kFactor             Float    @default(32)
   maxConsecutiveGames Int      @default(2)
+  teamSwapEnabled     Boolean  @default(false)
+  teamSwapTimeMin     Int      @default(2)
   rules               String?
   paymentInfo         String?
   updatedAt           DateTime @updatedAt

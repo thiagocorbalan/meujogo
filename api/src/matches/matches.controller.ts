@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { MatchesService } from './matches.service';
 import { StartMatchDto } from './dto/start-match.dto';
 import { RegisterGoalDto } from './dto/register-goal.dto';
@@ -46,6 +46,16 @@ export class MatchesController {
     @Body() dto: EndMatchDto,
   ) {
     return this.matchesService.end(id, dto, req.groupContext.groupId);
+  }
+
+  @Delete('matches/:id/goal/:goalId')
+  @GroupRoles(GroupRole.DONO, GroupRole.ADMIN)
+  undoGoal(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('goalId', ParseIntPipe) goalId: number,
+  ) {
+    return this.matchesService.undoGoal(id, goalId, req.groupContext.groupId);
   }
 
   @Get('sessions/:sessionId/matches/next')

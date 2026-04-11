@@ -22,12 +22,18 @@ const confirmedCount = computed(() =>
   attendances.value.filter((a: any) => a.status === 'ATIVO').length
 )
 
+const confirmedLinhaCount = computed(() =>
+  attendances.value.filter(
+    (a: any) => a.status === 'ATIVO' && a.player?.position === 'LINHA'
+  ).length
+)
+
 const minPlayersForDraw = computed(() => {
   if (!settings.value) return Infinity
   return 2 * (settings.value.playersPerTeam ?? 5)
 })
 
-const canDraw = computed(() => confirmedCount.value >= minPlayersForDraw.value)
+const canDraw = computed(() => confirmedLinhaCount.value >= minPlayersForDraw.value)
 
 // Find the current user's attendance record
 const myAttendance = computed(() => {
@@ -230,13 +236,13 @@ async function onUpdate(playerId: number, status: string) {
         <BaseButton
           variant="primary"
           :disabled="!canDraw"
-          :title="canDraw ? 'Ir para o sorteio de times' : `Mínimo de ${minPlayersForDraw} jogadores confirmados para sortear`"
+          :title="canDraw ? 'Ir para o sorteio de times' : `Mínimo de ${minPlayersForDraw} jogadores de linha confirmados para sortear`"
           @click="navigateTo('/sorteio')"
         >
           Sortear Times
         </BaseButton>
-        <p v-if="!canDraw && confirmedCount > 0" class="text-xs text-muted-foreground mt-2">
-          {{ confirmedCount }} de {{ minPlayersForDraw }} jogadores confirmados para sortear.
+        <p v-if="!canDraw && confirmedLinhaCount > 0" class="text-xs text-muted-foreground mt-2">
+          {{ confirmedLinhaCount }} de {{ minPlayersForDraw }} jogadores de linha confirmados para sortear.
         </p>
       </div>
 

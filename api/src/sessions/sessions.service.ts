@@ -42,7 +42,9 @@ export class SessionsService {
   }
 
   async create(dto: CreateSessionDto, groupId: number) {
-    const totalMatches = Math.floor(dto.durationMinutes / dto.matchDurationMinutes);
+    const settings = await this.prisma.settings.findUnique({ where: { groupId } });
+    const swapTime = settings?.teamSwapEnabled ? (settings.teamSwapTimeMin ?? 0) : 0;
+    const totalMatches = Math.floor(dto.durationMinutes / (dto.matchDurationMinutes + swapTime));
 
     const session = await this.prisma.session.create({
       data: {

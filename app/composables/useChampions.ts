@@ -10,7 +10,7 @@ export function useChampions() {
     uploadChampionPhoto: (championId: number, file: File) => {
       const formData = new FormData();
       formData.append('photo', file);
-      return $fetch(`${baseURL}/champions/${championId}/photo`, {
+      return fetch(`/champions/${championId}/photo`, {
         method: 'POST',
         body: formData,
       });

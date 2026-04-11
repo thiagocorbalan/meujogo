@@ -8,6 +8,8 @@ export function useMatches() {
       fetch(`/matches/${matchId}/goal`, { method: 'PATCH', body: data }),
     endMatch: (matchId: string | number, data: any) =>
       fetch(`/matches/${matchId}/end`, { method: 'PATCH', body: data }),
+    undoGoal: (matchId: string | number, goalId: string | number) =>
+      fetch(`/matches/${matchId}/goal/${goalId}`, { method: 'DELETE' }),
     getNextMatch: (sessionId: string | number) => fetch(`/sessions/${sessionId}/matches/next`),
   };
 }

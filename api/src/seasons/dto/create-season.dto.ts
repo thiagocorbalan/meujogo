@@ -1,4 +1,4 @@
-import { IsDateString, IsInt } from 'class-validator';
+import { IsDateString, IsInt, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateSeasonDto {
   @IsInt()
@@ -6,4 +6,9 @@ export class CreateSeasonDto {
 
   @IsDateString()
   startDate: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  name?: string;
 }

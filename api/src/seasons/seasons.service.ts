@@ -64,7 +64,7 @@ export class SeasonsService {
     });
   }
 
-  async closeAndCreateNew(groupId: number) {
+  async closeAndCreateNew(groupId: number, name?: string) {
     return this.prisma.$transaction(async (tx) => {
       const openSeason = await tx.season.findFirst({
         where: { isClosed: false, groupId },
@@ -80,9 +80,12 @@ export class SeasonsService {
         });
       }
 
+      const year = new Date().getFullYear();
+
       return tx.season.create({
         data: {
-          year: new Date().getFullYear(),
+          year,
+          name: name ?? String(year),
           startDate: new Date(),
           isClosed: false,
           groupId,

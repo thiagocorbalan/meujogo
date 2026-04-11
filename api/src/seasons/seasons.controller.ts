@@ -35,7 +35,7 @@ export class SeasonsController {
 
   @Post('close-and-renew')
   @GroupRoles(GroupRole.DONO, GroupRole.ADMIN)
-  closeAndRenew(@Req() req: any) {
-    return this.seasonsService.closeAndCreateNew(req.groupContext.groupId);
+  closeAndRenew(@Req() req: any, @Body() body: { name?: string }) {
+    return this.seasonsService.closeAndCreateNew(req.groupContext.groupId, body.name);
   }
 }

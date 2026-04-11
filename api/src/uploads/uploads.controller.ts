@@ -31,7 +31,11 @@ export class UploadsController {
     const filePath = join(UPLOADS_ROOT, 'champions', safeName);
     const ext = extname(safeName).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-    res.set({ 'Content-Type': contentType });
+    res.set({
+      'Content-Type': contentType,
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    });
     return new StreamableFile(createReadStream(filePath));
   }
 }

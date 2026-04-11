@@ -16,6 +16,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'goal', playerId: number, teamId: number): void
+  (e: 'undo-goal', goal: { id: number; playerName: string; teamName: string; minute?: number }): void
 }>()
 
 function resolveTeam(teamRef: any) {
@@ -44,6 +45,28 @@ function normalizePlayers(rawPlayers: any[]): { id: number; name: string }[] {
 
 const playersA = computed(() => normalizePlayers(teamAResolved.value?.players ?? []))
 const playersB = computed(() => normalizePlayers(teamBResolved.value?.players ?? []))
+
+const lastGoal = computed(() => {
+  const goals = props.match.goals
+  if (!goals || goals.length === 0) return null
+  const goal = goals[goals.length - 1]
+  const teamId = goal.teamId
+  const team = teamId === teamAResolved.value?.id ? teamAResolved.value : teamBResolved.value
+  const allPlayers = [...playersA.value, ...playersB.value]
+  const player = allPlayers.find((p) => p.id === goal.playerId)
+  return {
+    id: goal.id,
+    playerName: player?.name ?? 'Jogador',
+    teamName: team?.name ?? 'Time',
+    minute: goal.minute,
+  }
+})
+
+function handleUndoGoal() {
+  if (lastGoal.value) {
+    emit('undo-goal', lastGoal.value)
+  }
+}
 </script>
 
 <template>
@@ -53,8 +76,17 @@ const playersB = computed(() => normalizePlayers(teamBResolved.value?.players ??
         <span class="inline-block w-3.5 h-3.5 rounded-full shrink-0" :style="{ backgroundColor: teamAColor }" />
         <span class="text-base font-semibold">{{ teamAResolved?.name ?? match.teamA?.name ?? 'Time A' }}</span>
       </div>
-      <div class="text-4xl font-extrabold tracking-wider flex items-center gap-2.5 text-slate-100">
-        {{ match.scoreA ?? 0 }} <span class="text-2xl font-normal text-slate-400">&times;</span> {{ match.scoreB ?? 0 }}
+      <div class="flex flex-col items-center">
+        <div class="text-4xl font-extrabold tracking-wider flex items-center gap-2.5 text-slate-100">
+          {{ match.scoreA ?? 0 }} <span class="text-2xl font-normal text-slate-400">&times;</span> {{ match.scoreB ?? 0 }}
+        </div>
+        <button
+          v-if="lastGoal && !disabled"
+          class="mt-1 text-[11px] text-slate-400 hover:text-red-400 transition-colors underline underline-offset-2"
+          @click.stop="handleUndoGoal"
+        >
+          Desfazer gol
+        </button>
       </div>
       <div class="flex items-center gap-2 justify-end">
         <span class="text-base font-semibold">{{ teamBResolved?.name ?? match.teamB?.name ?? 'Time B' }}</span>

@@ -51,7 +51,7 @@ function formatDate(dateStr: string) {
     </div>
 
     <template v-else>
-      <div class="grid grid-cols-3 max-md:grid-cols-2 gap-4 mb-8">
+      <div class="grid grid-cols-3 max-md:grid-cols-2 gap-4 mb-4">
         <DashboardStatsCard title="Sessão Atual" :value="data?.currentSession?.status ?? '—'" color="#6366f1" />
         <DashboardStatsCard title="Jogadores Ativos" :value="data?.activePlayersCount ?? 0" color="#3b82f6" />
         <DashboardStatsCard title="Confirmados" :value="data?.confirmedCount ?? 0" color="#22c55e" />
@@ -66,6 +66,13 @@ function formatDate(dateStr: string) {
           :value="data?.highestElo ? `${data.highestElo.name} (${data.highestElo.elo})` : '—'"
           color="#8b5cf6"
         />
+      </div>
+
+      <div class="grid grid-cols-4 max-md:grid-cols-2 gap-4 mb-8">
+        <DashboardStatsCard title="Jogadores Ativos" :value="data?.playerStatusCounts?.active ?? 0" color="#22c55e" />
+        <DashboardStatsCard title="Jogadores Lesionados" :value="data?.playerStatusCounts?.injured ?? 0" color="#f59e0b" />
+        <DashboardStatsCard title="Jogadores Suspensos" :value="data?.playerStatusCounts?.suspended ?? 0" color="#ef4444" />
+        <DashboardStatsCard title="Jogadores Avulsos" :value="data?.playerStatusCounts?.guest ?? 0" color="#8b5cf6" />
       </div>
 
       <div class="mb-8">

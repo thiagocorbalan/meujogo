@@ -218,6 +218,62 @@ export class MatchesService {
     return updated;
   }
 
+  async undoGoal(matchId: number, goalId: number, groupId: number) {
+    const match = await this.prisma.match.findFirst({
+      where: { id: matchId, session: { groupId } },
+      include: { events: true },
+    });
+
+    if (!match) {
+      throw new NotFoundException(`Match #${matchId} not found`);
+    }
+
+    const hasEnded = match.events.some((e) => e.type === 'MATCH_ENDED');
+    if (hasEnded) {
+      throw new BadRequestException('Cannot undo goal: match has already ended.');
+    }
+
+    const goal = await this.prisma.goal.findFirst({
+      where: { id: goalId, matchId },
+    });
+
+    if (!goal) {
+      throw new NotFoundException(`Goal #${goalId} not found in match #${matchId}`);
+    }
+
+    const isTeamA = goal.teamId === match.teamAId;
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.goal.delete({ where: { id: goalId } });
+
+      await tx.matchEvent.deleteMany({
+        where: {
+          matchId,
+          type: 'GOAL_SCORED',
+          payload: {
+            path: ['playerId'],
+            equals: goal.playerId,
+          },
+        },
+      });
+
+      await tx.match.update({
+        where: { id: matchId },
+        data: isTeamA ? { scoreA: { decrement: 1 } } : { scoreB: { decrement: 1 } },
+      });
+
+      await tx.player.update({
+        where: { id: goal.playerId },
+        data: { goals: { decrement: 1 } },
+      });
+    });
+
+    return this.prisma.match.findUnique({
+      where: { id: matchId },
+      include: { goals: true },
+    });
+  }
+
   async getNextMatch(sessionId: number, groupId: number) {
     // Verify session belongs to group
     const session = await this.prisma.session.findFirst({

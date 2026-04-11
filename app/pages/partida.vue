@@ -1,69 +1,37 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useCountdownTimer } from '~/composables/useCountdownTimer'
 
 const { canManageMatch } = usePermissions()
 const { getSessions, getSession, endSession } = useSessions()
 const { getTeams } = useTeams()
-const { getMatches, startMatch, registerGoal, endMatch, getNextMatch } = useMatches()
+const { getMatches, startMatch, registerGoal, endMatch, undoGoal, getNextMatch } = useMatches()
+const { getSettings } = useSettings()
 
 const matches = ref<any[]>([])
 const teams = ref<any[]>([])
 const session = ref<any | null>(null)
 const sessionId = ref<number | null>(null)
+const settings = ref<any>(null)
 const loading = ref(false)
 const loadingNextMatch = ref(false)
 const showEndModal = ref(false)
 const showWinnerModal = ref(false)
 const showFinalizeModal = ref(false)
+const showEndSessionModal = ref(false)
 const selectedTeamA = ref<number | null>(null)
 const selectedTeamB = ref<number | null>(null)
 const nextMatchSuggestion = ref<any | null>(null)
 const errorMessage = ref<string | null>(null)
 
+// Undo goal state
+const undoGoalData = ref<{ id: number; playerName: string; teamName: string; minute?: number } | null>(null)
+const showUndoGoalModal = ref(false)
+
+// Swap timer state
+const showSwapTimer = ref(false)
+
 let pollInterval: ReturnType<typeof setInterval> | null = null
-let timerInterval: ReturnType<typeof setInterval> | null = null
-const elapsedSeconds = ref(0)
-
-const timerDisplay = computed(() => {
-  const mins = Math.floor(elapsedSeconds.value / 60)
-  const secs = elapsedSeconds.value % 60
-  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
-})
-
-const currentMinute = computed(() => Math.floor(elapsedSeconds.value / 60) + 1)
-
-const isTimeUp = computed(() => {
-  if (!session.value?.matchDurationMinutes) return false
-  return elapsedSeconds.value >= session.value.matchDurationMinutes * 60
-})
-
-function getMatchStartTimestamp(match: any): string | null {
-  if (!match?.events?.length) return null
-  const startEvent = match.events.find((e: any) => e.type === 'MATCH_STARTED')
-  return startEvent?.timestamp ?? startEvent?.createdAt ?? null
-}
-
-function startTimer() {
-  stopTimer()
-  const ts = getMatchStartTimestamp(currentMatch.value)
-  if (!ts) {
-    elapsedSeconds.value = 0
-    return
-  }
-  const startTime = new Date(ts).getTime()
-  elapsedSeconds.value = Math.max(0, Math.floor((Date.now() - startTime) / 1000))
-  timerInterval = setInterval(() => {
-    elapsedSeconds.value = Math.max(0, Math.floor((Date.now() - startTime) / 1000))
-  }, 1000)
-}
-
-function stopTimer() {
-  if (timerInterval) {
-    clearInterval(timerInterval)
-    timerInterval = null
-  }
-  elapsedSeconds.value = 0
-}
 
 const finishedMatches = computed(() =>
   matches.value
@@ -74,6 +42,22 @@ const finishedMatches = computed(() =>
 const currentMatch = computed(() =>
   matches.value.find((m: any) => m.winnerId == null && m.isDraw !== true) ?? null,
 )
+
+function getMatchStartTimestamp(match: any): string | null {
+  if (!match?.events?.length) return null
+  const startEvent = match.events.find((e: any) => e.type === 'MATCH_STARTED')
+  return startEvent?.timestamp ?? startEvent?.createdAt ?? null
+}
+
+// Countdown timer
+const durationSeconds = computed(() => (session.value?.matchDurationMinutes ?? 10) * 60)
+const matchStartTimestamp = computed(() => getMatchStartTimestamp(currentMatch.value))
+const { display: timerDisplay, isTimeUp, isOvertime, remainingSeconds, start: startTimer, stop: stopTimer } = useCountdownTimer(durationSeconds, matchStartTimestamp)
+
+const currentMinute = computed(() => {
+  const elapsed = durationSeconds.value - remainingSeconds.value
+  return Math.floor(elapsed / 60) + 1
+})
 
 const isFirstMatch = computed(() => finishedMatches.value.length === 0 && !currentMatch.value)
 
@@ -167,6 +151,7 @@ onMounted(async () => {
     sessionId.value = active.id
     session.value = active
 
+    settings.value = await getSettings()
     await fetchAll()
 
     if (!currentMatch.value && finishedMatches.value.length > 0) {
@@ -192,10 +177,8 @@ function stopPolling() {
 
 watch(currentMatch, (match) => {
   if (match) {
-    startTimer()
     startPolling()
   } else {
-    stopTimer()
     stopPolling()
   }
 }, { immediate: true })
@@ -205,10 +188,18 @@ onUnmounted(() => {
   stopTimer()
 })
 
+async function handleSwapTimerUp() {
+  showSwapTimer.value = false
+  if (nextMatchSuggestion.value) {
+    await handleStartSuggestedMatch()
+  }
+}
+
 async function handleStartMatch() {
   if (!sessionId.value || !selectedTeamA.value || !selectedTeamB.value) return
   loading.value = true
   errorMessage.value = null
+  showSwapTimer.value = false
   try {
     await startMatch(sessionId.value, {
       teamAId: selectedTeamA.value,
@@ -230,6 +221,7 @@ async function handleStartSuggestedMatch() {
   if (!sessionId.value || !nextMatchSuggestion.value) return
   loading.value = true
   errorMessage.value = null
+  showSwapTimer.value = false
   try {
     await startMatch(sessionId.value, {
       teamAId: nextMatchSuggestion.value.teamA?.id ?? nextMatchSuggestion.value.teamAId,
@@ -261,6 +253,28 @@ async function handleGoal(playerId: number, teamId: number) {
   }
 }
 
+function handleUndoGoalClick(goal: { id: number; playerName: string; teamName: string; minute?: number }) {
+  undoGoalData.value = goal
+  showUndoGoalModal.value = true
+}
+
+async function confirmUndoGoal() {
+  if (!currentMatch.value || !undoGoalData.value) return
+  loading.value = true
+  errorMessage.value = null
+  showUndoGoalModal.value = false
+  try {
+    await undoGoal(currentMatch.value.id, undoGoalData.value.id)
+    undoGoalData.value = null
+    await fetchAll()
+  } catch (e) {
+    console.error('Erro ao desfazer gol:', e)
+    showError('Erro ao desfazer gol: ' + extractErrorMessage(e))
+  } finally {
+    loading.value = false
+  }
+}
+
 function handleEndMatchClick() {
   if (!currentMatch.value) return
   const isFirst = finishedMatches.value.length === 0
@@ -285,6 +299,10 @@ async function confirmEndMatch(winnerId: number | null | undefined) {
     await fetchAll()
     if (!currentMatch.value) {
       await fetchNextMatch()
+      // Activate swap timer if enabled
+      if (settings.value?.teamSwapEnabled) {
+        showSwapTimer.value = true
+      }
     }
   } catch (e) {
     console.error('Erro ao encerrar partida:', e)
@@ -351,6 +369,14 @@ async function handleFinalizeSession() {
             ({{ finishedMatches.length + 1 }} de {{ session.totalMatches }})
           </span>
         </h2>
+        <MatchesSwapTimer
+          v-if="showSwapTimer"
+          :duration-seconds="(settings?.teamSwapTimeMin ?? 2) * 60"
+          :active="showSwapTimer"
+          class="mb-4"
+          @time-up="handleSwapTimerUp"
+        />
+
 <div v-if="!currentMatch && teams.length > 0 && !hasReachedMaxMatches && canManageMatch()" class="bg-white border rounded-lg p-5 flex flex-col gap-4">
 <template v-if="isFirstMatch">
             <p class="text-sm text-muted-foreground mb-1">Selecione os times para a primeira partida:</p>
@@ -452,9 +478,6 @@ async function handleFinalizeSession() {
             <span v-if="isTimeUp" class="text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded">
               Tempo esgotado
             </span>
-            <span v-else-if="session" class="text-xs text-muted-foreground">
-              / {{ session.matchDurationMinutes }}:00
-            </span>
           </div>
 
           <MatchesMatchBoard
@@ -462,6 +485,7 @@ async function handleFinalizeSession() {
             :teams="teams"
             :disabled="loading || !canManageMatch()"
             @goal="handleGoal"
+            @undo-goal="handleUndoGoalClick"
           />
 
           <div v-if="canManageMatch()" class="flex justify-end mt-4">
@@ -469,6 +493,8 @@ async function handleFinalizeSession() {
               variant="danger"
               size="md"
               :loading="loading"
+              :disabled="!isTimeUp"
+              :title="!isTimeUp ? 'Aguarde o tempo regulamentar encerrar' : 'Encerrar partida'"
               @click="handleEndMatchClick"
             >
               Encerrar Partida
@@ -524,6 +550,13 @@ async function handleFinalizeSession() {
         </div>
       </section>
     </template>
+<MatchesUndoGoalModal
+      :show="showUndoGoalModal"
+      :goal="undoGoalData"
+      :loading="loading"
+      @close="showUndoGoalModal = false"
+      @confirm="confirmUndoGoal"
+    />
 <BaseModal :show="showWinnerModal" title="Empate -- Escolha o vencedor" @close="showWinnerModal = false">
       <p class="text-foreground text-sm mb-4">
         A primeira partida terminou em empate. Escolha o time vencedor para fins de rodízio (ambos os times recebem 1 ponto):

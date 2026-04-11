@@ -66,6 +66,13 @@ export class DashboardService {
       include: { champion: true, season: true, _count: { select: { matches: true } } },
     });
 
+    const [activePlayers, injuredPlayers, suspendedPlayers, guestPlayers] = await Promise.all([
+      this.prisma.player.count({ where: { groupId, isActive: true, status: 'ATIVO' } }),
+      this.prisma.player.count({ where: { groupId, isActive: true, status: 'LESIONADO' } }),
+      this.prisma.player.count({ where: { groupId, isActive: true, status: 'AUSENTE' } }),
+      this.prisma.player.count({ where: { groupId, type: 'CONVIDADO' } }),
+    ]);
+
     return {
       currentSession,
       activePlayersCount,
@@ -75,6 +82,12 @@ export class DashboardService {
       highestElo,
       recentSessions,
       seasonRanking: null,
+      playerStatusCounts: {
+        active: activePlayers,
+        injured: injuredPlayers,
+        suspended: suspendedPlayers,
+        guest: guestPlayers,
+      },
     };
   }
 }

@@ -4,9 +4,11 @@ import {
   IsNumber,
   IsEnum,
   IsArray,
+  IsBoolean,
   ValidateNested,
   IsString,
   MaxLength,
+  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -57,6 +59,15 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsInt()
   maxConsecutiveGames?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  teamSwapEnabled?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  teamSwapTimeMin?: number;
 
   @IsOptional()
   @IsString()

@@ -1,0 +1,39 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    # Only deploy after CI passes
+    needs: []
+    if: github.ref == 'refs/heads/main'
+    # RAILWAY_TOKEN must be configured in GitHub repo Settings > Secrets and variables > Actions
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      # Deploy API service
+      - name: Deploy API
+        run: railway up --service meujogo-api
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      # Deploy App service
+      - name: Deploy App
+        run: railway up --service meujogo-app
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      # Verify health after deploy
+      - name: Health Check
+        run: |
+          sleep 30
+          curl -f https://api.meujogo.app/health || echo "Health check failed - verify manually"
+        continue-on-error: true

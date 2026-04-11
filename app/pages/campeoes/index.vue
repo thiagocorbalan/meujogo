@@ -3,10 +3,13 @@ import { Card, CardContent } from '@/components/ui/card'
 
 const { getChampions } = useChampions()
 const { baseURL } = useApi()
+const { canEdit } = usePermissions()
 
 const champions = ref<any[]>([])
 const loading = ref(true)
 const errorMessage = ref<string | null>(null)
+const editingChampionId = ref<number | null>(null)
+const showEditModal = ref(false)
 
 function resolvePhotoUrl(url: string | null | undefined): string | undefined {
   if (!url) return undefined
@@ -14,7 +17,7 @@ function resolvePhotoUrl(url: string | null | undefined): string | undefined {
   return `${baseURL}${url}`
 }
 
-onMounted(async () => {
+async function fetchChampions() {
   try {
     const data = await getChampions()
     champions.value = Array.isArray(data) ? data : []
@@ -24,7 +27,20 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-})
+}
+
+function openEditPhoto(championId: number) {
+  editingChampionId.value = championId
+  showEditModal.value = true
+}
+
+async function onPhotoUploaded() {
+  showEditModal.value = false
+  editingChampionId.value = null
+  await fetchChampions()
+}
+
+onMounted(fetchChampions)
 
 function formatDate(dateStr: string) {
   if (!dateStr) return '—'
@@ -49,7 +65,20 @@ function formatDate(dateStr: string) {
           <span v-else class="text-5xl">&#127942;</span>
         </div>
         <CardContent class="p-4">
-          <h3 class="text-base font-bold text-foreground mb-1">{{ c.team?.name || 'Time Campeão' }}</h3>
+          <div class="flex items-start justify-between mb-1">
+            <h3 class="text-base font-bold text-foreground">{{ c.team?.name || 'Time Campeão' }}</h3>
+            <BaseButton
+              v-if="canEdit('champions')"
+              variant="ghost"
+              size="icon-sm"
+              title="Editar foto"
+              @click.stop="openEditPhoto(c.id)"
+            >
+              <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+              </svg>
+            </BaseButton>
+          </div>
           <p class="text-[13px] text-muted-foreground mb-2">{{ formatDate(c.createdAt) }}</p>
           <p v-if="c.team?.players?.length" class="text-[13px] text-foreground leading-relaxed">
             {{ c.team.players.map((tp: any) => tp.player?.name ?? tp.name).join(', ') }}
@@ -61,5 +90,12 @@ function formatDate(dateStr: string) {
     <div v-else class="py-10 text-center bg-muted rounded-lg text-muted-foreground">
       <p>Nenhum campeão registrado ainda.</p>
     </div>
+
+    <ChampionsEditPhotoModal
+      :show="showEditModal"
+      :champion-id="editingChampionId"
+      @close="showEditModal = false"
+      @uploaded="onPhotoUploaded"
+    />
   </div>
 </template>

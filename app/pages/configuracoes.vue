@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 
 const { canEdit, canDelete } = usePermissions()
 const { getSettings, updateSettings, resetData } = useSettings()
@@ -18,10 +19,22 @@ const form = ref({
   sessionDurationMin: 120,
   matchDurationMin: 10,
   maxConsecutiveGames: 2,
+  teamSwapEnabled: false,
+  teamSwapTimeMin: 2,
   drawMode: 'ALEATORIO',
   defaultElo: 1200,
   kFactor: 32,
   vests: [] as { name: string; color: string }[],
+})
+
+const seasonName = ref('')
+
+const calculatedGames = computed(() => {
+  const total = form.value.sessionDurationMin
+  const match = form.value.matchDurationMin
+  const swap = form.value.teamSwapEnabled ? (form.value.teamSwapTimeMin ?? 0) : 0
+  if (match + swap <= 0) return 0
+  return Math.floor(total / (match + swap))
 })
 
 onMounted(async () => {
@@ -34,6 +47,8 @@ onMounted(async () => {
         sessionDurationMin: data.sessionDurationMin ?? 120,
         matchDurationMin: data.matchDurationMin ?? 10,
         maxConsecutiveGames: data.maxConsecutiveGames ?? 2,
+        teamSwapEnabled: data.teamSwapEnabled ?? false,
+        teamSwapTimeMin: data.teamSwapTimeMin ?? 2,
         drawMode: data.drawMode ?? 'ALEATORIO',
         defaultElo: data.defaultElo ?? 1200,
         kFactor: data.kFactor ?? 32,
@@ -105,7 +120,9 @@ async function onCloseSeason() {
   closingSeason.value = true
   seasonError.value = null
   try {
-    await closeAndRenewSeason()
+    const name = seasonName.value.trim() || undefined
+    await closeAndRenewSeason(name ? { name } : undefined)
+    seasonName.value = ''
     closeSeasonModal()
     success.value = 'Temporada encerrada e nova temporada criada com sucesso.'
   } catch (e: any) {
@@ -157,6 +174,23 @@ async function onCloseSeason() {
               <Label>Máx. Jogos Consecutivos</Label>
               <Input v-model.number="form.maxConsecutiveGames" type="number" min="1" />
             </div>
+          </div>
+
+          <div class="mt-4 space-y-3">
+            <div class="flex items-center gap-3">
+              <Switch
+                :checked="form.teamSwapEnabled"
+                @update:checked="form.teamSwapEnabled = $event"
+              />
+              <Label>Tempo de Troca de Time</Label>
+            </div>
+            <div v-if="form.teamSwapEnabled" class="flex flex-col gap-1 max-w-[200px]">
+              <Label>Tempo de Troca (min)</Label>
+              <Input v-model.number="form.teamSwapTimeMin" type="number" min="1" />
+            </div>
+            <p class="text-sm text-muted-foreground">
+              Total de jogos estimado: <strong>{{ calculatedGames }}</strong>
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -316,6 +350,11 @@ async function onCloseSeason() {
       <div class="text-sm text-muted-foreground">
         <p>A temporada atual será encerrada e uma nova temporada será criada automaticamente.</p>
         <p class="mt-2">Os dados da temporada anterior serão preservados.</p>
+      </div>
+      <div class="mt-4 flex flex-col gap-1">
+        <Label>Nome da Nova Temporada</Label>
+        <Input v-model="seasonName" placeholder="Ex: Verao 2026" />
+        <p class="text-xs text-muted-foreground mt-1">Opcional. Se vazio, usa o ano atual.</p>
       </div>
       <div v-if="seasonError" class="rounded-lg border border-destructive bg-destructive/10 p-3 text-destructive text-sm mt-3">
         <p>{{ seasonError }}</p>

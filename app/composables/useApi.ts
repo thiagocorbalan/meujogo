@@ -1,6 +1,7 @@
 const STATE_CHANGING_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
 
 let csrfSignature: string | null = null
+let refreshPromise: Promise<void> | null = null
 
 async function fetchCsrfToken(baseURL: string): Promise<string | null> {
   try {
@@ -71,11 +72,19 @@ export function useApi() {
 
         if (error?.status === 401) {
           try {
-            await $fetch('/auth/refresh', {
-              baseURL,
-              method: 'POST',
-              credentials: 'include',
-            })
+            if (!refreshPromise) {
+              refreshPromise = $fetch('/auth/refresh', {
+                baseURL,
+                method: 'POST',
+                credentials: 'include',
+              }).then(() => {
+                refreshPromise = null
+              }).catch((refreshError: any) => {
+                refreshPromise = null
+                throw refreshError
+              })
+            }
+            await refreshPromise
 
             return await $fetch<T>(path, {
               baseURL,
@@ -84,11 +93,15 @@ export function useApi() {
               ...opts,
             })
           } catch {
-            try {
-              const authStore = useAuthStore()
-              authStore.clearAuth()
-            } catch {
+            const authStore = useAuthStore()
+            authStore.clearAuth()
+            if (import.meta.client) {
+              const currentPath = window.location.pathname + window.location.search
+              if (currentPath !== '/login') {
+                await navigateTo(`/login?redirect=${encodeURIComponent(currentPath)}`)
+              }
             }
+            return undefined as T
           }
         }
         throw error

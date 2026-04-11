@@ -43,10 +43,10 @@ export class AuthService {
     });
 
     const refreshTokenExpiry = rememberMe ? '30d' : '7d';
-    const refreshToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_REFRESH_SECRET,
-      expiresIn: refreshTokenExpiry,
-    });
+    const refreshToken = this.jwtService.sign(
+      { ...payload, rememberMe },
+      { secret: process.env.JWT_REFRESH_SECRET, expiresIn: refreshTokenExpiry },
+    );
 
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
     await this.usersService.updateRefreshToken(user.id, hashedRefreshToken);
@@ -89,16 +89,18 @@ export class AuthService {
       { secret: process.env.JWT_SECRET, expiresIn: '15m' },
     );
 
-    // Rotate refresh token
+    // Rotate refresh token (preserve rememberMe from original token)
+    const rememberMe = payload.rememberMe === true;
+    const refreshTokenExpiry = rememberMe ? '30d' : '7d';
     const newRefreshToken = this.jwtService.sign(
-      { sub: user.id, role: user.role },
-      { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' },
+      { sub: user.id, role: user.role, rememberMe },
+      { secret: process.env.JWT_REFRESH_SECRET, expiresIn: refreshTokenExpiry },
     );
 
     const hashedRefreshToken = await bcrypt.hash(newRefreshToken, 10);
     await this.usersService.updateRefreshToken(user.id, hashedRefreshToken);
 
-    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+    return { accessToken: newAccessToken, refreshToken: newRefreshToken, rememberMe };
   }
 
   async logout(userId: number) {

@@ -99,6 +99,8 @@ describe('AuthController', () => {
     it('should return 200 with new access token', async () => {
       (authService.refreshToken as jest.Mock).mockResolvedValue({
         accessToken: 'new-access-token',
+        refreshToken: 'new-refresh-token',
+        rememberMe: false,
       });
       const req = { cookies: {} } as any;
       const res = createMockResponse();
@@ -110,6 +112,27 @@ describe('AuthController', () => {
       );
 
       expect(result).toEqual({ message: 'Token atualizado com sucesso' });
+      const refreshCookie = res.getCookies().find((c: any) => c.name === 'refreshToken');
+      expect(refreshCookie?.options.maxAge).toBe(7 * 24 * 60 * 60 * 1000);
+    });
+
+    it('should set 30d cookie maxAge when rememberMe is true', async () => {
+      (authService.refreshToken as jest.Mock).mockResolvedValue({
+        accessToken: 'new-access-token',
+        refreshToken: 'new-refresh-token-30d',
+        rememberMe: true,
+      });
+      const req = { cookies: {} } as any;
+      const res = createMockResponse();
+
+      await controller.refresh(
+        { refreshToken: 'valid-refresh-token' },
+        req,
+        res as any,
+      );
+
+      const refreshCookie = res.getCookies().find((c: any) => c.name === 'refreshToken');
+      expect(refreshCookie?.options.maxAge).toBe(30 * 24 * 60 * 60 * 1000);
     });
   });
 

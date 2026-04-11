@@ -146,7 +146,7 @@ describe('AuthService', () => {
       await service.login(mockUserWithoutPassword, true);
 
       expect(jwtService.sign).toHaveBeenCalledWith(
-        { sub: 1, role: 'USUARIO' },
+        { sub: 1, role: 'USUARIO', rememberMe: true },
         expect.objectContaining({ expiresIn: '30d' }),
       );
     });
@@ -165,7 +165,25 @@ describe('AuthService', () => {
 
       expect(result.accessToken).toBe('new-access-token');
       expect(result.refreshToken).toBe('new-refresh-token');
+      expect(result.rememberMe).toBe(false);
       expect(usersService.updateRefreshToken).toHaveBeenCalledWith(1, 'hashed-value');
+    });
+
+    it('should generate 30d refresh token when original had rememberMe', async () => {
+      (jwtService.verify as jest.Mock).mockReturnValue({ sub: 1, role: 'USUARIO', rememberMe: true });
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (jwtService.sign as jest.Mock)
+        .mockReturnValueOnce('new-access-token')
+        .mockReturnValueOnce('new-refresh-token-30d');
+
+      const result = await service.refreshToken('valid-refresh-token');
+
+      expect(result.rememberMe).toBe(true);
+      expect(jwtService.sign).toHaveBeenCalledWith(
+        { sub: 1, role: 'USUARIO', rememberMe: true },
+        expect.objectContaining({ expiresIn: '30d' }),
+      );
     });
 
     it('should throw UnauthorizedException for invalid token', async () => {

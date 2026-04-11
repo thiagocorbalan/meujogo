@@ -60,6 +60,13 @@ export const useAuthStore = defineStore('auth', () => {
 
   function clearAuth() {
     user.value = null
+    try {
+      localStorage.removeItem('user')
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+    } catch {
+      // localStorage may be unavailable
+    }
   }
 
   

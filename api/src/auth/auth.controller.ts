@@ -93,6 +93,7 @@ export class AuthController {
     return { user: result.user };
   }
 
+  @SkipCsrf()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(
@@ -114,20 +115,24 @@ export class AuthController {
       maxAge: 15 * 60 * 1000,
     });
 
-    // Set rotated refresh token cookie
+    // Set rotated refresh token cookie (preserve rememberMe preference)
     if (result.refreshToken) {
+      const maxAge = result.rememberMe
+        ? 30 * 24 * 60 * 60 * 1000
+        : 7 * 24 * 60 * 60 * 1000;
       res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
         sameSite: 'lax',
         secure: isProduction(),
         path: '/auth/refresh',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge,
       });
     }
 
     return { message: 'Token atualizado com sucesso' };
   }
 
+  @SkipCsrf()
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)

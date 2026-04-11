@@ -178,10 +178,7 @@ async function onCloseSeason() {
 
           <div class="mt-4 space-y-3">
             <div class="flex items-center gap-3">
-              <Switch
-                :checked="form.teamSwapEnabled"
-                @update:checked="form.teamSwapEnabled = $event"
-              />
+              <Switch v-model="form.teamSwapEnabled" />
               <Label>Tempo de Troca de Time</Label>
             </div>
             <div v-if="form.teamSwapEnabled" class="flex flex-col gap-1 max-w-[200px]">

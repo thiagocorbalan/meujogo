@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
 
@@ -197,11 +197,7 @@ describe('REQ-SEC-07 + REQ-SEC-08: Login Cookie Flow', () => {
       });
       const res = createMockResponse();
 
-      await controller.refresh(
-        { refreshToken: '' },
-        req as any,
-        res as any,
-      );
+      await controller.refresh({ refreshToken: '' }, req as any, res as any);
 
       expect(authService.refreshToken).toHaveBeenCalledWith(
         'cookie-refresh-token',

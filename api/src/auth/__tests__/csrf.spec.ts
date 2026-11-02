@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
 
@@ -136,7 +136,9 @@ describe('REQ-SEC-09: CSRF Protection', () => {
 
   describe('GET requests should work without CSRF', () => {
     it('GET /auth/me should not require CSRF token', () => {
-      const req = { user: { id: 1, name: 'Test', email: 'test@test.com', role: 'USUARIO' } };
+      const req = {
+        user: { id: 1, name: 'Test', email: 'test@test.com', role: 'USUARIO' },
+      };
 
       const result = controller.getMe(req);
       expect(result).toBeDefined();

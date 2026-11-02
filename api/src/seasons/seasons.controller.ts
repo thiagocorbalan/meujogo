@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { SeasonsService } from './seasons.service';
 import { CreateSeasonDto } from './dto/create-season.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
@@ -36,6 +46,9 @@ export class SeasonsController {
   @Post('close-and-renew')
   @GroupRoles(GroupRole.DONO, GroupRole.ADMIN)
   closeAndRenew(@Req() req: any, @Body() body: { name?: string }) {
-    return this.seasonsService.closeAndCreateNew(req.groupContext.groupId, body.name);
+    return this.seasonsService.closeAndCreateNew(
+      req.groupContext.groupId,
+      body.name,
+    );
   }
 }

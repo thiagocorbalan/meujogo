@@ -30,34 +30,22 @@ describe('REQ-SEC-05: Password Complexity Validation', () => {
     });
 
     it('should reject passwords without uppercase letters', async () => {
-      const errors = await getPasswordErrors(
-        CreateUserDto,
-        'mystrongpass99!',
-      );
+      const errors = await getPasswordErrors(CreateUserDto, 'mystrongpass99!');
       expect(errors.length).toBeGreaterThan(0);
     });
 
     it('should reject passwords without lowercase letters', async () => {
-      const errors = await getPasswordErrors(
-        CreateUserDto,
-        'MYSTRONGPASS99!',
-      );
+      const errors = await getPasswordErrors(CreateUserDto, 'MYSTRONGPASS99!');
       expect(errors.length).toBeGreaterThan(0);
     });
 
     it('should reject passwords without numbers', async () => {
-      const errors = await getPasswordErrors(
-        CreateUserDto,
-        'MyStrongPass!!ab',
-      );
+      const errors = await getPasswordErrors(CreateUserDto, 'MyStrongPass!!ab');
       expect(errors.length).toBeGreaterThan(0);
     });
 
     it('should reject passwords without special characters', async () => {
-      const errors = await getPasswordErrors(
-        CreateUserDto,
-        'MyStrongPass99ab',
-      );
+      const errors = await getPasswordErrors(CreateUserDto, 'MyStrongPass99ab');
       expect(errors.length).toBeGreaterThan(0);
     });
 
@@ -84,10 +72,7 @@ describe('REQ-SEC-05: Password Complexity Validation', () => {
 
   describe('ResetPasswordDto password validation', () => {
     it('should accept a valid password meeting all criteria', async () => {
-      const errors = await getPasswordErrors(
-        ResetPasswordDto,
-        VALID_PASSWORD,
-      );
+      const errors = await getPasswordErrors(ResetPasswordDto, VALID_PASSWORD);
       expect(errors).toHaveLength(0);
     });
 

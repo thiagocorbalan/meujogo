@@ -29,10 +29,7 @@ export class AttendanceService {
         player: {
           isActive: true,
           groupId,
-          OR: [
-            { membership: { isNot: null } },
-            { type: 'CONVIDADO' },
-          ],
+          OR: [{ membership: { isNot: null } }, { type: 'CONVIDADO' }],
           ...(search
             ? { name: { contains: search, mode: 'insensitive' as const } }
             : {}),
@@ -50,12 +47,19 @@ export class AttendanceService {
     });
     const existingIds = new Set(existing.map((a) => a.playerId));
 
-    const fixoPlayers = await this.prisma.player.findMany({
-      where: { isActive: true, type: 'FIXO', groupId, membership: { isNot: null } },
+    const players = await this.prisma.player.findMany({
+      where: {
+        isActive: true,
+        groupId,
+        OR: [
+          { type: 'FIXO', membership: { isNot: null } },
+          { type: 'CONVIDADO' },
+        ],
+      },
       select: { id: true },
     });
 
-    const missing = fixoPlayers.filter((p) => !existingIds.has(p.id));
+    const missing = players.filter((p) => !existingIds.has(p.id));
     if (missing.length === 0) return;
 
     await this.prisma.attendance.createMany({
@@ -102,7 +106,7 @@ export class AttendanceService {
       where: { id: playerId, groupId },
     });
 
-    if (!player || !player.isActive) {
+    if (!player?.isActive) {
       throw new NotFoundException(`Player #${playerId} not found`);
     }
 

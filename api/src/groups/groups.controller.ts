@@ -99,10 +99,7 @@ export class GroupsController {
   @Post(':id/invite/regenerate')
   @UseGuards(JwtAuthGuard, GroupRolesGuard)
   @GroupRoles(GroupRole.DONO, GroupRole.ADMIN)
-  regenerateInviteCode(
-    @Req() req: any,
-    @Param('id', ParseIntPipe) id: number,
-  ) {
+  regenerateInviteCode(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
     return this.groupsService.regenerateInviteCode(req.groupContext.groupId);
   }
 
@@ -132,9 +129,7 @@ export class GroupsController {
     });
 
     // Auto-create players for members that don't have one yet (legacy data fix)
-    const membersWithoutPlayer = members.filter(
-      (m: any) => m.playerId == null,
-    );
+    const membersWithoutPlayer = members.filter((m: any) => m.playerId == null);
     if (membersWithoutPlayer.length > 0) {
       const settings = await this.prisma.settings.findFirst({
         where: { groupId },
@@ -241,10 +236,7 @@ export class GroupsController {
     @Param('id', ParseIntPipe) id: number,
     @Param('memberId', ParseIntPipe) memberId: number,
   ) {
-    return this.groupsService.suspendMember(
-      req.groupContext.groupId,
-      memberId,
-    );
+    return this.groupsService.suspendMember(req.groupContext.groupId, memberId);
   }
 
   @Patch(':id/members/:memberId/reactivate')
@@ -276,10 +268,7 @@ export class GroupsController {
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, GroupRolesGuard)
   leaveGroup(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
-    return this.groupsService.leaveGroup(
-      req.groupContext.groupId,
-      req.user.id,
-    );
+    return this.groupsService.leaveGroup(req.groupContext.groupId, req.user.id);
   }
 
   @Post(':id/guest-player')

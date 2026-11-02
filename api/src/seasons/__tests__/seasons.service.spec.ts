@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { SeasonsService } from '../seasons.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 
@@ -23,7 +23,9 @@ describe('SeasonsService', () => {
         {
           provide: PrismaService,
           useValue: {
-            $transaction: jest.fn((cb: (tx: typeof mockTx) => Promise<any>) => cb(mockTx)),
+            $transaction: jest.fn((cb: (tx: typeof mockTx) => Promise<any>) =>
+              cb(mockTx),
+            ),
             season: {
               findMany: jest.fn(),
               findFirst: jest.fn(),
@@ -45,7 +47,12 @@ describe('SeasonsService', () => {
   });
 
   describe('closeAndCreateNew', () => {
-    const newSeason = { id: 2, year: 2026, startDate: expect.any(Date), isClosed: false };
+    const newSeason = {
+      id: 2,
+      year: 2026,
+      startDate: expect.any(Date),
+      isClosed: false,
+    };
 
     it('should use a transaction', async () => {
       mockTx.season.findFirst.mockResolvedValue(null);
@@ -63,7 +70,9 @@ describe('SeasonsService', () => {
 
       const result = await service.closeAndCreateNew(groupId);
 
-      expect(mockTx.season.findFirst).toHaveBeenCalledWith({ where: { isClosed: false, groupId } });
+      expect(mockTx.season.findFirst).toHaveBeenCalledWith({
+        where: { isClosed: false, groupId },
+      });
       expect(mockTx.season.update).toHaveBeenCalledWith({
         where: { id: 1 },
         data: {
@@ -88,15 +97,21 @@ describe('SeasonsService', () => {
 
       const result = await service.closeAndCreateNew(groupId);
 
-      expect(mockTx.season.findFirst).toHaveBeenCalledWith({ where: { isClosed: false, groupId } });
+      expect(mockTx.season.findFirst).toHaveBeenCalledWith({
+        where: { isClosed: false, groupId },
+      });
       expect(mockTx.season.update).not.toHaveBeenCalled();
       expect(mockTx.season.create).toHaveBeenCalledTimes(1);
       expect(result).toEqual(newSeason);
     });
 
     it('should propagate error if transaction fails', async () => {
-      (prisma.$transaction as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
-      await expect(service.closeAndCreateNew(groupId)).rejects.toThrow('DB error');
+      (prisma.$transaction as jest.Mock).mockRejectedValueOnce(
+        new Error('DB error'),
+      );
+      await expect(service.closeAndCreateNew(groupId)).rejects.toThrow(
+        'DB error',
+      );
     });
   });
 });

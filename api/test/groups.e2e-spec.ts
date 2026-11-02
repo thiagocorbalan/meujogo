@@ -84,7 +84,14 @@ const mockGroupsService = {
       isActive: true,
     },
     settings: { id: 1, groupId: 1 },
-    player: { id: 1, name: 'Pelada do Parque', position: 'LINHA', type: 'FIXO', groupId: 1, userId: 1 },
+    player: {
+      id: 1,
+      name: 'Pelada do Parque',
+      position: 'LINHA',
+      type: 'FIXO',
+      groupId: 1,
+      userId: 1,
+    },
     member: { id: 1, groupId: 1, userId: 1, playerId: 1, role: 'DONO' },
   }),
   findAllByUser: jest.fn().mockResolvedValue([]),
@@ -122,13 +129,17 @@ const mockGroupsService = {
       });
     }
     const { NotFoundException } = require('@nestjs/common');
-    return Promise.reject(new NotFoundException(`Group with invite code '${code}' not found`));
+    return Promise.reject(
+      new NotFoundException(`Group with invite code '${code}' not found`),
+    );
   }),
   joinViaInvite: jest.fn().mockImplementation(() => {
     joinCallCount++;
     if (joinCallCount > 1) {
       const { ConflictException } = require('@nestjs/common');
-      return Promise.reject(new ConflictException('User is already a member of this group'));
+      return Promise.reject(
+        new ConflictException('User is already a member of this group'),
+      );
     }
     return Promise.resolve({
       id: 2,
@@ -242,7 +253,7 @@ describe('GroupsController (e2e)', () => {
     // It does not exist yet, so we fall back to EmptyModule.
     let AppTestModule: any = EmptyModule;
     try {
-      const mod = await import('../src/groups/groups.module');
+      const mod = await import('../src/groups/groups.module.js');
       if (mod?.GroupsModule) {
         AppTestModule = mod.GroupsModule;
       }
@@ -250,9 +261,9 @@ describe('GroupsController (e2e)', () => {
       // GroupsModule doesn't exist yet — expected in TDD red phase
     }
 
-    const { GroupsService } = await import('../src/groups/groups.service');
-    const { PrismaService } = await import('../src/prisma/prisma.service');
-    const { JwtAuthGuard } = await import('../src/auth/guards/jwt-auth.guard');
+    const { GroupsService } = await import('../src/groups/groups.service.js');
+    const { PrismaService } = await import('../src/prisma/prisma.service.js');
+    const { JwtAuthGuard } = await import('../src/auth/guards/jwt-auth.guard.js');
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppTestModule],

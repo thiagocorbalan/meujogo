@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users.service.js';
@@ -266,7 +266,11 @@ describe('UsersService', () => {
     });
 
     it('allows updating email when it belongs to the same user', async () => {
-      const existingUser = { ...userWithPassword, id: 1, email: 'john@example.com' };
+      const existingUser = {
+        ...userWithPassword,
+        id: 1,
+        email: 'john@example.com',
+      };
       mockPrisma.user.findUnique.mockResolvedValueOnce(userWithoutPassword);
       mockPrisma.user.findUnique.mockResolvedValueOnce(existingUser);
       mockPrisma.user.update.mockResolvedValue(userWithoutPassword);

@@ -37,7 +37,12 @@ describe('REQ-SEC-03: CORS Whitelist', () => {
     app.enableCors({
       origin: allowedOrigins,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Group-Id'],
+      allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'X-CSRF-Token',
+        'X-Group-Id',
+      ],
       credentials: true,
       maxAge: 3600,
     });
@@ -69,9 +74,7 @@ describe('REQ-SEC-03: CORS Whitelist', () => {
         .get('/')
         .set('Origin', 'http://localhost:4000');
 
-      expect(response.headers['access-control-allow-credentials']).toBe(
-        'true',
-      );
+      expect(response.headers['access-control-allow-credentials']).toBe('true');
     });
   });
 
@@ -81,9 +84,9 @@ describe('REQ-SEC-03: CORS Whitelist', () => {
         .get('/')
         .set('Origin', 'http://evil-site.com');
 
-      expect(
-        response.headers['access-control-allow-origin'],
-      ).not.toBe('http://evil-site.com');
+      expect(response.headers['access-control-allow-origin']).not.toBe(
+        'http://evil-site.com',
+      );
     });
 
     it('should not return Access-Control-Allow-Origin for random port', async () => {
@@ -91,9 +94,9 @@ describe('REQ-SEC-03: CORS Whitelist', () => {
         .get('/')
         .set('Origin', 'http://localhost:9999');
 
-      expect(
-        response.headers['access-control-allow-origin'],
-      ).not.toBe('http://localhost:9999');
+      expect(response.headers['access-control-allow-origin']).not.toBe(
+        'http://localhost:9999',
+      );
     });
   });
 

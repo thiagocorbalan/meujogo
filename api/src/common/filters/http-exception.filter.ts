@@ -46,10 +46,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
     };
 
-    if (
-      process.env.NODE_ENV === 'development' &&
-      exception instanceof Error
-    ) {
+    if (process.env.NODE_ENV === 'development' && exception instanceof Error) {
       responseBody.stack = exception.stack;
     }
 

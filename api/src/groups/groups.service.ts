@@ -389,9 +389,7 @@ export class GroupsService {
     }
 
     if (member.role === 'DONO') {
-      throw new ForbiddenException(
-        'Não é possível suspender o dono do grupo',
-      );
+      throw new ForbiddenException('Não é possível suspender o dono do grupo');
     }
 
     if (!member.playerId) {
@@ -433,7 +431,7 @@ export class GroupsService {
       where: { id: member.playerId },
     });
 
-    if (!player || player.status !== 'AUSENTE') {
+    if (player?.status !== 'AUSENTE') {
       throw new BadRequestException('Membro não está suspenso');
     }
 

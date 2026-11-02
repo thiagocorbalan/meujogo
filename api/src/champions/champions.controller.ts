@@ -39,8 +39,14 @@ export class ChampionsController {
   }
 
   @Get('sessions/:sessionId/champion')
-  findBySession(@Req() req: any, @Param('sessionId', ParseIntPipe) sessionId: number) {
-    return this.championsService.findBySession(sessionId, req.groupContext.groupId);
+  findBySession(
+    @Req() req: any,
+    @Param('sessionId', ParseIntPipe) sessionId: number,
+  ) {
+    return this.championsService.findBySession(
+      sessionId,
+      req.groupContext.groupId,
+    );
   }
 
   @Post('sessions/:sessionId/champion')
@@ -81,14 +87,16 @@ export class ChampionsController {
     @Param('id', ParseIntPipe) id: number,
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
-        ],
+        validators: [new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 })],
       }),
     )
     file: any,
   ) {
     const photoUrl = `/uploads/champions/${file.filename}`;
-    return this.championsService.uploadPhoto(id, photoUrl, req.groupContext.groupId);
+    return this.championsService.uploadPhoto(
+      id,
+      photoUrl,
+      req.groupContext.groupId,
+    );
   }
 }

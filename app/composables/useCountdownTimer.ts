@@ -17,14 +17,13 @@ export function useCountdownTimer(
   let interval: ReturnType<typeof setInterval> | null = null
 
   const isTimeUp = computed(() => remainingSeconds.value <= 0)
-  const isOvertime = computed(() => remainingSeconds.value < 0)
+  const isOvertime = computed(() => false)
 
   const display = computed(() => {
-    const abs = Math.abs(remainingSeconds.value)
-    const mins = Math.floor(abs / 60)
-    const secs = abs % 60
-    const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
-    return isOvertime.value ? `+${formatted}` : formatted
+    const clamped = Math.max(0, remainingSeconds.value)
+    const mins = Math.floor(clamped / 60)
+    const secs = clamped % 60
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
   })
 
   function start() {
@@ -35,7 +34,9 @@ export function useCountdownTimer(
 
     function tick() {
       const elapsed = Math.floor((Date.now() - startTime) / 1000)
-      remainingSeconds.value = durationSeconds.value - elapsed
+      const remaining = durationSeconds.value - elapsed
+      remainingSeconds.value = Math.max(0, remaining)
+      if (remaining <= 0) stop()
     }
 
     tick()

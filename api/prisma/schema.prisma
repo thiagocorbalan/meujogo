@@ -52,6 +52,56 @@ enum MatchEventType {
   MATCH_STARTED
   GOAL_SCORED
   MATCH_ENDED
+  GOAL_UNDONE
+  LATE_GOAL_ADDED
+  LATE_GOAL_REMOVED
+  PLAYER_SUBSTITUTED
+  SUBSTITUTION_REVERTED
+}
+
+enum GoalSource {
+  LIVE
+  LATE
+}
+
+enum SubstitutionType {
+  TEMPORARIA
+  PERMANENTE
+}
+
+enum SubstitutionReason {
+  LESAO
+  CANSACO
+  SEM_MOTIVO
+}
+
+enum LegalDocumentType {
+  TERMS
+  PRIVACY
+}
+
+enum LegalDocumentStatus {
+  DRAFT
+  PUBLISHED
+  INACTIVE
+}
+
+enum TrialExpireBehavior {
+  CONVERT_TO_FREE
+  BLOCK
+}
+
+enum AuditLogAction {
+  USER_SUSPENDED
+  USER_UNSUSPENDED
+  USER_IMPERSONATED
+  GROUP_SUSPENDED
+  GROUP_REACTIVATED
+  PLAN_CREATED
+  PLAN_UPDATED
+  PLAN_DELETED
+  LEGAL_PUBLISHED
+  INTEGRATION_UPDATED
 }
 
 model User {
@@ -65,26 +115,35 @@ model User {
   resetTokenExpiry DateTime?
   googleId         String?   @unique
   appleId          String?   @unique
+  isSuperAdmin     Boolean   @default(false)
+  isSuspended      Boolean   @default(false)
+  suspendedReason  String?
+  lastLoginAt      DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  memberships GroupMember[]
-  players     Player[]
+  memberships    GroupMember[]
+  players        Player[]
+  auditLogs      AdminAuditLog[]
+  legalDocuments LegalDocument[]
 
   @@map("users")
 }
 
 model Group {
-  id          Int      @id @default(autoincrement())
-  name        String
-  slug        String   @unique
-  description String?
-  dayOfWeek   Int?
-  defaultTime String?
-  address     String?
-  inviteCode  String   @unique
-  isActive    Boolean  @default(true)
+  id              Int      @id @default(autoincrement())
+  name            String
+  slug            String   @unique
+  description     String?
+  dayOfWeek       Int?
+  defaultTime     String?
+  address         String?
+  inviteCode      String   @unique
+  isActive        Boolean  @default(true)
+  isSuspended     Boolean  @default(false)
+  suspendedReason String?
+  planId          Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -94,6 +153,7 @@ model Group {
   sessions Session[]
   seasons  Season[]
   settings Settings?
+  plan     Plan?     @relation(fields: [planId], references: [id])
 
   @@map("groups")
 }
@@ -133,12 +193,15 @@ model Player {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  group       Group?        @relation(fields: [groupId], references: [id])
-  user        User?         @relation(fields: [userId], references: [id])
-  teamPlayers TeamPlayer[]
-  goalEvents  Goal[]
-  attendances Attendance[]
-  membership  GroupMember?
+  group             Group?         @relation(fields: [groupId], references: [id])
+  user              User?          @relation(fields: [userId], references: [id])
+  teamPlayers       TeamPlayer[]
+  goalEvents        Goal[]
+  attendances       Attendance[]
+  membership        GroupMember?
+  matchPlayers      MatchPlayer[]
+  substitutionsOut  Substitution[] @relation("substitutionOut")
+  substitutionsIn   Substitution[] @relation("substitutionIn")
 
   @@map("players")
 }
@@ -173,12 +236,13 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  group       Group?       @relation(fields: [groupId], references: [id])
-  season      Season       @relation(fields: [seasonId], references: [id])
-  teams       Team[]
-  matches     Match[]
-  champion    Champion?
-  attendances Attendance[]
+  group         Group?         @relation(fields: [groupId], references: [id])
+  season        Season         @relation(fields: [seasonId], references: [id])
+  teams         Team[]
+  matches       Match[]
+  champion      Champion?
+  attendances   Attendance[]
+  substitutions Substitution[]
 
   @@map("sessions")
 }
@@ -192,13 +256,16 @@ model Team {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  session    Session      @relation(fields: [sessionId], references: [id])
-  players    TeamPlayer[]
-  matchesAsA Match[]      @relation("teamA")
-  matchesAsB Match[]      @relation("teamB")
-  matchesWon Match[]      @relation("winner")
-  goals      Goal[]
-  champions  Champion[]
+  session                Session        @relation(fields: [sessionId], references: [id])
+  players                TeamPlayer[]
+  matchesAsA             Match[]        @relation("teamA")
+  matchesAsB             Match[]        @relation("teamB")
+  matchesWon             Match[]        @relation("winner")
+  goals                  Goal[]
+  champions              Champion[]
+  matchPlayers           MatchPlayer[]
+  substitutionsAsTarget  Substitution[] @relation("substitutionTarget")
+  substitutionsAsSource  Substitution[] @relation("substitutionSource")
 
   @@map("teams")
 }
@@ -215,6 +282,55 @@ model TeamPlayer {
   @@map("team_players")
 }
 
+model MatchPlayer {
+  id            Int     @id @default(autoincrement())
+  matchId       Int
+  playerId      Int
+  teamId        Int
+  isStarter     Boolean @default(true)
+  enteredMinute Int?
+  leftMinute    Int?
+
+  createdAt DateTime @default(now())
+
+  match  Match  @relation(fields: [matchId], references: [id])
+  player Player @relation(fields: [playerId], references: [id])
+  team   Team   @relation(fields: [teamId], references: [id])
+
+  @@unique([matchId, playerId])
+  @@index([matchId, teamId])
+  @@index([playerId])
+  @@map("match_players")
+}
+
+model Substitution {
+  id           Int                @id @default(autoincrement())
+  sessionId    Int
+  matchId      Int?
+  teamId       Int
+  sourceTeamId Int?
+  playerOutId  Int
+  playerInId   Int
+  type         SubstitutionType
+  reason       SubstitutionReason
+  minute       Int?
+  isReverted   Boolean            @default(false)
+
+  createdAt  DateTime  @default(now())
+  revertedAt DateTime?
+
+  session    Session @relation(fields: [sessionId], references: [id])
+  match      Match?  @relation(fields: [matchId], references: [id])
+  team       Team    @relation("substitutionTarget", fields: [teamId], references: [id])
+  sourceTeam Team?   @relation("substitutionSource", fields: [sourceTeamId], references: [id])
+  playerOut  Player  @relation("substitutionOut", fields: [playerOutId], references: [id])
+  playerIn   Player  @relation("substitutionIn", fields: [playerInId], references: [id])
+
+  @@index([sessionId])
+  @@index([matchId])
+  @@map("substitutions")
+}
+
 model Match {
   id         Int     @id @default(autoincrement())
   sessionId  Int
@@ -229,12 +345,14 @@ model Match {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  session Session      @relation(fields: [sessionId], references: [id])
-  teamA   Team         @relation("teamA", fields: [teamAId], references: [id])
-  teamB   Team         @relation("teamB", fields: [teamBId], references: [id])
-  winner  Team?        @relation("winner", fields: [winnerId], references: [id])
-  events  MatchEvent[]
-  goals   Goal[]
+  session       Session        @relation(fields: [sessionId], references: [id])
+  teamA         Team           @relation("teamA", fields: [teamAId], references: [id])
+  teamB         Team           @relation("teamB", fields: [teamBId], references: [id])
+  winner        Team?          @relation("winner", fields: [winnerId], references: [id])
+  events        MatchEvent[]
+  goals         Goal[]
+  matchPlayers  MatchPlayer[]
+  substitutions Substitution[]
 
   @@map("matches")
 }
@@ -245,25 +363,33 @@ model MatchEvent {
   type      MatchEventType
   timestamp DateTime       @default(now())
   payload   Json?
+  goalId    Int?
 
   match Match @relation(fields: [matchId], references: [id])
+  goal  Goal? @relation(fields: [goalId], references: [id])
 
+  @@index([matchId, type])
+  @@index([goalId])
   @@map("match_events")
 }
 
 model Goal {
-  id       Int  @id @default(autoincrement())
+  id       Int        @id @default(autoincrement())
   matchId  Int
-  playerId Int
+  playerId Int?
   teamId   Int
   minute   Int?
+  source   GoalSource @default(LIVE)
 
   createdAt DateTime @default(now())
 
-  match  Match  @relation(fields: [matchId], references: [id])
-  player Player @relation(fields: [playerId], references: [id])
-  team   Team   @relation(fields: [teamId], references: [id])
+  match  Match        @relation(fields: [matchId], references: [id])
+  player Player?      @relation(fields: [playerId], references: [id])
+  team   Team         @relation(fields: [teamId], references: [id])
+  events MatchEvent[]
 
+  @@index([matchId])
+  @@index([playerId])
   @@map("goals")
 }
 
@@ -328,4 +454,76 @@ model Vest {
   settings   Settings @relation(fields: [settingsId], references: [id])
 
   @@map("vests")
+}
+
+model Plan {
+  id                   Int                  @id @default(autoincrement())
+  name                 String
+  priceMonthly         Decimal              @db.Decimal(10, 2)
+  priceAnnual          Decimal              @db.Decimal(10, 2)
+  maxPlayers           Int?
+  maxSessionsPerMonth  Int?
+  features             Json                 @default("[]")
+  stripePriceIdMonthly String?
+  stripePriceIdAnnual  String?
+  trialDays            Int                  @default(14)
+  trialExpireBehavior  TrialExpireBehavior  @default(CONVERT_TO_FREE)
+  isActive             Boolean              @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  groups Group[]
+
+  @@map("plans")
+}
+
+model LegalDocument {
+  id          Int                 @id @default(autoincrement())
+  type        LegalDocumentType
+  version     String
+  content     String
+  status      LegalDocumentStatus @default(DRAFT)
+  authorId    Int
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author User @relation(fields: [authorId], references: [id])
+
+  @@unique([type, version])
+  @@index([type, status])
+  @@map("legal_documents")
+}
+
+model IntegrationConfig {
+  id           Int      @id @default(autoincrement())
+  service      String   @unique
+  encryptedKey String?
+  keyIv        String?
+  keyTag       String?
+  isConfigured Boolean  @default(false)
+
+  updatedAt DateTime @updatedAt
+
+  @@map("integration_configs")
+}
+
+model AdminAuditLog {
+  id         Int            @id @default(autoincrement())
+  adminId    Int
+  action     AuditLogAction
+  targetType String?
+  targetId   Int?
+  metadata   Json?
+  ipAddress  String?
+
+  createdAt DateTime @default(now())
+
+  admin User @relation(fields: [adminId], references: [id])
+
+  @@index([adminId])
+  @@index([createdAt])
+  @@map("admin_audit_logs")
 }

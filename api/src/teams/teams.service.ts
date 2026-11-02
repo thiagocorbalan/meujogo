@@ -1,6 +1,13 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { drawTeamsRandom, drawTeamsBalanced } from '../engines/team-draw.engine.js';
+import {
+  drawTeamsRandom,
+  drawTeamsBalanced,
+} from '../engines/team-draw.engine.js';
 
 @Injectable()
 export class TeamsService {
@@ -37,7 +44,9 @@ export class TeamsService {
     });
 
     if (hasActiveMatch) {
-      throw new ForbiddenException('Session has an active match. Cannot re-draw teams.');
+      throw new ForbiddenException(
+        'Session has an active match. Cannot re-draw teams.',
+      );
     }
 
     await this.prisma.$transaction(async (tx) => {
@@ -52,7 +61,13 @@ export class TeamsService {
         const matchIds = existingMatches.map((m) => m.id);
         if (matchIds.length > 0) {
           await tx.goal.deleteMany({ where: { matchId: { in: matchIds } } });
-          await tx.matchEvent.deleteMany({ where: { matchId: { in: matchIds } } });
+          await tx.matchEvent.deleteMany({
+            where: { matchId: { in: matchIds } },
+          });
+          await tx.matchPlayer.deleteMany({
+            where: { matchId: { in: matchIds } },
+          });
+          await tx.substitution.deleteMany({ where: { sessionId } });
           await tx.match.deleteMany({ where: { sessionId } });
         }
         await tx.teamPlayer.deleteMany({ where: { teamId: { in: teamIds } } });

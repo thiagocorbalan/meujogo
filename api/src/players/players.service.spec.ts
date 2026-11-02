@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { PlayersService } from './players.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -59,7 +59,11 @@ describe('PlayersService', () => {
     };
 
     it('should find Player by userId+groupId, update name/position/status', async () => {
-      const dto = { name: 'Novo Nome', position: 'GOLEIRO' as const, status: 'LESIONADO' as const };
+      const dto = {
+        name: 'Novo Nome',
+        position: 'GOLEIRO' as const,
+        status: 'LESIONADO' as const,
+      };
       const updatedPlayer = { ...existingPlayer, ...dto };
 
       mockPrisma.player.findFirst.mockResolvedValue(existingPlayer);
@@ -94,7 +98,11 @@ describe('PlayersService', () => {
     });
 
     it('should only update allowed fields (name, position, status) — not elo, goals, games, type', async () => {
-      const dto = { name: 'Novo Nome', position: 'GOLEIRO' as const, status: 'LESIONADO' as const };
+      const dto = {
+        name: 'Novo Nome',
+        position: 'GOLEIRO' as const,
+        status: 'LESIONADO' as const,
+      };
       const updatedPlayer = { ...existingPlayer, ...dto };
 
       mockPrisma.player.findFirst.mockResolvedValue(existingPlayer);

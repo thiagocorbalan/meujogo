@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { SettingsService } from '../settings.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 
@@ -28,7 +28,9 @@ describe('SettingsService', () => {
         {
           provide: PrismaService,
           useValue: {
-            $transaction: jest.fn((cb: (tx: typeof mockTx) => Promise<void>) => cb(mockTx)),
+            $transaction: jest.fn((cb: (tx: typeof mockTx) => Promise<void>) =>
+              cb(mockTx),
+            ),
             settings: {
               findUnique: jest.fn(),
               create: jest.fn(),
@@ -108,7 +110,9 @@ describe('SettingsService', () => {
     });
 
     it('should propagate error if transaction fails', async () => {
-      (prisma.$transaction as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
+      (prisma.$transaction as jest.Mock).mockRejectedValueOnce(
+        new Error('DB error'),
+      );
       await expect(service.resetData(groupId)).rejects.toThrow('DB error');
     });
   });

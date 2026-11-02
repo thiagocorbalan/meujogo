@@ -6,6 +6,7 @@ export interface AuthUser {
   name: string
   email: string
   role: string
+  isSuperAdmin?: boolean
   [key: string]: any
 }
 

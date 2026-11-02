@@ -88,7 +88,12 @@ export class AuthController {
     }
     const result = await this.authService.login(user, dto.rememberMe ?? false);
 
-    setTokenCookies(res, result.accessToken, result.refreshToken, dto.rememberMe);
+    setTokenCookies(
+      res,
+      result.accessToken,
+      result.refreshToken,
+      dto.rememberMe,
+    );
 
     return { user: result.user };
   }
@@ -196,8 +201,7 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  googleLogin() {
-  }
+  googleLogin() {}
 
   @SkipCsrf()
   @SkipThrottle()
@@ -213,8 +217,7 @@ export class AuthController {
 
   @Get('apple')
   @UseGuards(AuthGuard('apple'))
-  appleLogin() {
-  }
+  appleLogin() {}
 
   @SkipCsrf()
   @SkipThrottle()

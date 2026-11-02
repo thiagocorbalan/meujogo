@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { EmailService } from '../email/email.service.js';
 import { RegisterDto } from './dto/register.dto.js';
 
 @Injectable()
@@ -17,11 +18,12 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
+    private readonly emailService: EmailService,
   ) {}
 
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
-    if (!user || !user.password) {
+    if (!user?.password) {
       return null;
     }
 
@@ -35,7 +37,11 @@ export class AuthService {
   }
 
   async login(user: any, rememberMe: boolean) {
-    const payload = { sub: user.id, role: user.role };
+    const payload = {
+      sub: user.id,
+      role: user.role,
+      isSuperAdmin: user.isSuperAdmin ?? false,
+    };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET,
@@ -85,7 +91,11 @@ export class AuthService {
     }
 
     const newAccessToken = this.jwtService.sign(
-      { sub: user.id, role: user.role },
+      {
+        sub: user.id,
+        role: user.role,
+        isSuperAdmin: user.isSuperAdmin ?? false,
+      },
       { secret: process.env.JWT_SECRET, expiresIn: '15m' },
     );
 
@@ -100,7 +110,11 @@ export class AuthService {
     const hashedRefreshToken = await bcrypt.hash(newRefreshToken, 10);
     await this.usersService.updateRefreshToken(user.id, hashedRefreshToken);
 
-    return { accessToken: newAccessToken, refreshToken: newRefreshToken, rememberMe };
+    return {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+      rememberMe,
+    };
   }
 
   async logout(userId: number) {
@@ -125,16 +139,15 @@ export class AuthService {
       data: { resetToken: hashedToken, resetTokenExpiry },
     });
 
-    // The unhashed resetToken would be sent to the user via email
-    // Return it here so the caller (controller) can include it in the email
+    // Send the unhashed token via email (best-effort — won't throw if no provider configured)
+    await this.emailService.sendPasswordReset(email, resetToken);
+
+    // Return the token for backwards compatibility
     return resetToken;
   }
 
   async resetPassword(token: string, newPassword: string) {
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
     const user = await this.prisma.user.findFirst({
       where: { resetToken: hashedToken },

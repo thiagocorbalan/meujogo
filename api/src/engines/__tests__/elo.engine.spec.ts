@@ -1,8 +1,8 @@
 import {
   calculateNewElo,
   processSessionElo,
-  PlayerWithTeam,
-  MatchResult,
+  type PlayerWithTeam,
+  type MatchResult,
 } from '../elo.engine';
 
 describe('calculateNewElo', () => {
@@ -54,12 +54,19 @@ describe('processSessionElo', () => {
       { playerId: 2, elo: 1200, teamId: 2 },
     ];
     const matches: MatchResult[] = [
-      { teamAId: 1, teamBId: 2, scoreA: 2, scoreB: 1, isDraw: false, winnerId: 1 },
+      {
+        teamAId: 1,
+        teamBId: 2,
+        scoreA: 2,
+        scoreB: 1,
+        isDraw: false,
+        winnerId: 1,
+      },
     ];
     const updates = processSessionElo(players, matches, 32);
     expect(updates).toHaveLength(2);
-    expect(updates[0].playerId).toBe(1);
-    expect(updates[1].playerId).toBe(2);
+    expect(updates[0]!.playerId).toBe(1);
+    expect(updates[1]!.playerId).toBe(2);
   });
 
   it('2 teams, 2 matches: winner gains ELO, loser loses ELO', () => {
@@ -68,8 +75,22 @@ describe('processSessionElo', () => {
       { playerId: 2, elo: 1200, teamId: 2 },
     ];
     const matches: MatchResult[] = [
-      { teamAId: 1, teamBId: 2, scoreA: 3, scoreB: 1, isDraw: false, winnerId: 1 },
-      { teamAId: 1, teamBId: 2, scoreA: 2, scoreB: 0, isDraw: false, winnerId: 1 },
+      {
+        teamAId: 1,
+        teamBId: 2,
+        scoreA: 3,
+        scoreB: 1,
+        isDraw: false,
+        winnerId: 1,
+      },
+      {
+        teamAId: 1,
+        teamBId: 2,
+        scoreA: 2,
+        scoreB: 0,
+        isDraw: false,
+        winnerId: 1,
+      },
     ];
     const updates = processSessionElo(players, matches, 32);
 
@@ -86,8 +107,22 @@ describe('processSessionElo', () => {
       { playerId: 2, elo: 1000, teamId: 2 },
     ];
     const matches: MatchResult[] = [
-      { teamAId: 1, teamBId: 2, scoreA: 1, scoreB: 1, isDraw: true, winnerId: null },
-      { teamAId: 1, teamBId: 2, scoreA: 2, scoreB: 1, isDraw: false, winnerId: 1 },
+      {
+        teamAId: 1,
+        teamBId: 2,
+        scoreA: 1,
+        scoreB: 1,
+        isDraw: true,
+        winnerId: null,
+      },
+      {
+        teamAId: 1,
+        teamBId: 2,
+        scoreA: 2,
+        scoreB: 1,
+        isDraw: false,
+        winnerId: 1,
+      },
     ];
     const updates = processSessionElo(players, matches, 32);
 
@@ -104,7 +139,14 @@ describe('processSessionElo', () => {
       { playerId: 99, elo: 1500, teamId: 99 },
     ];
     const matches: MatchResult[] = [
-      { teamAId: 1, teamBId: 2, scoreA: 1, scoreB: 0, isDraw: false, winnerId: 1 },
+      {
+        teamAId: 1,
+        teamBId: 2,
+        scoreA: 1,
+        scoreB: 0,
+        isDraw: false,
+        winnerId: 1,
+      },
     ];
     const updates = processSessionElo(players, matches, 32);
     const p99 = updates.find((u) => u.playerId === 99)!;
@@ -117,7 +159,14 @@ describe('processSessionElo', () => {
       { playerId: 2, elo: 1200, teamId: 2 },
     ];
     const matches: MatchResult[] = [
-      { teamAId: 1, teamBId: 2, scoreA: 1, scoreB: 1, isDraw: true, winnerId: null },
+      {
+        teamAId: 1,
+        teamBId: 2,
+        scoreA: 1,
+        scoreB: 1,
+        isDraw: true,
+        winnerId: null,
+      },
     ];
     const updates = processSessionElo(players, matches, 32);
     const p1 = updates.find((u) => u.playerId === 1)!;
@@ -160,7 +209,14 @@ describe('processSessionElo edge cases', () => {
 
   it('empty players array: returns empty array', () => {
     const matches: MatchResult[] = [
-      { teamAId: 1, teamBId: 2, scoreA: 2, scoreB: 1, isDraw: false, winnerId: 1 },
+      {
+        teamAId: 1,
+        teamBId: 2,
+        scoreA: 2,
+        scoreB: 1,
+        isDraw: false,
+        winnerId: 1,
+      },
     ];
     const updates = processSessionElo([], matches, 32);
     expect(updates).toEqual([]);

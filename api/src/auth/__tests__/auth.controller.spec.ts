@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
@@ -112,7 +112,9 @@ describe('AuthController', () => {
       );
 
       expect(result).toEqual({ message: 'Token atualizado com sucesso' });
-      const refreshCookie = res.getCookies().find((c: any) => c.name === 'refreshToken');
+      const refreshCookie = res
+        .getCookies()
+        .find((c: any) => c.name === 'refreshToken');
       expect(refreshCookie?.options.maxAge).toBe(7 * 24 * 60 * 60 * 1000);
     });
 
@@ -131,7 +133,9 @@ describe('AuthController', () => {
         res as any,
       );
 
-      const refreshCookie = res.getCookies().find((c: any) => c.name === 'refreshToken');
+      const refreshCookie = res
+        .getCookies()
+        .find((c: any) => c.name === 'refreshToken');
       expect(refreshCookie?.options.maxAge).toBe(30 * 24 * 60 * 60 * 1000);
     });
   });

@@ -90,7 +90,7 @@ describe('drawTeamsBalanced', () => {
       const elos = players.map((p) => p.elo);
       const spread = Math.max(...elos) - Math.min(...elos);
       const [teamA, teamB] = result;
-      const diff = Math.abs(teamA.avgElo - teamB.avgElo);
+      const diff = Math.abs(teamA!.avgElo - teamB!.avgElo);
       expect(diff).toBeLessThan(spread * 0.1);
     });
   });
@@ -148,7 +148,7 @@ describe('drawTeamsRandom edge cases', () => {
     const players = makePlayers(5);
     const result = drawTeamsRandom(players, 3, 1);
     expect(result).toHaveLength(1);
-    expect(result[0].players).toHaveLength(3);
+    expect(result[0]!.players).toHaveLength(3);
   });
 
   it('negative playersPerTeam: returns empty', () => {
@@ -206,7 +206,7 @@ describe('drawTeamsBalanced edge cases', () => {
     const players = makePlayers(5);
     const result = drawTeamsBalanced(players, 3, 1);
     expect(result).toHaveLength(1);
-    expect(result[0].players).toHaveLength(3);
+    expect(result[0]!.players).toHaveLength(3);
   });
 
   it('negative playersPerTeam: returns empty', () => {

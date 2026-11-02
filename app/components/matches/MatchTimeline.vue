@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { formatMatchTime } from '~/utils/matchTime'
 
 interface TimelineEvent {
   type: string
@@ -7,9 +8,15 @@ interface TimelineEvent {
   payload?: Record<string, any>
 }
 
+interface TimelineMatchPlayer {
+  playerId?: number
+  player?: { id: number; name: string }
+}
+
 const props = defineProps<{
   events: TimelineEvent[]
   teams?: any[]
+  matchPlayers?: TimelineMatchPlayer[]
 }>()
 
 const sortedEvents = computed(() =>
@@ -22,11 +29,22 @@ function iconFor(type: string): string {
   if (type === 'GOAL_SCORED') return '\u26BD'
   if (type === 'MATCH_STARTED') return '\uD83D\uDFE2'
   if (type === 'MATCH_ENDED') return '\uD83D\uDD34'
+  if (type === 'PLAYER_SUBSTITUTED') return '\uD83D\uDD04'
+  if (type === 'SUBSTITUTION_REVERTED') return '\u21A9\uFE0F'
+  if (type === 'LATE_GOAL_ADDED') return '\u26BD'
+  if (type === 'LATE_GOAL_REMOVED') return '\u274C'
   return '\u2022'
 }
 
 function resolvePlayerName(playerId: number | undefined): string {
-  if (playerId == null || !props.teams?.length) return ''
+  if (playerId == null) return ''
+  if (props.matchPlayers?.length) {
+    for (const mp of props.matchPlayers) {
+      const pid = mp.player?.id ?? mp.playerId
+      if (pid === playerId && mp.player?.name) return mp.player.name
+    }
+  }
+  if (!props.teams?.length) return ''
   for (const team of props.teams) {
     if (!team.players) continue
     for (const tp of team.players) {
@@ -38,14 +56,49 @@ function resolvePlayerName(playerId: number | undefined): string {
   return ''
 }
 
+function resolveTeamName(teamId: number | undefined): string {
+  if (teamId == null || !props.teams?.length) return ''
+  const team = props.teams.find((t) => t.id === teamId)
+  return team?.name ?? ''
+}
+
+function reasonLabel(reason: string | undefined): string {
+  if (reason === 'LESAO') return 'Lesão'
+  if (reason === 'CANSACO') return 'Cansaço'
+  if (reason === 'SEM_MOTIVO') return 'sem motivo'
+  return ''
+}
+
 function labelFor(event: TimelineEvent): string {
   if (event.type === 'GOAL_SCORED') {
     const name = event.payload?.playerName || resolvePlayerName(event.payload?.playerId) || 'Jogador desconhecido'
-    const minute = event.payload?.minute != null ? ` - ${event.payload.minute}'` : ''
+    const formatted = formatMatchTime(event.payload?.minute)
+    const minute = formatted ? ` - ${formatted}` : ''
     return `Gol de ${name}${minute}`
   }
   if (event.type === 'MATCH_STARTED') return 'Partida iniciada'
   if (event.type === 'MATCH_ENDED') return 'Partida encerrada'
+  if (event.type === 'PLAYER_SUBSTITUTED') {
+    const teamName = resolveTeamName(event.payload?.teamId)
+    const outName = resolvePlayerName(event.payload?.playerOutId) || 'Jogador'
+    const inName = resolvePlayerName(event.payload?.playerInId) || 'Jogador'
+    const reason = reasonLabel(event.payload?.reason)
+    const formatted = formatMatchTime(event.payload?.minute)
+    const minute = formatted ? ` - ${formatted}` : ''
+    const teamSuffix = teamName ? ` no ${teamName}` : ''
+    const reasonSuffix = reason ? ` por ${reason}` : ''
+    return `Substituição${teamSuffix} - \u2B07\uFE0E ${outName} \u2B06\uFE0E ${inName}${reasonSuffix}${minute}`
+  }
+  if (event.type === 'SUBSTITUTION_REVERTED') {
+    const teamName = resolveTeamName(event.payload?.teamId)
+    const teamSuffix = teamName ? ` no ${teamName}` : ''
+    return `Substituição desfeita${teamSuffix}`
+  }
+  if (event.type === 'LATE_GOAL_ADDED') {
+    const teamName = resolveTeamName(event.payload?.teamId)
+    return `Gol tardio ${teamName ? `(${teamName})` : ''}`.trim()
+  }
+  if (event.type === 'LATE_GOAL_REMOVED') return 'Gol tardio removido'
   return event.type
 }
 
@@ -72,7 +125,7 @@ function formatTime(ts: string): string {
           !['GOAL_SCORED', 'MATCH_STARTED', 'MATCH_ENDED'].includes(event.type) ? 'bg-muted' : '',
         ]"
       >
-        <span class="text-base shrink-0">{{ iconFor(event.type) }}</span>
+        <span aria-hidden="true" class="text-base shrink-0">{{ iconFor(event.type) }}</span>
         <span class="flex-1">{{ labelFor(event) }}</span>
         <span class="text-xs text-muted-foreground whitespace-nowrap shrink-0">{{ formatTime(event.timestamp) }}</span>
       </li>

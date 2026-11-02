@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { GroupContextMiddleware } from './group-context.middleware';
-import { PrismaService } from '../../prisma/prisma.service';
+import { type PrismaService } from '../../prisma/prisma.service';
 
 describe('GroupContextMiddleware', () => {
   let middleware: GroupContextMiddleware;
@@ -13,7 +13,10 @@ describe('GroupContextMiddleware', () => {
 
   const userId = 1;
 
-  function createMockRequest(headers: Record<string, string> = {}, user = { id: userId }) {
+  function createMockRequest(
+    headers: Record<string, string> = {},
+    user = { id: userId },
+  ) {
     return {
       user,
       headers,
@@ -104,9 +107,9 @@ describe('GroupContextMiddleware', () => {
       const req = createMockRequest({ 'x-group-id': String(groupId) });
       const res = createMockResponse();
 
-      await expect(middleware.use(req as any, res as any, mockNext)).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        middleware.use(req as any, res as any, mockNext),
+      ).rejects.toThrow(ForbiddenException);
 
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -118,9 +121,9 @@ describe('GroupContextMiddleware', () => {
       const req = createMockRequest({ 'x-group-id': String(groupId) });
       const res = createMockResponse();
 
-      await expect(middleware.use(req as any, res as any, mockNext)).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        middleware.use(req as any, res as any, mockNext),
+      ).rejects.toThrow(ForbiddenException);
 
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -138,9 +141,9 @@ describe('GroupContextMiddleware', () => {
       const req = createMockRequest({ 'x-group-id': String(groupId) });
       const res = createMockResponse();
 
-      await expect(middleware.use(req as any, res as any, mockNext)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        middleware.use(req as any, res as any, mockNext),
+      ).rejects.toThrow(NotFoundException);
 
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -151,9 +154,9 @@ describe('GroupContextMiddleware', () => {
       const req = createMockRequest({ 'x-group-id': 'abc' });
       const res = createMockResponse();
 
-      await expect(middleware.use(req as any, res as any, mockNext)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        middleware.use(req as any, res as any, mockNext),
+      ).rejects.toThrow(BadRequestException);
 
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -162,9 +165,9 @@ describe('GroupContextMiddleware', () => {
       const req = createMockRequest({ 'x-group-id': '' });
       const res = createMockResponse();
 
-      await expect(middleware.use(req as any, res as any, mockNext)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        middleware.use(req as any, res as any, mockNext),
+      ).rejects.toThrow(BadRequestException);
 
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -173,9 +176,9 @@ describe('GroupContextMiddleware', () => {
       const req = createMockRequest({ 'x-group-id': '3.14' });
       const res = createMockResponse();
 
-      await expect(middleware.use(req as any, res as any, mockNext)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        middleware.use(req as any, res as any, mockNext),
+      ).rejects.toThrow(BadRequestException);
 
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -184,9 +187,9 @@ describe('GroupContextMiddleware', () => {
       const req = createMockRequest({ 'x-group-id': '-1' });
       const res = createMockResponse();
 
-      await expect(middleware.use(req as any, res as any, mockNext)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        middleware.use(req as any, res as any, mockNext),
+      ).rejects.toThrow(BadRequestException);
 
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -195,9 +198,9 @@ describe('GroupContextMiddleware', () => {
       const req = createMockRequest({ 'x-group-id': '0' });
       const res = createMockResponse();
 
-      await expect(middleware.use(req as any, res as any, mockNext)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        middleware.use(req as any, res as any, mockNext),
+      ).rejects.toThrow(BadRequestException);
 
       expect(mockNext).not.toHaveBeenCalled();
     });

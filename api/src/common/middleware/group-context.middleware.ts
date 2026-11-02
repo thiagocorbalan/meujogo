@@ -30,7 +30,12 @@ export class GroupContextMiddleware implements NestMiddleware {
     // Middleware runs before guards, so req.user may not exist yet.
     // Store the groupId for later validation by the guard, or validate if user exists.
     if (!userId) {
-      (req as any)['groupContext'] = { groupId, groupRole: null, userId: null, playerId: null };
+      (req as any)['groupContext'] = {
+        groupId,
+        groupRole: null,
+        userId: null,
+        playerId: null,
+      };
       return next();
     }
 

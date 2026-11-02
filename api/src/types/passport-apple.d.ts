@@ -15,7 +15,10 @@ declare module 'passport-apple' {
   }
 
   class Strategy extends OAuth2Strategy {
-    constructor(options: AppleStrategyOptions, verify: (...args: any[]) => void);
+    constructor(
+      options: AppleStrategyOptions,
+      verify: (...args: any[]) => void,
+    );
     name: string;
   }
 

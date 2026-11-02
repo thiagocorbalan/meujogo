@@ -92,7 +92,7 @@ export class PlayersService {
       where: { id, groupId },
     });
 
-    if (!player || !player.isActive) {
+    if (!player?.isActive) {
       throw new NotFoundException(`Player #${id} not found`);
     }
 
@@ -112,7 +112,7 @@ export class PlayersService {
       where: { id, groupId },
     });
 
-    if (!player || !player.isActive) {
+    if (!player?.isActive) {
       throw new NotFoundException(`Player #${id} not found`);
     }
 

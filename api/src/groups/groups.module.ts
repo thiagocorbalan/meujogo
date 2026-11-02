@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { GroupContextMiddleware } from '../common/middleware/group-context.middleware.js';
 import { GroupRolesGuard } from '../common/guards/group-roles.guard.js';
@@ -15,9 +20,7 @@ export class GroupsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(GroupContextMiddleware)
-      .exclude(
-        { path: 'groups/invite/(.*)', method: RequestMethod.GET },
-      )
+      .exclude({ path: 'groups/invite/(.*)', method: RequestMethod.GET })
       .forRoutes(GroupsController);
   }
 }

@@ -1,8 +1,8 @@
 import {
   shouldForceRotation,
   getNextMatch,
-  Team,
-  MatchHistory,
+  type Team,
+  type MatchHistory,
 } from '../match-rotation.engine';
 
 describe('shouldForceRotation', () => {

@@ -91,9 +91,7 @@ describe('REQ-SEC-02: Rate Limiting', () => {
 
     it('should return 429 after exceeding 5 login attempts', async () => {
       for (let i = 0; i < 6; i++) {
-        await request(app.getHttpServer())
-          .post('/test-auth/login')
-          .send({});
+        await request(app.getHttpServer()).post('/test-auth/login').send({});
       }
 
       const response = await request(app.getHttpServer())
@@ -105,9 +103,7 @@ describe('REQ-SEC-02: Rate Limiting', () => {
 
     it('should include Retry-After header in 429 response', async () => {
       for (let i = 0; i < 7; i++) {
-        await request(app.getHttpServer())
-          .post('/test-auth/login')
-          .send({});
+        await request(app.getHttpServer()).post('/test-auth/login').send({});
       }
 
       const response = await request(app.getHttpServer())

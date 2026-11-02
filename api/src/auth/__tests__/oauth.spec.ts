@@ -1,9 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { UsersService } from '../../users/users.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { EmailService } from '../../email/email.service';
 
 jest.mock('bcrypt', () => ({
   hash: jest.fn().mockResolvedValue('hashed-value'),
@@ -58,8 +59,15 @@ describe('AuthService - validateOAuthUser', () => {
       providers: [
         AuthService,
         { provide: UsersService, useValue: usersService },
-        { provide: JwtService, useValue: { sign: jest.fn(), verify: jest.fn() } },
+        {
+          provide: JwtService,
+          useValue: { sign: jest.fn(), verify: jest.fn() },
+        },
         { provide: PrismaService, useValue: prismaService },
+        {
+          provide: EmailService,
+          useValue: { sendPasswordReset: jest.fn(), sendWelcome: jest.fn() },
+        },
       ],
     }).compile();
 
@@ -107,7 +115,9 @@ describe('AuthService - validateOAuthUser', () => {
 
     it('should throw UnauthorizedException when linking to user with password', async () => {
       (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
-      (usersService.findByEmail as jest.Mock).mockResolvedValue(baseMockUser as any);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(
+        baseMockUser as any,
+      );
 
       await expect(
         service.validateOAuthUser(googleProfile, 'google'),
@@ -118,7 +128,9 @@ describe('AuthService - validateOAuthUser', () => {
     it('should link to existing OAuth-only user by email', async () => {
       const oauthOnlyUser = { ...baseMockUser, password: null };
       (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
-      (usersService.findByEmail as jest.Mock).mockResolvedValue(oauthOnlyUser as any);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(
+        oauthOnlyUser as any,
+      );
       (prismaService.user.update as jest.Mock).mockResolvedValue({
         ...oauthOnlyUser,
         googleId: 'google-id-123',
@@ -170,7 +182,9 @@ describe('AuthService - validateOAuthUser', () => {
 
     it('should throw UnauthorizedException when linking to user with password', async () => {
       (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
-      (usersService.findByEmail as jest.Mock).mockResolvedValue(baseMockUser as any);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(
+        baseMockUser as any,
+      );
 
       await expect(
         service.validateOAuthUser(appleProfile, 'apple'),
@@ -181,7 +195,9 @@ describe('AuthService - validateOAuthUser', () => {
     it('should link to existing OAuth-only user', async () => {
       const oauthOnlyUser = { ...baseMockUser, password: null };
       (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
-      (usersService.findByEmail as jest.Mock).mockResolvedValue(oauthOnlyUser as any);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(
+        oauthOnlyUser as any,
+      );
       (prismaService.user.update as jest.Mock).mockResolvedValue({
         ...oauthOnlyUser,
         appleId: 'apple-id-456',
@@ -203,10 +219,16 @@ describe('AuthService - validateOAuthUser', () => {
         ...baseMockUser,
         googleId: 'google-id-123',
       };
-      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(existingGoogleUser);
+      (prismaService.user.findFirst as jest.Mock).mockResolvedValue(
+        existingGoogleUser,
+      );
 
       const result = await service.validateOAuthUser(
-        { email: 'google@example.com', name: 'Google User', providerId: 'google-id-123' },
+        {
+          email: 'google@example.com',
+          name: 'Google User',
+          providerId: 'google-id-123',
+        },
         'google',
       );
 
@@ -218,11 +240,17 @@ describe('AuthService - validateOAuthUser', () => {
 
     it('should throw UnauthorizedException when linking appleId to user with password', async () => {
       (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
-      (usersService.findByEmail as jest.Mock).mockResolvedValue(baseMockUser as any);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(
+        baseMockUser as any,
+      );
 
       await expect(
         service.validateOAuthUser(
-          { email: 'existing@example.com', name: 'Existing User', providerId: 'apple-id-new' },
+          {
+            email: 'existing@example.com',
+            name: 'Existing User',
+            providerId: 'apple-id-new',
+          },
           'apple',
         ),
       ).rejects.toThrow(UnauthorizedException);
@@ -232,14 +260,20 @@ describe('AuthService - validateOAuthUser', () => {
     it('should update appleId on existing OAuth-only user found by email', async () => {
       const oauthOnlyUser = { ...baseMockUser, password: null };
       (prismaService.user.findFirst as jest.Mock).mockResolvedValue(null);
-      (usersService.findByEmail as jest.Mock).mockResolvedValue(oauthOnlyUser as any);
+      (usersService.findByEmail as jest.Mock).mockResolvedValue(
+        oauthOnlyUser as any,
+      );
       (prismaService.user.update as jest.Mock).mockResolvedValue({
         ...oauthOnlyUser,
         appleId: 'apple-id-new',
       });
 
       const result = await service.validateOAuthUser(
-        { email: 'existing@example.com', name: 'Existing User', providerId: 'apple-id-new' },
+        {
+          email: 'existing@example.com',
+          name: 'Existing User',
+          providerId: 'apple-id-new',
+        },
         'apple',
       );
 

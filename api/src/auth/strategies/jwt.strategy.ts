@@ -16,7 +16,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: { sub: number; role: string }) {
-    return { id: payload.sub, role: payload.role };
+  validate(payload: {
+    sub: number;
+    role: string;
+    isSuperAdmin: boolean;
+    impersonatedBy?: number;
+  }) {
+    return {
+      id: payload.sub,
+      role: payload.role,
+      isSuperAdmin: payload.isSuperAdmin,
+      impersonatedBy: payload.impersonatedBy,
+    };
   }
 }

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, ArgumentsHost } from '@nestjs/common';
+import { HttpException, HttpStatus, type ArgumentsHost } from '@nestjs/common';
 import { HttpExceptionFilter } from '../http-exception.filter';
 
 describe('REQ-SEC-06: Global Exception Filter', () => {

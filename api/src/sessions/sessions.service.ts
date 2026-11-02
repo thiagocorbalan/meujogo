@@ -5,8 +5,15 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSessionDto } from './dto/create-session.dto';
-import { processSessionElo, PlayerWithTeam, MatchResult } from '../engines/elo.engine';
-import { calculateRanking, MatchResult as RankingMatchResult } from '../engines/ranking.engine';
+import {
+  processSessionEloFromParticipation,
+  MatchParticipation,
+  MatchResult,
+} from '../engines/elo.engine';
+import {
+  calculateRanking,
+  MatchResult as RankingMatchResult,
+} from '../engines/ranking.engine';
 
 @Injectable()
 export class SessionsService {
@@ -42,9 +49,15 @@ export class SessionsService {
   }
 
   async create(dto: CreateSessionDto, groupId: number) {
-    const settings = await this.prisma.settings.findUnique({ where: { groupId } });
-    const swapTime = settings?.teamSwapEnabled ? (settings.teamSwapTimeMin ?? 0) : 0;
-    const totalMatches = Math.floor(dto.durationMinutes / (dto.matchDurationMinutes + swapTime));
+    const settings = await this.prisma.settings.findUnique({
+      where: { groupId },
+    });
+    const swapTime = settings?.teamSwapEnabled
+      ? (settings.teamSwapTimeMin ?? 0)
+      : 0;
+    const totalMatches = Math.floor(
+      dto.durationMinutes / (dto.matchDurationMinutes + swapTime),
+    );
 
     const session = await this.prisma.session.create({
       data: {
@@ -84,7 +97,9 @@ export class SessionsService {
     }
 
     if (session.status !== 'PENDING') {
-      throw new BadRequestException('Session must be in PENDING status to start');
+      throw new BadRequestException(
+        'Session must be in PENDING status to start',
+      );
     }
 
     return this.prisma.session.update({
@@ -127,15 +142,43 @@ export class SessionsService {
         include: { players: { include: { player: true } } },
       });
 
-      const players: PlayerWithTeam[] = teams.flatMap((team) =>
-        team.players.map((tp) => ({
-          playerId: tp.player.id,
-          elo: tp.player.elo,
-          teamId: team.id,
-        })),
+      const matchIds = matches.map((m) => m.id);
+      const matchPlayers = matchIds.length
+        ? await tx.matchPlayer.findMany({
+            where: { matchId: { in: matchIds } },
+          })
+        : [];
+
+      const playerEloMap = new Map<number, number>();
+      for (const team of teams) {
+        for (const tp of team.players) {
+          playerEloMap.set(tp.player.id, tp.player.elo);
+        }
+      }
+      const missingPlayerIds = Array.from(
+        new Set(
+          matchPlayers
+            .map((mp) => mp.playerId)
+            .filter((pid) => !playerEloMap.has(pid)),
+        ),
       );
+      if (missingPlayerIds.length) {
+        const extraPlayers = await tx.player.findMany({
+          where: { id: { in: missingPlayerIds } },
+          select: { id: true, elo: true },
+        });
+        for (const p of extraPlayers) playerEloMap.set(p.id, p.elo);
+      }
+
+      const participations: MatchParticipation[] = matchPlayers.map((mp) => ({
+        matchId: mp.matchId,
+        playerId: mp.playerId,
+        teamId: mp.teamId,
+        elo: playerEloMap.get(mp.playerId) ?? 1000,
+      }));
 
       const matchResults: MatchResult[] = matches.map((m) => ({
+        matchId: m.id,
         teamAId: m.teamAId,
         teamBId: m.teamBId,
         scoreA: m.scoreA,
@@ -144,7 +187,11 @@ export class SessionsService {
         winnerId: m.winnerId,
       }));
 
-      const eloUpdates = processSessionElo(players, matchResults, kFactor);
+      const eloUpdates = processSessionEloFromParticipation(
+        participations,
+        matchResults,
+        kFactor,
+      );
 
       await Promise.all(
         eloUpdates

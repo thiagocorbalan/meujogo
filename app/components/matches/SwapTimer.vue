@@ -63,8 +63,11 @@ onUnmounted(stop)
   <div class="flex flex-col items-center gap-3 py-6 px-8 bg-amber-50 border border-amber-200 rounded-lg">
     <p class="text-sm font-semibold text-amber-800 uppercase tracking-wide">Intervalo — Troca de Time</p>
     <span
+      role="timer"
+      :aria-label="`Tempo de intervalo: ${finished ? 'pronto' : display}`"
+      aria-live="polite"
       :class="[
-        'font-mono text-2xl font-bold tabular-nums',
+        'font-mono text-2xl font-bold tabular-nums motion-reduce:transition-none',
         finished ? 'text-green-600' : 'text-amber-900',
       ]"
     >

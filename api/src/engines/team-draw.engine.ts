@@ -43,7 +43,10 @@ export function drawTeamsRandom(
   if (players.length === 0 || playersPerTeam <= 0 || maxTeams <= 0) return [];
 
   const shuffled = [...players].sort(() => Math.random() - 0.5);
-  const numTeams = Math.min(maxTeams, Math.floor(shuffled.length / playersPerTeam));
+  const numTeams = Math.min(
+    maxTeams,
+    Math.floor(shuffled.length / playersPerTeam),
+  );
   if (numTeams === 0) return [];
 
   return buildTeams(shuffled, playersPerTeam, numTeams);
@@ -56,7 +59,10 @@ export function drawTeamsBalanced(
 ): DrawnTeam[] {
   if (players.length === 0 || playersPerTeam <= 0 || maxTeams <= 0) return [];
 
-  const numTeams = Math.min(maxTeams, Math.floor(players.length / playersPerTeam));
+  const numTeams = Math.min(
+    maxTeams,
+    Math.floor(players.length / playersPerTeam),
+  );
   if (numTeams === 0) return [];
 
   const sorted = [...players].sort((a, b) => b.elo - a.elo);

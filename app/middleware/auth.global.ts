@@ -5,6 +5,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     '/esqueceu-senha',
     '/redefinir-senha',
     '/auth/callback',
+    '/termos',
+    '/privacidade',
   ]
 
   const isPublic =
@@ -33,6 +35,19 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   if (!authStore.isAuthenticated) {
     return navigateTo('/login')
+  }
+
+  // Admin routes — require isSuperAdmin
+  if (to.path.startsWith('/admin')) {
+    if (!authStore.user?.isSuperAdmin) {
+      return navigateTo('/')
+    }
+    return
+  }
+
+  // SuperAdmin accessing regular routes — redirect to admin panel
+  if (authStore.user?.isSuperAdmin) {
+    return navigateTo('/admin')
   }
 
   // Pages that don't require group context

@@ -16,10 +16,7 @@ export class DashboardService {
       where: {
         groupId,
         isActive: true,
-        OR: [
-          { membership: { isNot: null } },
-          { type: 'CONVIDADO' },
-        ],
+        OR: [{ membership: { isNot: null } }, { type: 'CONVIDADO' }],
       },
     });
 
@@ -39,10 +36,7 @@ export class DashboardService {
       where: {
         groupId,
         isActive: true,
-        OR: [
-          { membership: { isNot: null } },
-          { type: 'CONVIDADO' },
-        ],
+        OR: [{ membership: { isNot: null } }, { type: 'CONVIDADO' }],
       },
       orderBy: { goals: 'desc' },
     });
@@ -51,10 +45,7 @@ export class DashboardService {
       where: {
         groupId,
         isActive: true,
-        OR: [
-          { membership: { isNot: null } },
-          { type: 'CONVIDADO' },
-        ],
+        OR: [{ membership: { isNot: null } }, { type: 'CONVIDADO' }],
       },
       orderBy: { elo: 'desc' },
     });
@@ -63,15 +54,26 @@ export class DashboardService {
       where: { groupId },
       orderBy: { createdAt: 'desc' },
       take: 5,
-      include: { champion: true, season: true, _count: { select: { matches: true } } },
+      include: {
+        champion: true,
+        season: true,
+        _count: { select: { matches: true } },
+      },
     });
 
-    const [activePlayers, injuredPlayers, suspendedPlayers, guestPlayers] = await Promise.all([
-      this.prisma.player.count({ where: { groupId, isActive: true, status: 'ATIVO' } }),
-      this.prisma.player.count({ where: { groupId, isActive: true, status: 'LESIONADO' } }),
-      this.prisma.player.count({ where: { groupId, isActive: true, status: 'AUSENTE' } }),
-      this.prisma.player.count({ where: { groupId, type: 'CONVIDADO' } }),
-    ]);
+    const [activePlayers, injuredPlayers, suspendedPlayers, guestPlayers] =
+      await Promise.all([
+        this.prisma.player.count({
+          where: { groupId, isActive: true, status: 'ATIVO' },
+        }),
+        this.prisma.player.count({
+          where: { groupId, isActive: true, status: 'LESIONADO' },
+        }),
+        this.prisma.player.count({
+          where: { groupId, isActive: true, status: 'AUSENTE' },
+        }),
+        this.prisma.player.count({ where: { groupId, type: 'CONVIDADO' } }),
+      ]);
 
     return {
       currentSession,

@@ -12,10 +12,7 @@ export class StatsService {
           groupId,
           isActive: true,
           goals: { gt: 0 },
-          OR: [
-            { membership: { isNot: null } },
-            { type: 'CONVIDADO' },
-          ],
+          OR: [{ membership: { isNot: null } }, { type: 'CONVIDADO' }],
         },
         orderBy: { goals: 'desc' },
         take: limit,
@@ -34,6 +31,7 @@ export class StatsService {
       by: ['playerId'],
       where: {
         match: { session: { seasonId, groupId } },
+        playerId: { not: null },
       },
       _count: { id: true },
       orderBy: { _count: { id: 'desc' } },
@@ -42,7 +40,9 @@ export class StatsService {
 
     if (goalCounts.length === 0) return [];
 
-    const playerIds = goalCounts.map((g) => g.playerId);
+    const playerIds = goalCounts
+      .map((g) => g.playerId)
+      .filter((id): id is number => id !== null);
     const players = await this.prisma.player.findMany({
       where: { id: { in: playerIds }, groupId, isActive: true },
       select: {
@@ -58,6 +58,7 @@ export class StatsService {
     const playerMap = new Map(players.map((p) => [p.id, p]));
     return goalCounts
       .map((g) => {
+        if (g.playerId === null) return null;
         const player = playerMap.get(g.playerId);
         if (!player) return null;
         return {
@@ -73,10 +74,7 @@ export class StatsService {
       where: {
         groupId,
         isActive: true,
-        OR: [
-          { membership: { isNot: null } },
-          { type: 'CONVIDADO' },
-        ],
+        OR: [{ membership: { isNot: null } }, { type: 'CONVIDADO' }],
       },
       orderBy: { elo: 'desc' },
       take: limit,

@@ -1,9 +1,46 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import { useCountdownTimer } from '~/composables/useCountdownTimer'
+import type { GoalDisplay } from './GoalListItem.vue'
+
+interface MatchEventLike {
+  type: string
+  timestamp?: string
+  createdAt?: string
+}
+
+interface GoalLike {
+  id: number
+  playerId: number | null
+  teamId: number
+  minute: number | null
+  source?: 'LIVE' | 'LATE'
+}
+
+interface MatchPlayerLike {
+  playerId?: number
+  player?: { id: number; name: string }
+}
+
+interface MatchLike {
+  events?: MatchEventLike[]
+  goals?: GoalLike[]
+  session?: { matchDurationMinutes?: number }
+  teamA?: { id: number; name: string; color?: string; players?: unknown[] }
+  teamB?: { id: number; name: string; color?: string; players?: unknown[] }
+  matchPlayers?: MatchPlayerLike[]
+}
+
+interface TeamLike {
+  id: number
+  name: string
+  color?: string
+  players?: Array<{ id?: number; name?: string; player?: { id: number; name: string } }>
+}
 
 const props = defineProps<{
-  match: any
-  teams: any[]
+  match: MatchLike
+  teams: TeamLike[]
   loading: boolean
   disabled: boolean
   twoTeamMode: boolean
@@ -13,14 +50,14 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   goal: [playerId: number, teamId: number]
-  'undo-goal': [goal: { id: number; playerName: string; teamName: string; minute?: number }]
+  'undo-goal': [goal: GoalDisplay]
   'end-match': []
   'end-session': []
 }>()
 
-function getMatchStartTimestamp(match: any): string | null {
+function getMatchStartTimestamp(match: MatchLike | undefined): string | null {
   if (!match?.events?.length) return null
-  const startEvent = match.events.find((e: any) => e.type === 'MATCH_STARTED')
+  const startEvent = match.events.find((e) => e.type === 'MATCH_STARTED')
   return startEvent?.timestamp ?? startEvent?.createdAt ?? null
 }
 
@@ -39,21 +76,68 @@ const startTimestamp = computed(() => {
   return getMatchStartTimestamp(props.match)
 })
 
-const { display: timerDisplay, isTimeUp, isOvertime, remainingSeconds } = useCountdownTimer(durationSeconds, startTimestamp)
+const { display: timerDisplay, isTimeUp, remainingSeconds } = useCountdownTimer(durationSeconds, startTimestamp)
 
-const currentMinute = computed(() => {
-  const elapsed = durationSeconds.value - remainingSeconds.value
-  return Math.floor(elapsed / 60) + 1
-})
+const elapsedSeconds = computed(() =>
+  Math.max(0, durationSeconds.value - remainingSeconds.value),
+)
+const currentMinute = computed(() => Math.floor(elapsedSeconds.value / 60) + 1)
 
 function handleGoal(playerId: number, teamId: number) {
   emit('goal', playerId, teamId)
 }
 
-// In 2-team mode, the end-match button is always enabled (no time gate)
 const canEndMatch = computed(() => props.twoTeamMode || isTimeUp.value)
 
-defineExpose({ currentMinute })
+const showGoalList = ref(false)
+
+function normalizeTeamPlayers(team: TeamLike | undefined) {
+  if (!team?.players) return []
+  return team.players.map((p) => {
+    if (p.player && typeof p.player === 'object') {
+      return { id: p.player.id, name: p.player.name }
+    }
+    return { id: p.id ?? 0, name: p.name ?? '' }
+  })
+}
+
+function resolveTeam(teamId: number): TeamLike | undefined {
+  return props.teams.find((t) => t.id === teamId)
+}
+
+const displayGoals = computed<GoalDisplay[]>(() => {
+  const goals = props.match.goals ?? []
+  const allPlayers = [
+    ...normalizeTeamPlayers(resolveTeam(props.match.teamA?.id ?? 0)),
+    ...normalizeTeamPlayers(resolveTeam(props.match.teamB?.id ?? 0)),
+  ]
+  return goals.map((g) => {
+    const team = resolveTeam(g.teamId)
+    const player = g.playerId !== null ? allPlayers.find((p) => p.id === g.playerId) : null
+    return {
+      id: g.id,
+      playerName: player?.name ?? null,
+      teamName: team?.name ?? 'Time',
+      teamColor: team?.color ?? '#3b82f6',
+      minute: g.minute,
+      source: g.source ?? 'LIVE',
+    }
+  })
+})
+
+function handleOpenGoalList() {
+  showGoalList.value = true
+}
+
+function handleCloseGoalList() {
+  showGoalList.value = false
+}
+
+function handleUndoGoalFromList(goal: GoalDisplay) {
+  emit('undo-goal', goal)
+}
+
+defineExpose({ currentMinute, elapsedSeconds, isTimeUp })
 </script>
 
 <template>
@@ -64,15 +148,22 @@ defineExpose({ currentMinute })
           {{ twoTeamMode ? 'Sessão' : 'Tempo' }}
         </span>
         <span
+          role="timer"
+          :aria-label="`${twoTeamMode ? 'Tempo de sessao' : 'Tempo de partida'}: ${timerDisplay}`"
           :class="[
-            'font-mono text-3xl font-bold tabular-nums',
+            'font-mono text-3xl font-bold tabular-nums motion-reduce:animate-none',
             isTimeUp ? 'text-red-600 animate-pulse' : 'text-foreground',
           ]"
         >
           {{ timerDisplay }}
         </span>
       </div>
-      <span v-if="isTimeUp" class="text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded">
+      <span
+        v-if="isTimeUp"
+        role="status"
+        aria-live="assertive"
+        class="text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded"
+      >
         Tempo esgotado
       </span>
     </div>
@@ -82,7 +173,15 @@ defineExpose({ currentMinute })
       :teams="teams"
       :disabled="loading || disabled"
       @goal="handleGoal"
-      @undo-goal="$emit('undo-goal', $event)"
+      @open-goal-list="handleOpenGoalList"
+    />
+
+    <MatchesGoalList
+      v-if="showGoalList"
+      :goals="displayGoals"
+      :disabled="loading || disabled"
+      @close="handleCloseGoalList"
+      @undo-goal="handleUndoGoalFromList"
     />
 
     <div v-if="!disabled" class="flex justify-end mt-4">
@@ -110,7 +209,11 @@ defineExpose({ currentMinute })
 
     <div class="mt-2 bg-white border rounded-lg p-4">
       <h3 class="text-base font-semibold text-foreground mb-2.5 mt-0">Eventos</h3>
-      <MatchesMatchTimeline :events="match.events ?? []" :teams="teams" />
+      <MatchesMatchTimeline
+        :events="match.events ?? []"
+        :teams="teams"
+        :match-players="match.matchPlayers ?? []"
+      />
     </div>
   </div>
 </template>

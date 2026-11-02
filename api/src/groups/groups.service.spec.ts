@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import {
   BadRequestException,
   ConflictException,
@@ -20,7 +20,9 @@ describe('GroupsService', () => {
   };
 
   const mockPrisma = {
-    $transaction: jest.fn((cb: (tx: typeof mockTx) => Promise<any>) => cb(mockTx)),
+    $transaction: jest.fn((cb: (tx: typeof mockTx) => Promise<any>) =>
+      cb(mockTx),
+    ),
     group: {
       create: jest.fn(),
       findFirst: jest.fn(),
@@ -289,7 +291,12 @@ describe('GroupsService', () => {
     };
 
     it('should update group fields (name, description, dayOfWeek, defaultTime, address)', async () => {
-      const updatedGroup = { id: groupId, ...dto, slug: 'pelada-atualizada', isActive: true };
+      const updatedGroup = {
+        id: groupId,
+        ...dto,
+        slug: 'pelada-atualizada',
+        isActive: true,
+      };
       mockPrisma.group.update.mockResolvedValue(updatedGroup);
 
       const result = await service.update(groupId, dto);
@@ -369,13 +376,17 @@ describe('GroupsService', () => {
     it('should throw NotFoundException for invalid invite code', async () => {
       mockPrisma.group.findFirst.mockResolvedValue(null);
 
-      await expect(service.getInviteInfo('INVALID1')).rejects.toThrow(NotFoundException);
+      await expect(service.getInviteInfo('INVALID1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw NotFoundException for inactive group', async () => {
       mockPrisma.group.findFirst.mockResolvedValue(null);
 
-      await expect(service.getInviteInfo(inviteCode)).rejects.toThrow(NotFoundException);
+      await expect(service.getInviteInfo(inviteCode)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -400,7 +411,11 @@ describe('GroupsService', () => {
     it('should create GroupMember + Player and return membership', async () => {
       mockPrisma.group.findFirst.mockResolvedValue(group);
       mockPrisma.groupMember.findFirst.mockResolvedValue(null); // not already member
-      mockPrisma.player.create.mockResolvedValue({ id: 200, userId, groupId: group.id });
+      mockPrisma.player.create.mockResolvedValue({
+        id: 200,
+        userId,
+        groupId: group.id,
+      });
       mockPrisma.groupMember.create.mockResolvedValue({
         id: 60,
         groupId: group.id,
@@ -686,7 +701,10 @@ describe('GroupsService', () => {
         isActive: true,
       };
       mockPrisma.groupMember.findFirst.mockResolvedValue(membership);
-      mockPrisma.groupMember.update.mockResolvedValue({ ...membership, isActive: false });
+      mockPrisma.groupMember.update.mockResolvedValue({
+        ...membership,
+        isActive: false,
+      });
 
       // Ensure there are other DONOs (or user is not DONO)
       mockPrisma.groupMember.findMany.mockResolvedValue([]);
@@ -752,7 +770,10 @@ describe('GroupsService', () => {
     it('should find GroupMember by id+groupId, find linked Player, update Player.status to AUSENTE', async () => {
       mockPrisma.groupMember.findFirst.mockResolvedValue(activeMember);
       mockPrisma.player.findFirst.mockResolvedValue(activePlayer);
-      mockPrisma.player.update.mockResolvedValue({ ...activePlayer, status: 'AUSENTE' });
+      mockPrisma.player.update.mockResolvedValue({
+        ...activePlayer,
+        status: 'AUSENTE',
+      });
 
       const result = await service.suspendMember(groupId, memberId);
 
@@ -838,7 +859,10 @@ describe('GroupsService', () => {
     it('should find GroupMember, update Player.status to ATIVO', async () => {
       mockPrisma.groupMember.findFirst.mockResolvedValue(suspendedMember);
       mockPrisma.player.findFirst.mockResolvedValue(suspendedPlayer);
-      mockPrisma.player.update.mockResolvedValue({ ...suspendedPlayer, status: 'ATIVO' });
+      mockPrisma.player.update.mockResolvedValue({
+        ...suspendedPlayer,
+        status: 'ATIVO',
+      });
 
       const result = await service.reactivateMember(groupId, memberId);
 

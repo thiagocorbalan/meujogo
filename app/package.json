@@ -19,11 +19,15 @@
   "dependencies": {
     "@pinia/nuxt": "^0.11.3",
     "@sentry/nuxt": "^10.47.0",
+    "@tiptap/starter-kit": "^3.22.3",
+    "@tiptap/vue-3": "^3.22.3",
     "@vueuse/core": "^14.2.1",
+    "chart.js": "^4.5.1",
     "nuxt": "^3.17.2",
     "pinia": "^3.0.4",
     "reka-ui": "^2.9.2",
     "vue": "^3.5.13",
+    "vue-chartjs": "^5.3.3",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {

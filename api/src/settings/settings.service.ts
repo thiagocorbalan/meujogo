@@ -63,10 +63,14 @@ export class SettingsService {
   async resetData(groupId: number) {
     await this.prisma.$transaction(async (tx) => {
       await tx.goal.deleteMany({ where: { match: { session: { groupId } } } });
-      await tx.matchEvent.deleteMany({ where: { match: { session: { groupId } } } });
+      await tx.matchEvent.deleteMany({
+        where: { match: { session: { groupId } } },
+      });
       await tx.match.deleteMany({ where: { session: { groupId } } });
       await tx.champion.deleteMany({ where: { session: { groupId } } });
-      await tx.teamPlayer.deleteMany({ where: { team: { session: { groupId } } } });
+      await tx.teamPlayer.deleteMany({
+        where: { team: { session: { groupId } } },
+      });
       await tx.team.deleteMany({ where: { session: { groupId } } });
       await tx.attendance.deleteMany({ where: { session: { groupId } } });
       await tx.session.deleteMany({ where: { groupId } });

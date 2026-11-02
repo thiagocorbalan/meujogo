@@ -26,7 +26,10 @@ function getAppleSigningKey(header: jwt.JwtHeader): Promise<string> {
 }
 
 @Injectable()
-export class AppleOAuthStrategy extends PassportStrategy(AppleStrategy, 'apple') {
+export class AppleOAuthStrategy extends PassportStrategy(
+  AppleStrategy,
+  'apple',
+) {
   private readonly clientID: string;
 
   constructor(private readonly authService: AuthService) {
@@ -75,7 +78,7 @@ export class AppleOAuthStrategy extends PassportStrategy(AppleStrategy, 'apple')
       );
     }
 
-    if (!decoded || !decoded.sub) {
+    if (!decoded?.sub) {
       return done(
         new UnauthorizedException('Invalid Apple ID token'),
         undefined,

@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
@@ -14,6 +19,7 @@ import { UsersModule } from './users/users.module.js';
 import { SeasonsModule } from './seasons/seasons.module.js';
 import { SessionsModule } from './sessions/sessions.module.js';
 import { MatchesModule } from './matches/matches.module.js';
+import { SubstitutionsModule } from './substitutions/substitutions.module.js';
 import { TeamsModule } from './teams/teams.module.js';
 import { AttendanceModule } from './attendance/attendance.module.js';
 import { RankingModule } from './ranking/ranking.module.js';
@@ -23,6 +29,13 @@ import { UploadsModule } from './uploads/uploads.module.js';
 import { StatsModule } from './stats/stats.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { GroupsModule } from './groups/groups.module.js';
+import { CommonModule } from './common/common.module.js';
+import { AdminModule } from './admin/admin.module.js';
+import { PlansModule } from './plans/plans.module.js';
+import { LegalModule } from './legal/legal.module.js';
+import { IntegrationsModule } from './integrations/integrations.module.js';
+import { BillingModule } from './billing/billing.module.js';
+import { EmailModule } from './email/email.module.js';
 
 @Module({
   imports: [
@@ -59,6 +72,7 @@ import { GroupsModule } from './groups/groups.module.js';
     SeasonsModule,
     SessionsModule,
     MatchesModule,
+    SubstitutionsModule,
     TeamsModule,
     AttendanceModule,
     RankingModule,
@@ -68,6 +82,13 @@ import { GroupsModule } from './groups/groups.module.js';
     StatsModule,
     AuthModule,
     GroupsModule,
+    CommonModule,
+    AdminModule,
+    PlansModule,
+    LegalModule,
+    IntegrationsModule,
+    BillingModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [
@@ -90,6 +111,9 @@ export class AppModule implements NestModule {
         { path: 'auth/(.*)', method: RequestMethod.ALL },
         { path: 'health', method: RequestMethod.ALL },
         { path: 'groups/invite/(.*)', method: RequestMethod.GET },
+        { path: 'admin/(.*)', method: RequestMethod.ALL },
+        { path: 'legal/(.*)', method: RequestMethod.ALL },
+        { path: 'billing/webhook', method: RequestMethod.POST },
       )
       .forRoutes('*');
   }

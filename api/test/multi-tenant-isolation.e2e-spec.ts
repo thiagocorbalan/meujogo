@@ -53,35 +53,111 @@ const TEST_USER = { id: 1, role: 'ADMIN' };
 // ---------------------------------------------------------------------------
 
 const GROUP_A_PLAYERS = [
-  { id: 1, name: 'Carlos', position: 'LINHA', type: 'FIXO', groupId: GROUP_A_ID, isActive: true, elo: 1200 },
-  { id: 2, name: 'Roberto', position: 'GOLEIRO', type: 'FIXO', groupId: GROUP_A_ID, isActive: true, elo: 1200 },
+  {
+    id: 1,
+    name: 'Carlos',
+    position: 'LINHA',
+    type: 'FIXO',
+    groupId: GROUP_A_ID,
+    isActive: true,
+    elo: 1200,
+  },
+  {
+    id: 2,
+    name: 'Roberto',
+    position: 'GOLEIRO',
+    type: 'FIXO',
+    groupId: GROUP_A_ID,
+    isActive: true,
+    elo: 1200,
+  },
 ];
 
 const GROUP_B_PLAYERS = [
-  { id: 3, name: 'Ana', position: 'LINHA', type: 'FIXO', groupId: GROUP_B_ID, isActive: true, elo: 1300 },
-  { id: 4, name: 'Pedro', position: 'LINHA', type: 'FIXO', groupId: GROUP_B_ID, isActive: true, elo: 1100 },
-  { id: 5, name: 'Lucia', position: 'GOLEIRO', type: 'FIXO', groupId: GROUP_B_ID, isActive: true, elo: 1250 },
+  {
+    id: 3,
+    name: 'Ana',
+    position: 'LINHA',
+    type: 'FIXO',
+    groupId: GROUP_B_ID,
+    isActive: true,
+    elo: 1300,
+  },
+  {
+    id: 4,
+    name: 'Pedro',
+    position: 'LINHA',
+    type: 'FIXO',
+    groupId: GROUP_B_ID,
+    isActive: true,
+    elo: 1100,
+  },
+  {
+    id: 5,
+    name: 'Lucia',
+    position: 'GOLEIRO',
+    type: 'FIXO',
+    groupId: GROUP_B_ID,
+    isActive: true,
+    elo: 1250,
+  },
 ];
 
 const ALL_PLAYERS = [...GROUP_A_PLAYERS, ...GROUP_B_PLAYERS];
 
 const GROUP_A_SESSIONS = [
-  { id: 100, seasonId: 1, status: 'FINISHED', groupId: GROUP_A_ID, season: null, teams: [], matches: [] },
+  {
+    id: 100,
+    seasonId: 1,
+    status: 'FINISHED',
+    groupId: GROUP_A_ID,
+    season: null,
+    teams: [],
+    matches: [],
+  },
 ];
 
 const GROUP_B_SESSIONS = [
-  { id: 200, seasonId: 2, status: 'PENDING', groupId: GROUP_B_ID, season: null, teams: [], matches: [] },
-  { id: 201, seasonId: 2, status: 'IN_PROGRESS', groupId: GROUP_B_ID, season: null, teams: [], matches: [] },
+  {
+    id: 200,
+    seasonId: 2,
+    status: 'PENDING',
+    groupId: GROUP_B_ID,
+    season: null,
+    teams: [],
+    matches: [],
+  },
+  {
+    id: 201,
+    seasonId: 2,
+    status: 'IN_PROGRESS',
+    groupId: GROUP_B_ID,
+    season: null,
+    teams: [],
+    matches: [],
+  },
 ];
 
 const ALL_SESSIONS = [...GROUP_A_SESSIONS, ...GROUP_B_SESSIONS];
 
 const GROUP_A_SETTINGS = {
-  id: 1, groupId: GROUP_A_ID, playersPerTeam: 5, matchDuration: 10, kFactor: 32, defaultElo: 1200, vests: [],
+  id: 1,
+  groupId: GROUP_A_ID,
+  playersPerTeam: 5,
+  matchDuration: 10,
+  kFactor: 32,
+  defaultElo: 1200,
+  vests: [],
 };
 
 const GROUP_B_SETTINGS = {
-  id: 2, groupId: GROUP_B_ID, playersPerTeam: 6, matchDuration: 15, kFactor: 24, defaultElo: 1000, vests: [],
+  id: 2,
+  groupId: GROUP_B_ID,
+  playersPerTeam: 6,
+  matchDuration: 15,
+  kFactor: 24,
+  defaultElo: 1000,
+  vests: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -176,7 +252,9 @@ const mockPlayersService = {
     return Promise.resolve(player);
   }),
   findOne: jest.fn().mockImplementation((id: number, groupId: number) => {
-    const player = ALL_PLAYERS.find((p) => p.id === id && p.groupId === groupId);
+    const player = ALL_PLAYERS.find(
+      (p) => p.id === id && p.groupId === groupId,
+    );
     if (!player) {
       const { NotFoundException } = require('@nestjs/common');
       throw new NotFoundException(`Player #${id} not found`);
@@ -233,16 +311,28 @@ describe('Multi-tenant data isolation (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeAll(async () => {
-    const { PlayersModule } = await import('../src/players/players.module');
-    const { PlayersService } = await import('../src/players/players.service');
-    const { SessionsModule } = await import('../src/sessions/sessions.module');
-    const { SessionsService } = await import('../src/sessions/sessions.service');
-    const { SettingsModule } = await import('../src/settings/settings.module');
-    const { SettingsService } = await import('../src/settings/settings.service');
-    const { PrismaService } = await import('../src/prisma/prisma.service');
-    const { JwtAuthGuard } = await import('../src/auth/guards/jwt-auth.guard');
+    const { PlayersModule } = await import('../src/players/players.module.js');
+    const { PlayersService } = await import(
+      '../src/players/players.service.js'
+    );
+    const { SessionsModule } = await import(
+      '../src/sessions/sessions.module.js'
+    );
+    const { SessionsService } = await import(
+      '../src/sessions/sessions.service.js'
+    );
+    const { SettingsModule } = await import(
+      '../src/settings/settings.module.js'
+    );
+    const { SettingsService } = await import(
+      '../src/settings/settings.service.js'
+    );
+    const { PrismaService } = await import('../src/prisma/prisma.service.js');
+    const { JwtAuthGuard } = await import(
+      '../src/auth/guards/jwt-auth.guard.js'
+    );
     const { GroupContextMiddleware } = await import(
-      '../src/common/middleware/group-context.middleware'
+      '../src/common/middleware/group-context.middleware.js'
     );
 
     // Custom test module that wires fakeAuthMiddleware -> GroupContextMiddleware
@@ -471,7 +561,9 @@ describe('Multi-tenant data isolation (e2e)', () => {
 
       // ISOLATION CHECK: settings must belong to Group A
       expect(response.body.groupId).toBe(GROUP_A_ID);
-      expect(response.body.playersPerTeam).toBe(GROUP_A_SETTINGS.playersPerTeam);
+      expect(response.body.playersPerTeam).toBe(
+        GROUP_A_SETTINGS.playersPerTeam,
+      );
     });
 
     it('should return Group B settings (different values) when X-Group-Id is Group B', async () => {
@@ -482,7 +574,9 @@ describe('Multi-tenant data isolation (e2e)', () => {
 
       // ISOLATION CHECK: settings must belong to Group B with its specific values
       expect(response.body.groupId).toBe(GROUP_B_ID);
-      expect(response.body.playersPerTeam).toBe(GROUP_B_SETTINGS.playersPerTeam);
+      expect(response.body.playersPerTeam).toBe(
+        GROUP_B_SETTINGS.playersPerTeam,
+      );
       expect(response.body.kFactor).toBe(GROUP_B_SETTINGS.kFactor);
     });
   });

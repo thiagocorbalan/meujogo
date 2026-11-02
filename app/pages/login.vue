@@ -65,7 +65,9 @@ async function handleLogin() {
       user: result.user,
     })
 
-    const redirectTo = (route.query.redirect as string) || '/'
+    const redirectTo = result.user?.isSuperAdmin
+      ? '/admin'
+      : (route.query.redirect as string) || '/'
     await router.push(redirectTo)
   } catch (e: any) {
     errorMessage.value =

@@ -1,4 +1,8 @@
-import { calculateRanking, MatchResult, TeamInfo } from '../ranking.engine';
+import {
+  calculateRanking,
+  type MatchResult,
+  type TeamInfo,
+} from '../ranking.engine';
 
 const teams: TeamInfo[] = [
   { id: 1, name: 'Red', color: '#FF0000' },
@@ -9,67 +13,137 @@ const teams: TeamInfo[] = [
 describe('calculateRanking', () => {
   it('should rank 3 teams with a clear winner', () => {
     const matches: MatchResult[] = [
-      { teamAId: 1, teamBId: 2, scoreA: 2, scoreB: 0, isDraw: false, winnerId: 1 },
-      { teamAId: 1, teamBId: 3, scoreA: 3, scoreB: 1, isDraw: false, winnerId: 1 },
-      { teamAId: 2, teamBId: 3, scoreA: 1, scoreB: 0, isDraw: false, winnerId: 2 },
+      {
+        teamAId: 1,
+        teamBId: 2,
+        scoreA: 2,
+        scoreB: 0,
+        isDraw: false,
+        winnerId: 1,
+      },
+      {
+        teamAId: 1,
+        teamBId: 3,
+        scoreA: 3,
+        scoreB: 1,
+        isDraw: false,
+        winnerId: 1,
+      },
+      {
+        teamAId: 2,
+        teamBId: 3,
+        scoreA: 1,
+        scoreB: 0,
+        isDraw: false,
+        winnerId: 2,
+      },
     ];
 
     const ranking = calculateRanking(matches, teams);
 
-    expect(ranking[0].teamId).toBe(1);
-    expect(ranking[0].points).toBe(6);
-    expect(ranking[0].wins).toBe(2);
-    expect(ranking[0].losses).toBe(0);
+    expect(ranking[0]!.teamId).toBe(1);
+    expect(ranking[0]!.points).toBe(6);
+    expect(ranking[0]!.wins).toBe(2);
+    expect(ranking[0]!.losses).toBe(0);
 
-    expect(ranking[1].teamId).toBe(2);
-    expect(ranking[1].points).toBe(3);
+    expect(ranking[1]!.teamId).toBe(2);
+    expect(ranking[1]!.points).toBe(3);
 
-    expect(ranking[2].teamId).toBe(3);
-    expect(ranking[2].points).toBe(0);
+    expect(ranking[2]!.teamId).toBe(3);
+    expect(ranking[2]!.points).toBe(0);
   });
 
   it('should tiebreak by goal difference', () => {
     const matches: MatchResult[] = [
-      { teamAId: 1, teamBId: 3, scoreA: 3, scoreB: 0, isDraw: false, winnerId: 1 },
-      { teamAId: 2, teamBId: 3, scoreA: 1, scoreB: 0, isDraw: false, winnerId: 2 },
-      { teamAId: 1, teamBId: 2, scoreA: 0, scoreB: 1, isDraw: false, winnerId: 2 },
+      {
+        teamAId: 1,
+        teamBId: 3,
+        scoreA: 3,
+        scoreB: 0,
+        isDraw: false,
+        winnerId: 1,
+      },
+      {
+        teamAId: 2,
+        teamBId: 3,
+        scoreA: 1,
+        scoreB: 0,
+        isDraw: false,
+        winnerId: 2,
+      },
+      {
+        teamAId: 1,
+        teamBId: 2,
+        scoreA: 0,
+        scoreB: 1,
+        isDraw: false,
+        winnerId: 2,
+      },
     ];
 
     const ranking = calculateRanking(matches, teams);
 
-    expect(ranking[0].teamId).toBe(2);
-    expect(ranking[0].points).toBe(6);
+    expect(ranking[0]!.teamId).toBe(2);
+    expect(ranking[0]!.points).toBe(6);
 
-    expect(ranking[1].teamId).toBe(1);
-    expect(ranking[1].goalDifference).toBe(2);
+    expect(ranking[1]!.teamId).toBe(1);
+    expect(ranking[1]!.goalDifference).toBe(2);
 
-    expect(ranking[2].teamId).toBe(3);
+    expect(ranking[2]!.teamId).toBe(3);
   });
 
   it('should tiebreak by goals scored when points and GD are equal', () => {
     const matches: MatchResult[] = [
-      { teamAId: 1, teamBId: 3, scoreA: 3, scoreB: 1, isDraw: false, winnerId: 1 },
-      { teamAId: 2, teamBId: 3, scoreA: 2, scoreB: 0, isDraw: false, winnerId: 2 },
-      { teamAId: 1, teamBId: 2, scoreA: 1, scoreB: 1, isDraw: true, winnerId: null },
+      {
+        teamAId: 1,
+        teamBId: 3,
+        scoreA: 3,
+        scoreB: 1,
+        isDraw: false,
+        winnerId: 1,
+      },
+      {
+        teamAId: 2,
+        teamBId: 3,
+        scoreA: 2,
+        scoreB: 0,
+        isDraw: false,
+        winnerId: 2,
+      },
+      {
+        teamAId: 1,
+        teamBId: 2,
+        scoreA: 1,
+        scoreB: 1,
+        isDraw: true,
+        winnerId: null,
+      },
     ];
 
     const ranking = calculateRanking(matches, teams);
 
-    expect(ranking[0].teamId).toBe(1);
-    expect(ranking[0].points).toBe(4);
-    expect(ranking[0].goalsFor).toBe(4);
+    expect(ranking[0]!.teamId).toBe(1);
+    expect(ranking[0]!.points).toBe(4);
+    expect(ranking[0]!.goalsFor).toBe(4);
 
-    expect(ranking[1].teamId).toBe(2);
-    expect(ranking[1].points).toBe(4);
-    expect(ranking[1].goalsFor).toBe(3);
+    expect(ranking[1]!.teamId).toBe(2);
+    expect(ranking[1]!.points).toBe(4);
+    expect(ranking[1]!.goalsFor).toBe(3);
 
-    expect(ranking[2].teamId).toBe(3);
-    expect(ranking[2].points).toBe(0);
+    expect(ranking[2]!.teamId).toBe(3);
+    expect(ranking[2]!.points).toBe(0);
   });
 
   it('should return zeros for a team with no matches', () => {
     const matches: MatchResult[] = [
-      { teamAId: 1, teamBId: 2, scoreA: 2, scoreB: 1, isDraw: false, winnerId: 1 },
+      {
+        teamAId: 1,
+        teamBId: 2,
+        scoreA: 2,
+        scoreB: 1,
+        isDraw: false,
+        winnerId: 1,
+      },
     ];
 
     const ranking = calculateRanking(matches, teams);
@@ -87,9 +161,30 @@ describe('calculateRanking', () => {
 
   it('should handle all draws scenario', () => {
     const matches: MatchResult[] = [
-      { teamAId: 1, teamBId: 2, scoreA: 1, scoreB: 1, isDraw: true, winnerId: null },
-      { teamAId: 1, teamBId: 3, scoreA: 0, scoreB: 0, isDraw: true, winnerId: null },
-      { teamAId: 2, teamBId: 3, scoreA: 2, scoreB: 2, isDraw: true, winnerId: null },
+      {
+        teamAId: 1,
+        teamBId: 2,
+        scoreA: 1,
+        scoreB: 1,
+        isDraw: true,
+        winnerId: null,
+      },
+      {
+        teamAId: 1,
+        teamBId: 3,
+        scoreA: 0,
+        scoreB: 0,
+        isDraw: true,
+        winnerId: null,
+      },
+      {
+        teamAId: 2,
+        teamBId: 3,
+        scoreA: 2,
+        scoreB: 2,
+        isDraw: true,
+        winnerId: null,
+      },
     ];
 
     const ranking = calculateRanking(matches, teams);
@@ -103,8 +198,8 @@ describe('calculateRanking', () => {
     }
 
     const goalsFor = ranking.map((r) => r.goalsFor);
-    expect(goalsFor[0]).toBeGreaterThanOrEqual(goalsFor[1]);
-    expect(goalsFor[1]).toBeGreaterThanOrEqual(goalsFor[2]);
+    expect(goalsFor[0]!).toBeGreaterThanOrEqual(goalsFor[1]!);
+    expect(goalsFor[1]!).toBeGreaterThanOrEqual(goalsFor[2]!);
   });
 });
 
@@ -118,15 +213,15 @@ describe('calculateRanking edge cases', () => {
     const singleTeam: TeamInfo[] = [{ id: 1, name: 'Solo', color: '#FFFFFF' }];
     const ranking = calculateRanking([], singleTeam);
     expect(ranking).toHaveLength(1);
-    expect(ranking[0].teamId).toBe(1);
-    expect(ranking[0].played).toBe(0);
-    expect(ranking[0].wins).toBe(0);
-    expect(ranking[0].draws).toBe(0);
-    expect(ranking[0].losses).toBe(0);
-    expect(ranking[0].goalsFor).toBe(0);
-    expect(ranking[0].goalsAgainst).toBe(0);
-    expect(ranking[0].goalDifference).toBe(0);
-    expect(ranking[0].points).toBe(0);
+    expect(ranking[0]!.teamId).toBe(1);
+    expect(ranking[0]!.played).toBe(0);
+    expect(ranking[0]!.wins).toBe(0);
+    expect(ranking[0]!.draws).toBe(0);
+    expect(ranking[0]!.losses).toBe(0);
+    expect(ranking[0]!.goalsFor).toBe(0);
+    expect(ranking[0]!.goalsAgainst).toBe(0);
+    expect(ranking[0]!.goalDifference).toBe(0);
+    expect(ranking[0]!.points).toBe(0);
   });
 
   it('high-scoring match (10-9): correctly accounts for large goal numbers', () => {
@@ -135,7 +230,14 @@ describe('calculateRanking edge cases', () => {
       { id: 2, name: 'Blue', color: '#0000FF' },
     ];
     const matches: MatchResult[] = [
-      { teamAId: 1, teamBId: 2, scoreA: 10, scoreB: 9, isDraw: false, winnerId: 1 },
+      {
+        teamAId: 1,
+        teamBId: 2,
+        scoreA: 10,
+        scoreB: 9,
+        isDraw: false,
+        winnerId: 1,
+      },
     ];
     const ranking = calculateRanking(matches, twoTeams);
     const red = ranking.find((r) => r.teamId === 1)!;
@@ -155,7 +257,14 @@ describe('calculateRanking edge cases', () => {
   it('match referencing a team not in teams list: skips match gracefully without crash', () => {
     const knownTeams: TeamInfo[] = [{ id: 1, name: 'Red', color: '#FF0000' }];
     const matches: MatchResult[] = [
-      { teamAId: 1, teamBId: 99, scoreA: 2, scoreB: 0, isDraw: false, winnerId: 1 },
+      {
+        teamAId: 1,
+        teamBId: 99,
+        scoreA: 2,
+        scoreB: 0,
+        isDraw: false,
+        winnerId: 1,
+      },
     ];
     expect(() => calculateRanking(matches, knownTeams)).not.toThrow();
     const ranking = calculateRanking(matches, knownTeams);

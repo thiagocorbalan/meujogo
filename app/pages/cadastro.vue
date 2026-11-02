@@ -206,6 +206,13 @@ function registerWithApple() {
             <p v-if="errors.confirmPassword" class="text-xs text-destructive">{{ errors.confirmPassword }}</p>
           </div>
 
+          <p class="text-xs text-muted-foreground text-center">
+            Ao se cadastrar, você concorda com os
+            <NuxtLink to="/termos" class="text-primary hover:underline" target="_blank">Termos de Uso</NuxtLink>
+            e a
+            <NuxtLink to="/privacidade" class="text-primary hover:underline" target="_blank">Política de Privacidade</NuxtLink>.
+          </p>
+
           <BaseButton
             type="submit"
             :loading="isLoading"

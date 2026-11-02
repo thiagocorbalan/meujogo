@@ -1,8 +1,11 @@
 import { ForbiddenException } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import { type Reflector } from '@nestjs/core';
 import { GroupRole, UserRole } from '@prisma/client';
 import { GroupRolesGuard } from './group-roles.guard';
-import { GROUP_ROLES_KEY, GroupRoles } from '../decorators/group-roles.decorator';
+import {
+  GROUP_ROLES_KEY,
+  GroupRoles,
+} from '../decorators/group-roles.decorator';
 
 describe('GroupRolesGuard', () => {
   let guard: GroupRolesGuard;
@@ -10,7 +13,12 @@ describe('GroupRolesGuard', () => {
 
   function createMockExecutionContext(
     user: { role: UserRole } = { role: UserRole.USUARIO },
-    groupContext?: { groupRole: GroupRole; groupId: number; userId: number; playerId: number | null },
+    groupContext?: {
+      groupRole: GroupRole;
+      groupId: number;
+      userId: number;
+      playerId: number | null;
+    },
   ) {
     const request: Record<string, any> = { user };
     if (groupContext !== undefined) {
@@ -28,7 +36,10 @@ describe('GroupRolesGuard', () => {
 
   beforeEach(() => {
     reflector = { get: jest.fn() };
-    guard = new GroupRolesGuard(reflector as unknown as Reflector);
+    guard = new GroupRolesGuard(
+      reflector as unknown as Reflector,
+      {} as never,
+    );
   });
 
   afterEach(() => {
@@ -55,7 +66,9 @@ describe('GroupRolesGuard', () => {
       );
       reflector.get.mockReturnValue([GroupRole.DONO]);
 
-      expect(() => guard.canActivate(context as any)).toThrow(ForbiddenException);
+      expect(() => guard.canActivate(context as any)).toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should deny when user has groupRole JOGADOR', () => {
@@ -65,7 +78,9 @@ describe('GroupRolesGuard', () => {
       );
       reflector.get.mockReturnValue([GroupRole.DONO]);
 
-      expect(() => guard.canActivate(context as any)).toThrow(ForbiddenException);
+      expect(() => guard.canActivate(context as any)).toThrow(
+        ForbiddenException,
+      );
     });
   });
 
@@ -102,7 +117,9 @@ describe('GroupRolesGuard', () => {
       const context = createMockExecutionContext({ role: UserRole.USUARIO });
       reflector.get.mockReturnValue([GroupRole.DONO]);
 
-      expect(() => guard.canActivate(context as any)).toThrow(ForbiddenException);
+      expect(() => guard.canActivate(context as any)).toThrow(
+        ForbiddenException,
+      );
     });
   });
 

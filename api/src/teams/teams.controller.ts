@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Param, Body, ParseIntPipe, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  ParseIntPipe,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { TeamsService } from './teams.service.js';
 import { DrawTeamsDto } from './dto/draw-teams.dto.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
@@ -18,11 +27,18 @@ export class TeamsController {
     @Param('sessionId', ParseIntPipe) sessionId: number,
     @Body() body: DrawTeamsDto,
   ) {
-    return this.teamsService.draw(sessionId, req.groupContext.groupId, body.mode);
+    return this.teamsService.draw(
+      sessionId,
+      req.groupContext.groupId,
+      body.mode,
+    );
   }
 
   @Get('teams')
-  findBySession(@Req() req: any, @Param('sessionId', ParseIntPipe) sessionId: number) {
+  findBySession(
+    @Req() req: any,
+    @Param('sessionId', ParseIntPipe) sessionId: number,
+  ) {
     return this.teamsService.findBySession(sessionId, req.groupContext.groupId);
   }
 }

@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import { useId } from 'vue'
+
+const teamAId1 = useId()
+const teamBId1 = useId()
+const teamAId2 = useId()
+const teamBId2 = useId()
+
 const props = defineProps<{
   teams: any[]
   isFirstMatch: boolean
@@ -58,15 +65,15 @@ function handleStartTwoTeam() {
       <p class="text-sm text-muted-foreground mb-1">Selecione os times para a primeira partida:</p>
       <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-semibold text-foreground">Time A</label>
-          <select v-model="selectedTeamA" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+          <label :for="teamAId1" class="text-sm font-semibold text-foreground">Time A</label>
+          <select :id="teamAId1" v-model="selectedTeamA" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
             <option :value="null" disabled>Selecione...</option>
             <option v-for="t in teams" :key="t.id" :value="t.id">{{ t.name }}</option>
           </select>
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-sm font-semibold text-foreground">Time B</label>
-          <select v-model="selectedTeamB" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+          <label :for="teamBId1" class="text-sm font-semibold text-foreground">Time B</label>
+          <select :id="teamBId1" v-model="selectedTeamB" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
             <option :value="null" disabled>Selecione...</option>
             <option v-for="t in teams" :key="t.id" :value="t.id">{{ t.name }}</option>
           </select>
@@ -104,15 +111,15 @@ function handleStartTwoTeam() {
         <p class="text-xs mt-1">Selecione manualmente abaixo:</p>
         <div class="grid grid-cols-2 gap-4 mt-3 text-left">
           <div class="flex flex-col gap-1.5">
-            <label class="text-sm font-semibold text-foreground">Time A</label>
-            <select v-model="selectedTeamA" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+            <label :for="teamAId2" class="text-sm font-semibold text-foreground">Time A</label>
+            <select :id="teamAId2" v-model="selectedTeamA" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
               <option :value="null" disabled>Selecione...</option>
               <option v-for="t in teams" :key="t.id" :value="t.id">{{ t.name }}</option>
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-sm font-semibold text-foreground">Time B</label>
-            <select v-model="selectedTeamB" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+            <label :for="teamBId2" class="text-sm font-semibold text-foreground">Time B</label>
+            <select :id="teamBId2" v-model="selectedTeamB" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
               <option :value="null" disabled>Selecione...</option>
               <option v-for="t in teams" :key="t.id" :value="t.id">{{ t.name }}</option>
             </select>

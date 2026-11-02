@@ -1,8 +1,20 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { MatchesService } from './matches.service';
 import { StartMatchDto } from './dto/start-match.dto';
 import { RegisterGoalDto } from './dto/register-goal.dto';
 import { EndMatchDto } from './dto/end-match.dto';
+import { LateGoalDto } from './dto/late-goal.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { GroupRolesGuard } from '../common/guards/group-roles.guard.js';
 import { GroupRoles } from '../common/decorators/group-roles.decorator.js';
@@ -14,8 +26,14 @@ export class MatchesController {
   constructor(private readonly matchesService: MatchesService) {}
 
   @Get('sessions/:sessionId/matches')
-  findBySession(@Req() req: any, @Param('sessionId', ParseIntPipe) sessionId: number) {
-    return this.matchesService.findBySession(sessionId, req.groupContext.groupId);
+  findBySession(
+    @Req() req: any,
+    @Param('sessionId', ParseIntPipe) sessionId: number,
+  ) {
+    return this.matchesService.findBySession(
+      sessionId,
+      req.groupContext.groupId,
+    );
   }
 
   @Post('sessions/:sessionId/matches/start')
@@ -58,8 +76,42 @@ export class MatchesController {
     return this.matchesService.undoGoal(id, goalId, req.groupContext.groupId);
   }
 
+  @Post('matches/:id/late-goal')
+  @GroupRoles(GroupRole.DONO, GroupRole.ADMIN)
+  registerLateGoal(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: LateGoalDto,
+  ) {
+    return this.matchesService.registerLateGoal(
+      id,
+      dto,
+      req.groupContext.groupId,
+    );
+  }
+
+  @Delete('matches/:id/late-goal/:goalId')
+  @GroupRoles(GroupRole.DONO, GroupRole.ADMIN)
+  undoLateGoal(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('goalId', ParseIntPipe) goalId: number,
+  ) {
+    return this.matchesService.undoLateGoal(
+      id,
+      goalId,
+      req.groupContext.groupId,
+    );
+  }
+
   @Get('sessions/:sessionId/matches/next')
-  getNextMatch(@Req() req: any, @Param('sessionId', ParseIntPipe) sessionId: number) {
-    return this.matchesService.getNextMatch(sessionId, req.groupContext.groupId);
+  getNextMatch(
+    @Req() req: any,
+    @Param('sessionId', ParseIntPipe) sessionId: number,
+  ) {
+    return this.matchesService.getNextMatch(
+      sessionId,
+      req.groupContext.groupId,
+    );
   }
 }

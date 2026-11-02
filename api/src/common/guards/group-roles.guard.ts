@@ -6,9 +6,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { GroupRole, UserRole } from '@prisma/client';
-import { GROUP_ROLES_KEY } from '../decorators/group-roles.decorator';
-import { PrismaService } from '../../prisma/prisma.service';
+import { GroupRole } from '@prisma/client';
+import { GROUP_ROLES_KEY } from '../decorators/group-roles.decorator.js';
+import { PrismaService } from '../../prisma/prisma.service.js';
 
 @Injectable()
 export class GroupRolesGuard implements CanActivate {
@@ -50,20 +50,33 @@ export class GroupRolesGuard implements CanActivate {
         groupRole: membership.role,
         userId: request.user.id,
         playerId: membership.playerId,
+        isSuspended: membership.group.isSuspended,
       };
     }
 
     // No role restriction on this endpoint
     if (!requiredRoles) {
+      // Superadmin bypass: superadmin can access suspended groups
+      if (request.user?.isSuperAdmin === true) {
+        return true;
+      }
+      if (request.groupContext?.isSuspended === true) {
+        throw new ForbiddenException('Grupo suspenso');
+      }
       return true;
     }
 
-    // Superadmin bypass: system-level ADMIN can access any group endpoint
-    if (request.user?.role === UserRole.ADMIN) {
+    // Superadmin bypass: superadmin can access any group endpoint
+    if (request.user?.isSuperAdmin === true) {
       return true;
     }
 
-    if (!request.groupContext || !request.groupContext.groupRole) {
+    // Reject access to suspended groups (non-superadmin)
+    if (request.groupContext?.isSuspended === true) {
+      throw new ForbiddenException('Grupo suspenso');
+    }
+
+    if (!request.groupContext?.groupRole) {
       throw new ForbiddenException(
         'Group context is required for this endpoint',
       );
@@ -73,8 +86,6 @@ export class GroupRolesGuard implements CanActivate {
       return true;
     }
 
-    throw new ForbiddenException(
-      'Insufficient group role for this operation',
-    );
+    throw new ForbiddenException('Insufficient group role for this operation');
   }
 }

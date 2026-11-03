@@ -87,7 +87,6 @@ export type Icone = {
   path: string
   familia: Familia
   uso: string
-  provisorio?: string
 }
 
 export const FAMILIAS: Record<Familia, string> = {
@@ -115,14 +114,14 @@ export const ICONES: Icone[] = [
   { nome: "sorteio", mdi: "shuffle-variant", path: mdiShuffleVariant, familia: "dia-de-jogo", uso: "Sortear os times" },
   { nome: "colete", mdi: "tshirt-crew", path: mdiTshirtCrew, familia: "dia-de-jogo", uso: "Time e cor do colete" },
   { nome: "colete-contorno", mdi: "tshirt-crew-outline", path: mdiTshirtCrewOutline, familia: "dia-de-jogo", uso: "Contorno do colete branco ou amarelo sobre fundo claro" },
-  { nome: "goleiro", mdi: "hand-back-left", path: mdiHandBackLeft, familia: "dia-de-jogo", uso: "Goleiro", provisorio: "luva: o Thiago busca um ícone de goleiro" },
+  { nome: "goleiro", mdi: "hand-back-left", path: mdiHandBackLeft, familia: "dia-de-jogo", uso: "Goleiro" },
   { nome: "quadra", mdi: "soccer-field", path: mdiSoccerField, familia: "dia-de-jogo", uso: "Quadra e local" },
   { nome: "fila", mdi: "human-queue", path: mdiHumanQueue, familia: "dia-de-jogo", uso: "Fila de espera" },
   { nome: "substituicao", mdi: "swap-horizontal", path: mdiSwapHorizontal, familia: "dia-de-jogo", uso: "Substituição e rotação" },
   { nome: "apito", mdi: "whistle", path: mdiWhistle, familia: "dia-de-jogo", uso: "Iniciar e apitar" },
-  { nome: "gol", mdi: "soccer", path: mdiSoccer, familia: "dia-de-jogo", uso: "Gol na linha do tempo", provisorio: "a bola repete Jogos; falta trave no MDI" },
+  { nome: "gol", mdi: "soccer", path: mdiSoccer, familia: "dia-de-jogo", uso: "Gol na linha do tempo" },
   { nome: "assistencia", mdi: "shoe-cleat", path: mdiShoeCleat, familia: "dia-de-jogo", uso: "Assistência" },
-  { nome: "penalti", mdi: "target", path: mdiTarget, familia: "dia-de-jogo", uso: "Pênalti", provisorio: "alvo: o Thiago busca algo mais de futebol" },
+  { nome: "penalti", mdi: "target", path: mdiTarget, familia: "dia-de-jogo", uso: "Pênalti" },
   { nome: "cartao", mdi: "card", path: mdiCard, familia: "dia-de-jogo", uso: "Cartão amarelo ou vermelho, pela cor" },
   { nome: "cronometro", mdi: "timer-outline", path: mdiTimerOutline, familia: "dia-de-jogo", uso: "Cronômetro da partida" },
   { nome: "encerrar", mdi: "flag-checkered", path: mdiFlagCheckered, familia: "dia-de-jogo", uso: "Encerrar partida ou sessão" },

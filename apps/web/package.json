@@ -1,0 +1,36 @@
+{
+  "name": "@meujogo/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run build --filter=@meujogo/web^... --output-logs=errors-only && next dev -p 8080",
+    "build": "next build",
+    "start": "next start -p 8080",
+    "lint": "eslint .",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@meujogo/engines": "workspace:*",
+    "@meujogo/shared": "workspace:*",
+    "next": "^16.4.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@meujogo/eslint-config": "workspace:*",
+    "@next/eslint-plugin-next": "^16.4.4",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^24",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6",
+    "eslint": "^10",
+    "jsdom": "^30.1.3",
+    "typescript": "~6.0.2",
+    "vite": "^8",
+    "vitest": "^5.1.0"
+  }
+}

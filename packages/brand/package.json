@@ -1,0 +1,10 @@
+{
+  "name": "@meujogo/brand",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./logo/*": "./logo/*",
+    "./padroes/*": "./padroes/*",
+    "./emblemas/*": "./emblemas/*"
+  }
+}

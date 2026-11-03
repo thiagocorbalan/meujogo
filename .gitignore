@@ -1,0 +1,21 @@
+node_modules
+dist
+.turbo
+*.local
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# ferramentas locais e o hub de docs (symlink)
+.claude
+.agents
+.spec-workflow
+.tool-versions
+skills-lock.json
+CLAUDE.md
+doc

@@ -22,8 +22,8 @@ Argumento: o identificador da issue (`COR-NN`). Sem argumento, pergunte qual iss
 9. **QA e autorrevisão.** Um subagente **QA** roda o gate num clone limpo, executa o que der do roteiro de verificação manual e procura borda sem teste; devolve achados, não corrige. Depois rode a skill `code-review` contra a `main`. O que for real volta para o dev.
 
 Dúvida técnica (versão, configuração, ferramenta): resolva validando na doc oficial e no gate, registre na PR e siga. Pare só por dúvida de regra de produto ou de escopo.
-10. **PR.** Push da branch e `gh pr create` com: resumo, `Closes COR-NN`, fontes usadas, o que os testes cobrem e o roteiro de **Verificação manual** copiado da issue. Termine o corpo com a linha de atribuição pedida no sistema.
-11. **Esperar o CI** e o preview. Mova a issue para In Review e comente o link da PR e do preview.
+10. **PR.** Push da branch e `gh pr create` com: resumo, `Closes [COR-NN](<url da issue no Linear>)`, fontes usadas, o que os testes cobrem e o roteiro de **Verificação manual** copiado da issue. Termine o corpo com a linha de atribuição pedida no sistema.
+11. **Esperar o CI** e o preview. Na descrição da issue, marque cada item de **Critérios de aceite** e de **Testes automatizados** que o gate e o QA comprovaram; o que não foi comprovado fica desmarcado, com o motivo numa linha. A **Verificação manual** é do Thiago e não se marca. Mova a issue para In Review e comente o link da PR e do preview.
 12. **V2.** Avise o Thiago com o roteiro e **pare**. Não faça merge sem o "ok" dele.
 13. **Depois do ok.** Rebase na `origin/main` (avise antes de `--force-with-lease`), `gh pr merge --squash --delete-branch`, issue em Done com um comentário curto do que entrou. Se a issue mudou regra, contrato ou convenção, atualize o doc do hub (com `atualizado` no frontmatter).
 

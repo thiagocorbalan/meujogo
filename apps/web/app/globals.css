@@ -1,0 +1,8 @@
+@import "@meujogo/ui/globals.css";
+
+/* Same selector as the theme, declared later, so the self-hosted next/font families win. */
+:root {
+  --mj-font-display: var(--font-lexend), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mj-font-body: var(--font-manrope), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mj-font-num: var(--font-rajdhani), system-ui, -apple-system, "Segoe UI", sans-serif;
+}

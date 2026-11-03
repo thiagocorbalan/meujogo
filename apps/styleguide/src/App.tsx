@@ -1,4 +1,3 @@
-import { useTheme } from "next-themes"
 import { Logo, Code } from "./sections/_shared"
 import { Marca } from "./sections/Marca"
 import { Padroes } from "./sections/Padroes"
@@ -11,10 +10,9 @@ import { Componentes } from "./sections/Componentes"
 import { PadroesDeTela } from "./sections/PadroesDeTela"
 import { Movimento } from "./sections/Movimento"
 import { A11y } from "./sections/A11y"
-import { ToggleGroup, ToggleGroupItem } from "@meujogo/ui/components/ui/toggle-group"
+import { SeletorDeTema } from "@meujogo/ui/components/mj/seletor-de-tema"
 import { Icon } from "@meujogo/ui/components/icon"
 import { icone } from "@meujogo/ui/icones"
-import { mdiWhiteBalanceSunny, mdiWeatherNight, mdiThemeLightDark } from "@mdi/js"
 import simbolo from "@meujogo/brand/logo/meujogo-simbolo.svg?raw"
 import principal from "@meujogo/brand/logo/meujogo-logo.svg?raw"
 
@@ -31,32 +29,6 @@ const NAV: [string, string][] = [
   ["movimento", "Movimento"],
   ["acessibilidade", "A11y"],
 ]
-
-function Tema() {
-  const { theme, setTheme } = useTheme()
-  const v = theme ?? "system"
-  return (
-    <ToggleGroup
-      value={[v]}
-      onValueChange={(vals: string[]) => vals[0] && setTheme(vals[0])}
-      variant="outline"
-      size="sm"
-      spacing={0}
-      className="rounded-full border border-white/25 bg-white/5 text-white *:rounded-full *:border-0 *:text-white *:hover:bg-white/10 *:data-pressed:bg-white *:data-pressed:text-roxo *:aria-pressed:bg-white *:aria-pressed:text-roxo"
-      aria-label="Tema"
-    >
-      <ToggleGroupItem value="light" aria-label="Claro">
-        <Icon path={mdiWhiteBalanceSunny} />
-      </ToggleGroupItem>
-      <ToggleGroupItem value="system" aria-label="Automático">
-        <Icon path={mdiThemeLightDark} />
-      </ToggleGroupItem>
-      <ToggleGroupItem value="dark" aria-label="Escuro">
-        <Icon path={mdiWeatherNight} />
-      </ToggleGroupItem>
-    </ToggleGroup>
-  )
-}
 
 export function App() {
   return (
@@ -75,7 +47,11 @@ export function App() {
             ))}
           </nav>
           <span className="flex-1 md:hidden" />
-          <Tema />
+          <SeletorDeTema
+            compacto
+            spacing={0}
+            className="rounded-full border border-white/25 bg-white/5 text-white *:rounded-full *:border-0 *:text-white *:hover:bg-white/10 *:data-pressed:bg-white *:data-pressed:text-roxo *:aria-pressed:bg-white *:aria-pressed:text-roxo"
+          />
         </div>
       </header>
 

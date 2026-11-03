@@ -12,7 +12,10 @@ dist
 !.vscode/extensions.json
 
 # ferramentas locais e o hub de docs (symlink)
-.claude
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/executar-issue/
 .agents
 .spec-workflow
 .tool-versions

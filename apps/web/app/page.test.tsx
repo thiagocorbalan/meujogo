@@ -6,5 +6,5 @@ test("home shows the app name and proves the workspace packages load", () => {
   render(<Page />)
 
   expect(screen.getByRole("heading", { level: 1, name: "Meu Jogo" })).toBeDefined()
-  expect(screen.getByText("API: ok · placar 2 x 1 = 3 gols")).toBeDefined()
+  expect(screen.getByText("Contrato do /health: ok · 2 + 1 = 3 gols")).toBeDefined()
 })

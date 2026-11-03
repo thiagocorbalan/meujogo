@@ -1,1 +1,1 @@
-export { sumScore } from "./score.ts"
+export { sumGoals } from "./goals.ts"

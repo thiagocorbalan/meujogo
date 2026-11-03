@@ -10,6 +10,6 @@ for (const i of ICONES) {
   writeFileSync(resolve(out, `icone-${i.nome}.svg`), svg)
 }
 
-const mapa = ICONES.map(({ nome, mdi, familia, uso, provisorio }) => ({ nome, mdi, familia, uso, ...(provisorio ? { provisorio } : {}) }))
+const mapa = ICONES.map(({ nome, mdi, familia, uso }) => ({ nome, mdi, familia, uso }))
 writeFileSync(resolve(out, "mapa.json"), JSON.stringify(mapa, null, 2) + "\n")
 console.log(`${ICONES.length} ícones em ${out}`)

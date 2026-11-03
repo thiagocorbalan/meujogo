@@ -4,5 +4,5 @@
     "types": ["node"],
     "paths": { "@meujogo/ui/*": ["./src/*"] }
   },
-  "include": ["src", "scripts"]
+  "include": ["src", "scripts", "vitest.config.ts"]
 }

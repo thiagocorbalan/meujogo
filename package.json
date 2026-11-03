@@ -2,12 +2,13 @@
   "name": "meujogo",
   "private": true,
   "packageManager": "pnpm@10.34.9",
-  "engines": { "node": ">=22" },
+  "engines": { "node": ">=22.9" },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,css,json,md}\""
   },
   "devDependencies": {

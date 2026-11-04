@@ -4,14 +4,14 @@ import { cn } from "@meujogo/ui/lib/utils"
 export function Section({
   id,
   n,
-  titulo,
+  title,
   lead,
   children,
   className,
 }: {
   id: string
   n: string
-  titulo: string
+  title: string
   lead?: React.ReactNode
   children: React.ReactNode
   className?: string
@@ -20,7 +20,7 @@ export function Section({
     <section id={id} className={cn("scroll-mt-16 border-t border-border py-14 sm:py-16", className)}>
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         <p className="font-num text-sm font-bold tracking-[0.12em] text-muted-foreground uppercase">{n}</p>
-        <h2 className="mt-1 font-display text-3xl font-bold text-balance text-ink sm:text-4xl">{titulo}</h2>
+        <h2 className="mt-1 font-display text-3xl font-bold text-balance text-ink sm:text-4xl">{title}</h2>
         {lead ? <p className="mt-3 max-w-[65ch] text-base leading-relaxed text-fg-2">{lead}</p> : null}
         <div className="mt-8 flex flex-col gap-12">{children}</div>
       </div>
@@ -28,33 +28,33 @@ export function Section({
   )
 }
 
-export function Bloco({
-  titulo,
-  nota,
+export function Block({
+  title,
+  note,
   children,
   id,
 }: {
-  titulo: string
-  nota?: React.ReactNode
+  title: string
+  note?: React.ReactNode
   children: React.ReactNode
   id?: string
 }) {
   return (
     <div id={id} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <h3 className="font-display text-xl font-semibold text-ink">{titulo}</h3>
-        {nota ? <p className="max-w-[70ch] text-sm leading-relaxed text-fg-2">{nota}</p> : null}
+        <h3 className="font-display text-xl font-semibold text-ink">{title}</h3>
+        {note ? <p className="max-w-[70ch] text-sm leading-relaxed text-fg-2">{note}</p> : null}
       </div>
       {children}
     </div>
   )
 }
 
-function Pane({ tema, label, children }: { tema: "light" | "dark"; label: string; children: React.ReactNode }) {
+function Pane({ theme, label, children }: { theme: "light" | "dark"; label: string; children: React.ReactNode }) {
   return (
     <div
       className={cn(
-        tema,
+        theme,
         "relative flex min-w-0 flex-col gap-4 rounded-xl border border-border bg-background p-5 pt-9 text-foreground"
       )}
     >
@@ -69,61 +69,61 @@ function Pane({ tema, label, children }: { tema: "light" | "dark"; label: string
 export function Demo({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn("grid gap-3 md:grid-cols-2", className)}>
-      <Pane tema="light" label="Claro">
+      <Pane theme="light" label="Claro">
         {children}
       </Pane>
-      <Pane tema="dark" label="Escuro">
+      <Pane theme="dark" label="Escuro">
         {children}
       </Pane>
     </div>
   )
 }
 
-export function Linha({ children, className }: { children: React.ReactNode; className?: string }) {
+export function Row({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn("flex flex-wrap items-center gap-3", className)}>{children}</div>
 }
 
 export function Sw({
-  nome,
+  name,
   hex,
-  nota,
-  texto,
+  note,
+  text,
 }: {
-  nome: string
+  name: string
   hex: string
-  nota?: string
-  texto?: string
+  note?: string
+  text?: string
 }) {
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <div
         className="flex h-20 items-end rounded-lg border border-border/60 p-2 font-display text-sm font-semibold"
-        style={{ background: hex, color: texto ?? "transparent" }}
+        style={{ background: hex, color: text ?? "transparent" }}
       >
-        {texto ? "Aa" : ""}
+        {text ? "Aa" : ""}
       </div>
       <div className="flex flex-col">
-        <b className="text-sm text-ink">{nome}</b>
+        <b className="text-sm text-ink">{name}</b>
         <code className="font-num text-sm font-semibold text-fg-2">{hex}</code>
-        {nota ? <span className="text-xs leading-snug text-muted-foreground">{nota}</span> : null}
+        {note ? <span className="text-xs leading-snug text-muted-foreground">{note}</span> : null}
       </div>
     </div>
   )
 }
 
-export function Sw2({ nome, claro, escuro, nota }: { nome: string; claro: string; escuro: string; nota?: string }) {
+export function Sw2({ name, light, dark, note }: { name: string; light: string; dark: string; note?: string }) {
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <div className="flex h-20 overflow-hidden rounded-lg border border-border/60">
-        <span className="flex-1" style={{ background: claro }} />
-        <span className="flex-1" style={{ background: escuro }} />
+        <span className="flex-1" style={{ background: light }} />
+        <span className="flex-1" style={{ background: dark }} />
       </div>
       <div className="flex flex-col">
-        <b className="text-sm text-ink">{nome}</b>
+        <b className="text-sm text-ink">{name}</b>
         <code className="font-num text-sm font-semibold text-fg-2">
-          {claro} · {escuro}
+          {light} · {dark}
         </code>
-        {nota ? <span className="text-xs leading-snug text-muted-foreground">{nota}</span> : null}
+        {note ? <span className="text-xs leading-snug text-muted-foreground">{note}</span> : null}
       </div>
     </div>
   )
@@ -143,7 +143,7 @@ export function Code({ children }: { children: React.ReactNode }) {
   return <code className="rounded-md bg-muted px-1.5 py-0.5 font-num text-[0.95em] font-semibold text-ink">{children}</code>
 }
 
-export function Nunca({ children }: { children: React.ReactNode }) {
+export function Never({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex gap-2 text-sm leading-snug text-fg-2">
       <span aria-hidden="true" className="mt-1.5 inline-block size-2 shrink-0 rounded-full bg-error" />

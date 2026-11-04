@@ -8,12 +8,12 @@
     "./components/*": "./src/components/*.tsx",
     "./lib/*": "./src/lib/*.ts",
     "./hooks/*": "./src/hooks/*.ts",
-    "./icones": "./src/icones.ts"
+    "./icons": "./src/icons.ts"
   },
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "icones": "node scripts/export-icones.ts",
+    "icons": "node scripts/export-icons.ts",
     "test": "vitest run"
   },
   "dependencies": {

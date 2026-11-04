@@ -2,12 +2,12 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { ThemeProvider } from "next-themes"
 import { renderToString } from "react-dom/server"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
-import { SeletorDeTema } from "./seletor-de-tema.tsx"
+import { ThemeSwitcher } from "./theme-switcher.tsx"
 
 function renderWithTheme(defaultTheme = "system") {
   return render(
-    <ThemeProvider attribute="class" value={{ light: "claro", dark: "dark" }} defaultTheme={defaultTheme} enableSystem>
-      <SeletorDeTema />
+    <ThemeProvider attribute="class" value={{ light: "theme-light", dark: "dark" }} defaultTheme={defaultTheme} enableSystem>
+      <ThemeSwitcher />
     </ThemeProvider>
   )
 }
@@ -30,7 +30,7 @@ beforeEach(() => {
 
 afterEach(cleanup)
 
-describe("SeletorDeTema", () => {
+describe("ThemeSwitcher", () => {
   it("groups the light, automatic and dark options under the accessible name Tema", () => {
     renderWithTheme()
 
@@ -62,7 +62,7 @@ describe("SeletorDeTema", () => {
   it("renders no option as pressed on the server, where the stored theme is unknown", () => {
     const html = renderToString(
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-        <SeletorDeTema />
+        <ThemeSwitcher />
       </ThemeProvider>
     )
 

@@ -1,6 +1,6 @@
-import { Section, Bloco, Code } from "./_shared"
+import { Section, Block, Code } from "./_shared"
 
-const ESCALA: [string, string, string][] = [
+const SCALE: [string, string, string][] = [
   ["xs", "0.75rem", "12 px"],
   ["sm", "0.875rem", "14 px"],
   ["base", "1rem", "16 px"],
@@ -12,12 +12,12 @@ const ESCALA: [string, string, string][] = [
   ["placar", "3.5rem", "56 px · só Rajdhani"],
 ]
 
-export function Tipo() {
+export function Typography() {
   return (
     <Section
-      id="tipografia"
+      id="typography"
       n="04 · Tipografia"
-      titulo="Lexend fala, Manrope explica, Rajdhani conta."
+      title="Lexend fala, Manrope explica, Rajdhani conta."
       lead="Três famílias, todas sob SIL OFL, e nenhuma delas no logo: o nome é Outfit 700 vetorizada e só existe como desenho. Lexend nos títulos e no nome do jogador, Manrope no texto, nos botões e nos formulários, Rajdhani em tudo o que é número de jogo."
     >
       <div className="grid gap-4 lg:grid-cols-3">
@@ -47,9 +47,9 @@ export function Tipo() {
         </div>
       </div>
 
-      <Bloco titulo="Escala e entrelinha" nota="Base 16 px. Entrelinha 1,2 em títulos e números, 1,5 em texto, 1,7 em texto longo. Texto corrido com no máximo 65 caracteres por linha e nunca abaixo de 16 px no corpo.">
+      <Block title="Escala e entrelinha" note="Base 16 px. Entrelinha 1,2 em títulos e números, 1,5 em texto, 1,7 em texto longo. Texto corrido com no máximo 65 caracteres por linha e nunca abaixo de 16 px no corpo.">
         <div className="grid gap-2 rounded-xl border border-border bg-card p-4 sm:p-6">
-          {ESCALA.map(([n, rem, px]) => (
+          {SCALE.map(([n, rem, px]) => (
             <div key={n} className="grid items-baseline gap-3 border-b border-border py-2 last:border-0 sm:grid-cols-[6rem_1fr_8rem]">
               <code className="font-num text-sm font-bold text-muted-foreground">{n}</code>
               <span className={n === "placar" ? "font-num font-bold text-ink" : "font-display font-semibold text-ink"} style={{ fontSize: rem, lineHeight: 1.2 }}>
@@ -62,7 +62,7 @@ export function Tipo() {
         <p className="text-sm text-fg-2">
           No Tailwind: <Code>font-display</Code>, <Code>font-body</Code> (padrão) e <Code>font-num</Code>, com numerais tabulares no <Code>font-num</Code>.
         </p>
-      </Bloco>
+      </Block>
     </Section>
   )
 }

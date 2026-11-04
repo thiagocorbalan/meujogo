@@ -8,7 +8,8 @@ import App from "./App"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider attribute="class" value={{ light: "claro", dark: "dark" }} enableSystem>
+    {/* Not `light`: that class is reserved for forced-light subtrees (see `@custom-variant dark`). */}
+    <ThemeProvider attribute="class" value={{ light: "theme-light", dark: "dark" }} enableSystem>
       <TooltipProvider>
         <App />
         <Toaster position="bottom-center" />

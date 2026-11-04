@@ -39,19 +39,19 @@ function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
 
 function AvatarFallback({
   className,
-  tom = "roxo",
+  tone = "purple",
   ...props
 }: AvatarPrimitive.Fallback.Props & {
-  /** `lavanda` fica no lugar de uma foto que ainda não carregou ou não existe. */
-  tom?: "roxo" | "lavanda"
+  /** `lavender` fica no lugar de uma foto que ainda não carregou ou não existe. */
+  tone?: "purple" | "lavender"
 }) {
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
-      data-tom={tom}
+      data-tone={tone}
       className={cn(
         "flex size-full items-center justify-center rounded-full font-display text-xs font-semibold group-data-[size=sm]/avatar:text-[10px] group-data-[size=lg]/avatar:text-sm group-data-[size=xl]/avatar:text-lg",
-        tom === "roxo" ? "bg-roxo text-white" : "bg-line text-ink",
+        tone === "purple" ? "bg-purple text-white" : "bg-line text-ink",
         className
       )}
       {...props}

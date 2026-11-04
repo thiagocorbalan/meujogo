@@ -29,13 +29,13 @@ const badgeVariants = cva(
         count:
           "min-w-6 bg-primary px-1.5 font-num text-sm font-bold text-primary-foreground",
         bronze: cn("bg-surface-2 text-fg-2", dot, "before:bg-tier-bronze"),
-        prata: cn(
+        silver: cn(
           "bg-surface-2 text-fg-2",
           dot,
-          "before:bg-tier-prata before:ring-1 before:ring-line"
+          "before:bg-tier-silver before:ring-1 before:ring-line"
         ),
-        ouro: cn("bg-surface-2 text-fg-2", dot, "before:bg-tier-ouro"),
-        diamante: cn("bg-surface-2 text-fg-2", dot, "before:bg-tier-diamante"),
+        gold: cn("bg-surface-2 text-fg-2", dot, "before:bg-tier-gold"),
+        diamond: cn("bg-surface-2 text-fg-2", dot, "before:bg-tier-diamond"),
       },
     },
     defaultVariants: {

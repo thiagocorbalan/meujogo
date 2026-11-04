@@ -51,18 +51,18 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
 
 function TableRow({
   className,
-  eu,
+  self,
   ...props
 }: React.ComponentProps<"tr"> & {
   /** Linha do próprio usuário, em roxo 6%. */
-  eu?: boolean
+  self?: boolean
 }) {
   return (
     <tr
       data-slot="table-row"
-      data-eu={eu || undefined}
+      data-self={self || undefined}
       className={cn(
-        "border-b border-line transition-colors hover:bg-accent/60 has-aria-expanded:bg-accent data-eu:bg-accent data-[state=selected]:bg-accent",
+        "border-b border-line transition-colors hover:bg-accent/60 has-aria-expanded:bg-accent data-self:bg-accent data-[state=selected]:bg-accent",
         className
       )}
       {...props}

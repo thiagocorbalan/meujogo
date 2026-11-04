@@ -37,22 +37,22 @@ const Toaster = ({ ...props }: ToasterProps) => {
   )
 }
 
-type OpcoesDesfazer = {
+type UndoToastOptions = {
   /** Caminho MDI mostrado antes da mensagem. */
-  icone?: string
+  icon?: string
   /** Em milissegundos. */
-  duracao?: number
-  rotulo?: string
+  duration?: number
+  label?: string
 }
 
 /**
  * Snackbar escuro de desfazer: superfície `snackbar`, texto branco e a ação em
- * lavanda. Fecha sozinho depois de `duracao` ou ao tocar na ação.
+ * lavanda. Fecha sozinho depois de `duration` ou ao tocar na ação.
  */
-function toastDesfazer(
-  mensagem: string,
-  onDesfazer: () => void,
-  { icone, duracao = 5000, rotulo = "Desfazer" }: OpcoesDesfazer = {}
+function toastUndo(
+  message: string,
+  onUndo: () => void,
+  { icon, duration = 5000, label = "Desfazer" }: UndoToastOptions = {}
 ) {
   return toast.custom(
     (id) => (
@@ -60,23 +60,23 @@ function toastDesfazer(
         role="status"
         className="flex h-12 w-(--width) max-w-[calc(100vw-2rem)] items-center gap-2 rounded-lg bg-snackbar pr-2 pl-4 font-body text-white dark:ring-1 dark:ring-white/10"
       >
-        {icone ? <Icon path={icone} className="size-5 text-white" /> : null}
-        <span className="min-w-0 flex-1 truncate text-sm font-semibold">{mensagem}</span>
+        {icon ? <Icon path={icon} className="size-5 text-white" /> : null}
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold">{message}</span>
         <button
           type="button"
-          className="relative ml-auto inline-flex h-9 shrink-0 items-center rounded-full px-3 text-sm font-bold text-lavanda outline-none after:absolute after:inset-x-0 after:-inset-y-1 hover:bg-white/8 focus-visible:ring-3 focus-visible:ring-ring"
+          className="relative ml-auto inline-flex h-9 shrink-0 items-center rounded-full px-3 text-sm font-bold text-lavender outline-none after:absolute after:inset-x-0 after:-inset-y-1 hover:bg-white/8 focus-visible:ring-3 focus-visible:ring-ring"
           onClick={() => {
-            onDesfazer()
+            onUndo()
             toast.dismiss(id)
           }}
         >
-          {rotulo}
+          {label}
         </button>
       </div>
     ),
-    { duration: duracao }
+    { duration }
   )
 }
 
-export { Toaster, toastDesfazer }
-export type { OpcoesDesfazer }
+export { Toaster, toastUndo }
+export type { UndoToastOptions }

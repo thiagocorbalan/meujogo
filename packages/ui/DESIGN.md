@@ -67,7 +67,7 @@ Budget per screen (the live red badge counts as one): at most 2 distinct vivid c
   - *Immersive* (live match, and later the session summary): the header sits inside a full-width purple block (hero gradient + pattern) that runs edge to edge from the status bar down to the content; back and kebab are 40 px circles in white 14% with white icons, the title is white and centered with a white 70% subtitle. The content below is a white sheet with 24 px top corners overlapping the purple by 24 px.
 - **Bottom nav**: white, docked, hairline on top, 4–5 items (Início, Jogo, Ranking, Grupo, Perfil). Active item: filled MDI icon in purple with a purple 10% pill behind it and the label in purple; inactive: outline icon and label in muted. No gold.
 - **Buttons**: primary purple pill 48 px, Manrope 700 16, white text, no shadow; secondary purple 10% pill with purple text; ghost and link in purple. Only one primary button per screen. Destructive is a pink-ink text button, confirmed in a dialog.
-- **Inputs**: surface 2 fill, no border, radius 12, 52 px, leading icon in muted, label above in Manrope 600 14; focus = 2 px cyan ring; error = pink-ink message below with an icon. The 6-digit e-mail code is six 48 × 56 filled boxes in Rajdhani 24.
+- **Inputs**: surface 2 fill, no border, radius 12, 52 px, leading icon in muted, label above in Manrope 600 14; focus = 2 px cyan ring; error = pink-ink message below with an icon. On the dark login background the error message uses pink `#FF3D8A` (the dark-theme `error-ink`), because the ink `#C4175F` fails AA there (3.25:1 on `#1A0633`). The 6-digit e-mail code is six 48 × 56 filled boxes in Rajdhani 24.
 - **Stats**: rows with a centered label, the two values at the edges in Rajdhani and two thin bars (purple and purple 30%); or a 2-column tile grid on white with Rajdhani 28 numbers. Bars are purple, never multicolor.
 
 ## Iconography
@@ -96,7 +96,7 @@ Budget per screen (the live red badge counts as one): at most 2 distinct vivid c
 ## Notes for new screens
 
 - Use the exact hex values above. The purple tints listed are allowed; do not invent other hues.
-- Brand images come from `@meujogo/brand` (the `Marca` component for the logo, `Padrao` for patterns). Player photos fall back to initials, group crests to circles. Never draw a logo, mascot or silhouette.
+- Brand images come from `@meujogo/brand` (the `BrandMark` component for the logo, `BrandPattern` for patterns). Player photos fall back to initials, group crests to circles. Never draw a logo, mascot or silhouette.
 - Copy in Brazilian Portuguese with real-sounding names and messy numbers. Mobile screens 390 px wide.
 
 ## Motion

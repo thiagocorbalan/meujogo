@@ -1,42 +1,42 @@
 import * as React from "react"
 import { cn } from "@meujogo/ui/lib/utils"
 import { Icon } from "@meujogo/ui/components/icon"
-import { icone } from "@meujogo/ui/icones"
-import { Marca } from "@meujogo/ui/components/mj/marca"
-import { Padrao, type NomePadrao } from "@meujogo/ui/components/mj/padrao"
+import { iconPath } from "@meujogo/ui/icons"
+import { BrandMark } from "@meujogo/ui/components/mj/brand-mark"
+import { BrandPattern, type PatternName } from "@meujogo/ui/components/mj/brand-pattern"
 
-const foco = "outline-none focus-visible:ring-3 focus-visible:ring-ring"
+const focusRing = "outline-none focus-visible:ring-3 focus-visible:ring-ring"
 
 /* ------------------------------------------------------------------ */
 /* Botão redondo do topo                                               */
 /* ------------------------------------------------------------------ */
 
-type BotaoTopoProps = Omit<React.ComponentProps<"button">, "children"> & {
-  /** Path MDI (ver `icone()` em `@meujogo/ui/icones`). */
-  icone: string
-  rotulo: string
-  /** `claro` no topo branco, `imersivo` sobre o roxo, `nu` sem fundo (sino). */
-  tom?: "claro" | "imersivo" | "nu"
+type HeaderButtonProps = Omit<React.ComponentProps<"button">, "children"> & {
+  /** Path MDI (ver `iconPath()` em `@meujogo/ui/icons`). */
+  icon: string
+  label: string
+  /** `light` no topo branco, `immersive` sobre o roxo, `bare` sem fundo (sino). */
+  tone?: "light" | "immersive" | "bare"
   children?: React.ReactNode
 }
 
-const TONS_BOTAO = {
-  claro: "bg-tint-10 text-ink hover:bg-tint-6",
-  imersivo: "bg-on-hero-14 text-white hover:bg-white/20",
-  nu: "text-fg-2 hover:bg-tint-6",
+const BUTTON_TONES = {
+  light: "bg-tint-10 text-ink hover:bg-tint-6",
+  immersive: "bg-on-hero-14 text-white hover:bg-white/20",
+  bare: "text-fg-2 hover:bg-tint-6",
 } as const
 
 /** 40 px visíveis, 44 px de área de toque. */
-function BotaoTopo({ icone: path, rotulo, tom = "claro", className, children, type = "button", ...props }: BotaoTopoProps) {
+function HeaderButton({ icon: path, label, tone = "light", className, children, type = "button", ...props }: HeaderButtonProps) {
   return (
     <button
       type={type}
-      aria-label={rotulo}
-      data-slot="botao-topo"
+      aria-label={label}
+      data-slot="header-button"
       className={cn(
         "relative inline-flex size-header-btn shrink-0 items-center justify-center rounded-full transition-colors duration-150 before:absolute before:-inset-0.5 before:content-['']",
-        TONS_BOTAO[tom],
-        foco,
+        BUTTON_TONES[tone],
+        focusRing,
         className
       )}
       {...props}
@@ -51,91 +51,91 @@ function BotaoTopo({ icone: path, rotulo, tom = "claro", className, children, ty
 /* Raiz: as cinco abas                                                 */
 /* ------------------------------------------------------------------ */
 
-type HeaderRaizProps = {
-  grupo: string
-  /** `principal` só no Início; nas outras abas, o símbolo. */
-  marca?: "simbolo" | "principal"
-  onTrocarGrupo?: () => void
-  notificacoes?: number
-  onNotificacoes?: () => void
-  /** Normalmente um `AvatarJogador` de 32 px. */
+type RootHeaderProps = {
+  group: string
+  /** `primary` só no Início; nas outras abas, o símbolo. */
+  brand?: "symbol" | "primary"
+  onSwitchGroup?: () => void
+  notifications?: number
+  onNotifications?: () => void
+  /** Normalmente um `PlayerAvatar` de 32 px. */
   avatar: React.ReactNode
-  onPerfil?: () => void
-  titulo?: React.ReactNode
+  onProfile?: () => void
+  title?: React.ReactNode
   meta?: React.ReactNode
   /** Na rolagem o título grande sai e a linha de cima ganha hairline. */
-  recolhido?: boolean
+  collapsed?: boolean
   className?: string
 }
 
-function HeaderRaiz({
-  grupo,
-  marca = "simbolo",
-  onTrocarGrupo,
-  notificacoes = 0,
-  onNotificacoes,
+function RootHeader({
+  group,
+  brand = "symbol",
+  onSwitchGroup,
+  notifications = 0,
+  onNotifications,
   avatar,
-  onPerfil,
-  titulo,
+  onProfile,
+  title,
   meta,
-  recolhido = false,
+  collapsed = false,
   className,
-}: HeaderRaizProps) {
-  const principal = marca === "principal"
-  const contagem = notificacoes > 9 ? "9+" : String(notificacoes)
+}: RootHeaderProps) {
+  const primary = brand === "primary"
+  const count = notifications > 9 ? "9+" : String(notifications)
 
   return (
-    <div data-slot="header-raiz" className={className}>
+    <div data-slot="root-header" className={className}>
       <header
         className={cn(
           "flex h-topbar items-center justify-between gap-2 bg-surface px-4",
-          recolhido && "border-b border-line"
+          collapsed && "border-b border-line"
         )}
       >
         <div className="flex min-w-0 items-center gap-3">
-          {principal ? (
+          {primary ? (
             <>
-              <Marca versao="principal" className="h-[26px] text-ink" />
+              <BrandMark variant="primary" className="h-[26px] text-ink" />
               <span aria-hidden="true" className="h-6 w-px shrink-0 bg-line" />
             </>
           ) : null}
           <button
             type="button"
-            onClick={onTrocarGrupo}
-            aria-label={`Trocar de grupo, ${grupo}`}
+            onClick={onSwitchGroup}
+            aria-label={`Trocar de grupo, ${group}`}
             className={cn(
               "relative flex h-header-btn min-w-0 items-center rounded-full text-ink before:absolute before:-inset-y-0.5 before:inset-x-0 before:content-['']",
-              principal ? "gap-0.5 pr-1 font-body text-sm font-semibold" : "-ml-1 gap-2 pr-2 pl-1 font-display text-base font-semibold",
-              foco
+              primary ? "gap-0.5 pr-1 font-body text-sm font-semibold" : "-ml-1 gap-2 pr-2 pl-1 font-display text-base font-semibold",
+              focusRing
             )}
           >
-            {principal ? null : <Marca versao="simbolo" rotulo="" className="h-7" />}
-            <span className="truncate">{grupo}</span>
-            <Icon path={icone("expandir")} className={principal ? "size-[18px]" : "size-5"} />
+            {primary ? null : <BrandMark variant="symbol" label="" className="h-7" />}
+            <span className="truncate">{group}</span>
+            <Icon path={iconPath("expand")} className={primary ? "size-[18px]" : "size-5"} />
           </button>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
-          <BotaoTopo
-            tom="nu"
-            icone={icone("notificacao-contorno")}
-            rotulo={notificacoes > 0 ? `Notificações, ${notificacoes} novas` : "Notificações"}
-            onClick={onNotificacoes}
+          <HeaderButton
+            tone="bare"
+            icon={iconPath("notification-outline")}
+            label={notifications > 0 ? `Notificações, ${notifications} novas` : "Notificações"}
+            onClick={onNotifications}
           >
-            {notificacoes > 0 ? (
+            {notifications > 0 ? (
               <span
                 aria-hidden="true"
-                className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-roxo px-1 font-num text-[11px] leading-none font-bold text-white dark:bg-lavanda dark:text-roxo"
+                className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-purple px-1 font-num text-[11px] leading-none font-bold text-white dark:bg-lavender dark:text-purple"
               >
-                {contagem}
+                {count}
               </span>
             ) : null}
-          </BotaoTopo>
-          {onPerfil ? (
+          </HeaderButton>
+          {onProfile ? (
             <button
               type="button"
-              onClick={onPerfil}
+              onClick={onProfile}
               aria-label="Perfil"
-              className={cn("relative rounded-full before:absolute before:-inset-1.5 before:content-['']", foco)}
+              className={cn("relative rounded-full before:absolute before:-inset-1.5 before:content-['']", focusRing)}
             >
               {avatar}
             </button>
@@ -144,9 +144,9 @@ function HeaderRaiz({
           )}
         </div>
       </header>
-      {titulo && !recolhido ? (
+      {title && !collapsed ? (
         <div className="px-4 pt-3">
-          <h1 className="font-display text-[26px] leading-tight font-semibold text-foreground">{titulo}</h1>
+          <h1 className="font-display text-[26px] leading-tight font-semibold text-foreground">{title}</h1>
           {meta ? <div className="mt-0.5 text-sm font-medium text-muted-foreground">{meta}</div> : null}
         </div>
       ) : null}
@@ -158,86 +158,86 @@ function HeaderRaiz({
 /* Detalhe: telas empilhadas                                           */
 /* ------------------------------------------------------------------ */
 
-type HeaderCentroProps = {
-  titulo: React.ReactNode
-  subtitulo?: React.ReactNode
-  onVoltar?: () => void
-  rotuloVoltar?: string
-  /** No máximo uma ação: um `BotaoTopo` (compartilhar ou mais). */
-  acao?: React.ReactNode
+type CenteredHeaderProps = {
+  title: React.ReactNode
+  subtitle?: React.ReactNode
+  onBack?: () => void
+  backLabel?: string
+  /** No máximo uma ação: um `HeaderButton` (compartilhar ou mais). */
+  action?: React.ReactNode
   className?: string
 }
 
-function TopoCentrado({
-  titulo,
-  subtitulo,
-  onVoltar,
-  rotuloVoltar = "Voltar",
-  acao,
+function CenteredHeader({
+  title,
+  subtitle,
+  onBack,
+  backLabel = "Voltar",
+  action,
   className,
-  imersivo,
-}: HeaderCentroProps & { imersivo: boolean }) {
+  immersive,
+}: CenteredHeaderProps & { immersive: boolean }) {
   return (
     <header className={cn("flex h-topbar items-center justify-between gap-3", className)}>
-      <BotaoTopo tom={imersivo ? "imersivo" : "claro"} icone={icone("voltar")} rotulo={rotuloVoltar} onClick={onVoltar} />
+      <HeaderButton tone={immersive ? "immersive" : "light"} icon={iconPath("back")} label={backLabel} onClick={onBack} />
       <div className="flex min-w-0 flex-col items-center text-center">
-        <h1 className={cn("truncate font-display text-[17px] leading-tight font-semibold", imersivo ? "text-white" : "text-foreground")}>
-          {titulo}
+        <h1 className={cn("truncate font-display text-[17px] leading-tight font-semibold", immersive ? "text-white" : "text-foreground")}>
+          {title}
         </h1>
-        {subtitulo ? (
-          <p className={cn("mt-0.5 truncate text-xs leading-tight font-medium", imersivo ? "text-white/70" : "text-muted-foreground")}>
-            {subtitulo}
+        {subtitle ? (
+          <p className={cn("mt-0.5 truncate text-xs leading-tight font-medium", immersive ? "text-white/70" : "text-muted-foreground")}>
+            {subtitle}
           </p>
         ) : null}
       </div>
-      {acao ?? <span aria-hidden="true" className="size-header-btn shrink-0" />}
+      {action ?? <span aria-hidden="true" className="size-header-btn shrink-0" />}
     </header>
   )
 }
 
-function HeaderDetalhe({ className, ...props }: HeaderCentroProps) {
-  return <TopoCentrado {...props} imersivo={false} className={cn("bg-surface px-4", className)} />
+function DetailHeader({ className, ...props }: CenteredHeaderProps) {
+  return <CenteredHeader {...props} immersive={false} className={cn("bg-surface px-4", className)} />
 }
 
 /* ------------------------------------------------------------------ */
 /* Imersivo: dentro do bloco roxo                                      */
 /* ------------------------------------------------------------------ */
 
-function HeaderImersivo(props: HeaderCentroProps) {
-  return <TopoCentrado {...props} imersivo />
+function ImmersiveHeader(props: CenteredHeaderProps) {
+  return <CenteredHeader {...props} immersive />
 }
 
-type BlocoImersivoProps = React.ComponentProps<"section"> & {
-  padrao?: NomePadrao
+type ImmersiveBlockProps = React.ComponentProps<"section"> & {
+  pattern?: PatternName
 }
 
-/** Bloco roxo de ponta a ponta que leva o `HeaderImersivo`; a `FolhaImersiva` sobe 24 px sobre ele. */
-function BlocoImersivo({ padrao = "impulso", className, children, ...props }: BlocoImersivoProps) {
+/** Bloco roxo de ponta a ponta que leva o `ImmersiveHeader`; a `ImmersiveSheet` sobe 24 px sobre ele. */
+function ImmersiveBlock({ pattern = "impulse", className, children, ...props }: ImmersiveBlockProps) {
   return (
     <section
-      data-slot="bloco-imersivo"
+      data-slot="immersive-block"
       className={cn("relative w-full overflow-hidden bg-hero px-4 pt-3 pb-16 text-white", className)}
       {...props}
     >
-      <Padrao
-        padrao={padrao}
-        esmaecer={padrao === "impulso" ? "diagonal" : "canto"}
-        posicao={padrao === "impulso" ? "-top-10 -right-[60px] size-[400px]" : undefined}
+      <BrandPattern
+        pattern={pattern}
+        fade={pattern === "impulse" ? "diagonal" : "corner"}
+        position={pattern === "impulse" ? "-top-10 -right-[60px] size-[400px]" : undefined}
       />
       <div className="relative">{children}</div>
     </section>
   )
 }
 
-function FolhaImersiva({ className, ...props }: React.ComponentProps<"div">) {
+function ImmersiveSheet({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      data-slot="folha-imersiva"
+      data-slot="immersive-sheet"
       className={cn("relative -mt-6 flex flex-col gap-4 rounded-t-3xl bg-surface px-4 pt-5 pb-6", className)}
       {...props}
     />
   )
 }
 
-export { BotaoTopo, HeaderRaiz, HeaderDetalhe, HeaderImersivo, BlocoImersivo, FolhaImersiva }
-export type { BotaoTopoProps, HeaderRaizProps, HeaderCentroProps as HeaderDetalheProps, BlocoImersivoProps }
+export { HeaderButton, RootHeader, DetailHeader, ImmersiveHeader, ImmersiveBlock, ImmersiveSheet }
+export type { HeaderButtonProps, RootHeaderProps, CenteredHeaderProps as DetailHeaderProps, ImmersiveBlockProps }

@@ -1,7 +1,7 @@
-import { Section, Bloco, Code } from "./_shared"
+import { Section, Block, Code } from "./_shared"
 
-const ESPACO = [4, 8, 12, 16, 20, 24, 32, 40, 48, 64]
-const RAIOS: [string, number, string][] = [
+const SPACING = [4, 8, 12, 16, 20, 24, 32, 40, 48, 64]
+const RADII: [string, number, string][] = [
   ["sm", 6, "chip, badge quadrado, kbd"],
   ["md", 8, "item de menu"],
   ["lg", 10, "botão, campo, toggle"],
@@ -9,41 +9,41 @@ const RAIOS: [string, number, string][] = [
   ["2xl", 20, "dialog, folha"],
 ]
 
-export function Espaco() {
+export function Spacing() {
   return (
     <Section
-      id="espaco"
+      id="spacing"
       n="05 · Espaço, raio, sombra"
-      titulo="Base 4. Raio só nos contêineres. Quase nenhuma sombra."
+      title="Base 4. Raio só nos contêineres. Quase nenhuma sombra."
       lead="A marca é chapada; profundidade vem da cor, não do brilho. As formas da identidade têm raio zero; o raio pertence aos contêineres da interface."
     >
       <div className="grid gap-6 lg:grid-cols-3">
-        <Bloco titulo="Espaço" nota="Alvo de toque mínimo 44 × 44 px. Gutter lateral de 16 px no mínimo.">
+        <Block title="Espaço" note="Alvo de toque mínimo 44 × 44 px. Gutter lateral de 16 px no mínimo.">
           <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-5">
-            {ESPACO.map((v) => (
+            {SPACING.map((v) => (
               <div key={v} className="flex items-center gap-3">
                 <code className="w-8 font-num text-sm font-bold text-muted-foreground">{v}</code>
-                <span className="h-3 rounded-sm bg-roxo" style={{ width: v * 3 }} />
+                <span className="h-3 rounded-sm bg-purple" style={{ width: v * 3 }} />
               </div>
             ))}
           </div>
-        </Bloco>
-        <Bloco titulo="Raio" nota="Token --radius 10 px; o shadcn deriva os demais.">
+        </Block>
+        <Block title="Raio" note="Token --radius 10 px; o shadcn deriva os demais.">
           <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5">
-            {RAIOS.map(([n, px, uso]) => (
+            {RADII.map(([n, px, usage]) => (
               <div key={n} className="flex items-center gap-3">
                 <span className="size-10 shrink-0 border-2 border-ink bg-muted" style={{ borderRadius: px }} />
                 <div className="flex flex-col leading-tight">
                   <code className="font-num text-sm font-bold text-ink">
                     {n} · {px} px
                   </code>
-                  <span className="text-xs text-muted-foreground">{uso}</span>
+                  <span className="text-xs text-muted-foreground">{usage}</span>
                 </div>
               </div>
             ))}
           </div>
-        </Bloco>
-        <Bloco titulo="Sombra" nota="Card elevado: 0 1px 2px a 6% no claro, borda no escuro. O dialog é a única superfície com sombra forte. Nada brilha.">
+        </Block>
+        <Block title="Sombra" note="Card elevado: 0 1px 2px a 6% no claro, borda no escuro. O dialog é a única superfície com sombra forte. Nada brilha.">
           <div className="flex flex-col gap-3 rounded-xl border border-border bg-background p-5">
             <div className="rounded-xl border border-border bg-card p-4 text-sm">Card plano: só borda</div>
             <div className="rounded-xl bg-card p-4 text-sm shadow-sm ring-1 ring-border">Card elevado: borda e sombra sm</div>
@@ -52,7 +52,7 @@ export function Espaco() {
           <p className="text-sm text-fg-2">
             Tokens: <Code>shadow-sm</Code> e <Code>shadow-dialog</Code>.
           </p>
-        </Bloco>
+        </Block>
       </div>
     </Section>
   )

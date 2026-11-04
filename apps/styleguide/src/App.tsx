@@ -1,42 +1,42 @@
 import { Logo, Code } from "./sections/_shared"
-import { Marca } from "./sections/Marca"
-import { Padroes } from "./sections/Padroes"
-import { Cor } from "./sections/Cor"
-import { Tipo } from "./sections/Tipo"
-import { Espaco } from "./sections/Espaco"
-import { Icones } from "./sections/Icones"
-import { Emblemas } from "./sections/Emblemas"
-import { Componentes } from "./sections/Componentes"
-import { PadroesDeTela } from "./sections/PadroesDeTela"
-import { Movimento } from "./sections/Movimento"
+import { Brand } from "./sections/Brand"
+import { Patterns } from "./sections/Patterns"
+import { Color } from "./sections/Color"
+import { Typography } from "./sections/Typography"
+import { Spacing } from "./sections/Spacing"
+import { Icons } from "./sections/Icons"
+import { Emblems } from "./sections/Emblems"
+import { Components } from "./sections/Components"
+import { ScreenPatterns } from "./sections/ScreenPatterns"
+import { Motion } from "./sections/Motion"
 import { A11y } from "./sections/A11y"
-import { SeletorDeTema } from "@meujogo/ui/components/mj/seletor-de-tema"
+import { ThemeSwitcher } from "@meujogo/ui/components/mj/theme-switcher"
 import { Icon } from "@meujogo/ui/components/icon"
-import { icone } from "@meujogo/ui/icones"
-import simbolo from "@meujogo/brand/logo/meujogo-simbolo.svg?raw"
-import principal from "@meujogo/brand/logo/meujogo-logo.svg?raw"
+import { iconPath } from "@meujogo/ui/icons"
+import symbolLogo from "@meujogo/brand/logo/meujogo-simbolo.svg?raw"
+import primaryLogo from "@meujogo/brand/logo/meujogo-logo.svg?raw"
 
 const NAV: [string, string][] = [
-  ["marca", "Marca"],
-  ["padroes", "Padrões"],
-  ["cor", "Cor"],
-  ["tipografia", "Tipo"],
-  ["espaco", "Espaço"],
-  ["icones", "Ícones"],
-  ["emblemas", "Emblemas"],
-  ["componentes", "Componentes"],
-  ["padroes-de-tela", "Telas"],
-  ["movimento", "Movimento"],
-  ["acessibilidade", "A11y"],
+  ["brand", "Marca"],
+  ["patterns", "Padrões"],
+  ["color", "Cor"],
+  ["typography", "Tipo"],
+  ["spacing", "Espaço"],
+  ["icons", "Ícones"],
+  ["emblems", "Emblemas"],
+  ["components", "Componentes"],
+  ["screen-patterns", "Telas"],
+  ["motion", "Movimento"],
+  ["accessibility", "A11y"],
 ]
 
 export function App() {
   return (
     <div className="min-h-svh bg-background text-foreground">
-      <header className="sticky top-0 z-40 bg-roxo text-white">
+      <header className="sticky top-0 z-40 bg-purple text-white">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-4 px-4 sm:px-6">
-          <a href="#topo" className="flex items-center gap-2.5" aria-label="Meu Jogo, início">
-            <Logo svg={simbolo} className="h-8" />
+          <a href="#top" className="flex items-center gap-2.5" aria-label="Meu Jogo, início">
+            <Logo svg={symbolLogo} className="h-8" />
             <span className="font-display text-sm font-semibold text-white/90">Styleguide</span>
           </a>
           <nav className="hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex" aria-label="Seções">
@@ -47,15 +47,15 @@ export function App() {
             ))}
           </nav>
           <span className="flex-1 md:hidden" />
-          <SeletorDeTema
-            compacto
+          <ThemeSwitcher
+            compact
             spacing={0}
-            className="rounded-full border border-white/25 bg-white/5 text-white *:rounded-full *:border-0 *:text-white *:hover:bg-white/10 *:data-pressed:bg-white *:data-pressed:text-roxo *:aria-pressed:bg-white *:aria-pressed:text-roxo"
+            className="rounded-full border border-white/25 bg-white/5 text-white *:rounded-full *:border-0 *:text-white *:hover:bg-white/10 *:data-pressed:bg-white *:data-pressed:text-purple *:aria-pressed:bg-white *:aria-pressed:text-purple"
           />
         </div>
       </header>
 
-      <main id="topo">
+      <main id="top">
         <section className="mx-auto w-full max-w-6xl px-4 pt-14 pb-12 sm:px-6 sm:pt-20">
           <div className="grid items-center gap-10 lg:grid-cols-[1.2fr_1fr]">
             <div className="flex flex-col gap-5">
@@ -71,33 +71,33 @@ export function App() {
                 <span className="rounded-full border border-border bg-card px-3 py-1">Lexend · Manrope · Rajdhani</span>
               </div>
             </div>
-            <div className="flex aspect-[4/3] items-center justify-center rounded-2xl bg-ouro p-8 text-roxo">
-              <Logo svg={principal} className="h-16 w-auto sm:h-20" />
+            <div className="flex aspect-[4/3] items-center justify-center rounded-2xl bg-gold p-8 text-purple">
+              <Logo svg={primaryLogo} className="h-16 w-auto sm:h-20" />
             </div>
           </div>
         </section>
 
-        <Marca />
-        <Padroes />
-        <Cor />
-        <Tipo />
-        <Espaco />
-        <Icones />
-        <Emblemas />
-        <Componentes />
-        <PadroesDeTela />
-        <Movimento />
+        <Brand />
+        <Patterns />
+        <Color />
+        <Typography />
+        <Spacing />
+        <Icons />
+        <Emblems />
+        <Components />
+        <ScreenPatterns />
+        <Motion />
         <A11y />
       </main>
 
       <footer className="border-t border-border">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-10 text-sm text-fg-2 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <Logo svg={principal} className="h-12 text-ink" />
+          <Logo svg={primaryLogo} className="h-12 text-ink" />
           <p className="max-w-[60ch]">
             Componentes em <Code>packages/ui</Code>, arquivos da marca em <Code>packages/brand</Code>, esta vitrine em <Code>apps/styleguide</Code>. <Code>pnpm --filter @meujogo/styleguide dev</Code> para editar.
           </p>
           <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-            <Icon path={icone("temporada")} className="size-4" /> v3.2
+            <Icon path={iconPath("season")} className="size-4" /> v3.2
           </span>
         </div>
       </footer>

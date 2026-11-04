@@ -1,8 +1,8 @@
 import { toast } from "sonner"
-import { toastDesfazer } from "@meujogo/ui/components/ui/sonner"
-import { Section, Bloco, Demo, Linha, Logo, Code } from "./_shared"
+import { toastUndo } from "@meujogo/ui/components/ui/sonner"
+import { Section, Block, Demo, Row, Logo, Code } from "./_shared"
 import { Icon } from "@meujogo/ui/components/icon"
-import { icone } from "@meujogo/ui/icones"
+import { iconPath } from "@meujogo/ui/icons"
 import { Button } from "@meujogo/ui/components/ui/button"
 import { Badge } from "@meujogo/ui/components/ui/badge"
 import { Input } from "@meujogo/ui/components/ui/input"
@@ -28,10 +28,10 @@ import { Spinner } from "@meujogo/ui/components/ui/spinner"
 import { Kbd, KbdGroup } from "@meujogo/ui/components/ui/kbd"
 import { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount } from "@meujogo/ui/components/ui/avatar"
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@meujogo/ui/components/ui/empty"
-import simbolo from "@meujogo/brand/logo/meujogo-simbolo.svg?raw"
-import pequeno from "@meujogo/brand/logo/meujogo-simbolo-pequeno.svg?raw"
+import symbolLogo from "@meujogo/brand/logo/meujogo-simbolo.svg?raw"
+import smallLogo from "@meujogo/brand/logo/meujogo-simbolo-pequeno.svg?raw"
 
-const TIMES = [
+const TEAM_COUNTS = [
   { value: "2", label: "2 times" },
   { value: "3", label: "3 times" },
   { value: "4", label: "4 times" },
@@ -47,83 +47,83 @@ const RANKING: [number, string, string, number, number, number, boolean][] = [
 
 // Inputs fill with surface-2, which almost disappears on the page background:
 // in the app they always sit on a white surface, so the demo does too.
-function Superficie({ children, className }: { children: React.ReactNode; className?: string }) {
+function Surface({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={"flex flex-col gap-5 rounded-xl bg-card p-4 " + (className ?? "")}>{children}</div>
 }
 
-function Botoes() {
+function Buttons() {
   return (
-    <Bloco
-      titulo="Botão"
-      nota="Pílula. Primário na tinta (roxo no claro, branco no escuro), um por tela; secundário em roxo 10%; contorno e fantasma na tinta; destrutivo é texto na rosa-tinta, confirmado em dialog. 48 px por padrão, 56 no momento-chave, 36 e 28 em linhas densas com área de toque de 44. Hover em #4A1E85, ativo afunda 1 px, foco com anel ciano, desabilitado a 45%. Nada de ouro em botão."
+    <Block
+      title="Botão"
+      note="Pílula. Primário na tinta (roxo no claro, branco no escuro), um por tela; secundário em roxo 10%; contorno e fantasma na tinta; destrutivo é texto na rosa-tinta, confirmado em dialog. 48 px por padrão, 56 no momento-chave, 36 e 28 em linhas densas com área de toque de 44. Hover em #4A1E85, ativo afunda 1 px, foco com anel ciano, desabilitado a 45%. Nada de ouro em botão."
     >
       <Demo>
-        <Linha>
+        <Row>
           <Button>Confirmar presença</Button>
           <Button variant="secondary">Ver ranking</Button>
           <Button variant="outline">Convidar</Button>
           <Button variant="ghost">Cancelar</Button>
           <Button variant="destructive">Encerrar partida</Button>
           <Button variant="link">Esqueci o código</Button>
-        </Linha>
-        <Linha>
+        </Row>
+        <Row>
           <Button size="lg">
-            <Icon path={icone("apito")} /> Começar partida
+            <Icon path={iconPath("whistle")} /> Começar partida
           </Button>
           <Button size="sm" variant="secondary">
-            <Icon path={icone("substituicao")} /> Troca
+            <Icon path={iconPath("substitution")} /> Troca
           </Button>
           <Button size="xs" variant="secondary">
             Ver
           </Button>
           <Button size="icon" variant="secondary" aria-label="Voltar">
-            <Icon path={icone("voltar")} />
+            <Icon path={iconPath("back")} />
           </Button>
           <Button size="icon-sm" variant="ghost" aria-label="Mais ações">
-            <Icon path={icone("mais")} />
+            <Icon path={iconPath("more")} />
           </Button>
           <Button disabled>Desabilitado</Button>
           <Button disabled>
             <Spinner /> Salvando
           </Button>
-        </Linha>
+        </Row>
       </Demo>
-    </Bloco>
+    </Block>
   )
 }
 
-function Campos() {
+function Fields() {
   return (
-    <Bloco titulo="Campos" nota="52 px, preenchidos em surface-2 sem borda, raio 12, ícone à esquerda em muted, rótulo acima em Manrope 600 14. Foco com anel ciano de 2 px; erro com anel e mensagem na rosa-tinta, com ícone; desabilitado a 45%. O código por e-mail são seis caixas de 48 × 56 em Rajdhani 24.">
+    <Block title="Campos" note="52 px, preenchidos em surface-2 sem borda, raio 12, ícone à esquerda em muted, rótulo acima em Manrope 600 14. Foco com anel ciano de 2 px; erro com anel e mensagem na rosa-tinta, com ícone; desabilitado a 45%. O código por e-mail são seis caixas de 48 × 56 em Rajdhani 24.">
       <Demo>
-        <Superficie>
+        <Surface>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="nome">Nome do grupo</FieldLabel>
-              <Input id="nome" placeholder="Pelada de quinta" />
+              <FieldLabel htmlFor="group-name">Nome do grupo</FieldLabel>
+              <Input id="group-name" placeholder="Pelada de quinta" />
               <FieldDescription>Aparece no convite e no ranking.</FieldDescription>
             </Field>
             <Field data-invalid>
               <FieldLabel htmlFor="email">E-mail</FieldLabel>
-              <Input id="email" type="email" icone={icone("email-contorno")} aria-invalid defaultValue="thiago@" />
+              <Input id="email" type="email" icon={iconPath("email-outline")} aria-invalid defaultValue="thiago@" />
               <FieldError>
                 <span className="inline-flex items-center gap-1.5">
-                  <Icon path={icone("aviso")} className="size-4" /> Esse e-mail não parece completo.
+                  <Icon path={iconPath("warning")} className="size-4" /> Esse e-mail não parece completo.
                 </span>
               </FieldError>
             </Field>
             <Field>
-              <FieldLabel htmlFor="busca">Buscar jogador</FieldLabel>
-              <Input id="busca" icone={icone("buscar")} placeholder="Nome ou apelido" />
+              <FieldLabel htmlFor="player-search">Buscar jogador</FieldLabel>
+              <Input id="player-search" icon={iconPath("search")} placeholder="Nome ou apelido" />
             </Field>
             <Field>
-              <FieldLabel htmlFor="times">Times por sessão</FieldLabel>
-              <Select defaultValue="3" items={TIMES}>
-                <SelectTrigger id="times" className="w-full">
+              <FieldLabel htmlFor="team-count">Times por sessão</FieldLabel>
+              <Select defaultValue="3" items={TEAM_COUNTS}>
+                <SelectTrigger id="team-count" className="w-full">
                   <SelectValue placeholder="Escolha" />
                 </SelectTrigger>
                 <SelectContent>
-                  {TIMES.map((t) => (
+                  {TEAM_COUNTS.map((t) => (
                     <SelectItem key={t.value} value={t.value}>
                       {t.label}
                     </SelectItem>
@@ -132,12 +132,12 @@ function Campos() {
               </Select>
             </Field>
             <Field>
-              <FieldLabel htmlFor="obs">Observações</FieldLabel>
-              <Textarea id="obs" placeholder="Quadra 2, entrada pelo portão lateral" rows={2} />
+              <FieldLabel htmlFor="notes">Observações</FieldLabel>
+              <Textarea id="notes" placeholder="Quadra 2, entrada pelo portão lateral" rows={2} />
             </Field>
             <Field>
-              <FieldLabel htmlFor="quadra">Quadra</FieldLabel>
-              <Input id="quadra" icone={icone("local-contorno")} disabled defaultValue="Arena Vila Mariana" />
+              <FieldLabel htmlFor="court">Quadra</FieldLabel>
+              <Input id="court" icon={iconPath("location-outline")} disabled defaultValue="Arena Vila Mariana" />
             </Field>
           </FieldGroup>
           <Field>
@@ -157,8 +157,8 @@ function Campos() {
             </InputOTP>
             <FieldDescription>Vale por 10 minutos.</FieldDescription>
           </Field>
-        </Superficie>
-        <Superficie className="gap-4">
+        </Surface>
+        <Surface className="gap-4">
           <Field orientation="horizontal">
             <Checkbox id="c1" defaultChecked />
             <FieldLabel htmlFor="c1">Vou jogar quinta</FieldLabel>
@@ -175,46 +175,46 @@ function Campos() {
             <Switch id="s2" />
             <FieldLabel htmlFor="s2">Aceitar convidados</FieldLabel>
           </Field>
-        </Superficie>
+        </Surface>
       </Demo>
-    </Bloco>
+    </Block>
   )
 }
 
 function Chips() {
   return (
-    <Bloco titulo="Chip e badge" nota="Chip neutro em surface-2, 24 px, Manrope 600 12 em caixa de frase. A cor viva fica só no ponto de 8 px: verde para confirmado, rosa para faltou, a cor do tier na carta. Pendente, goleiro, novo e reserva não têm cor viva, só o texto (e o ícone, quando ajuda). O selo Ao vivo é a exceção: pílula vermelha cheia com texto e ponto brancos, o único lugar desse vermelho. Contagem em Rajdhani sobre a tinta.">
+    <Block title="Chip e badge" note="Chip neutro em surface-2, 24 px, Manrope 600 12 em caixa de frase. A cor viva fica só no ponto de 8 px: verde para confirmado, rosa para faltou, a cor do tier na carta. Pendente, goleiro, novo e reserva não têm cor viva, só o texto (e o ícone, quando ajuda). O selo Ao vivo é a exceção: pílula vermelha cheia com texto e ponto brancos, o único lugar desse vermelho. Contagem em Rajdhani sobre a tinta.">
       <Demo>
-        <Linha>
+        <Row>
           <Badge variant="success">Confirmado</Badge>
           <Badge variant="destructive">Faltou</Badge>
           <Badge variant="warning">
-            <Icon path={icone("sem-resposta")} /> Pendente
+            <Icon path={iconPath("no-answer")} /> Pendente
           </Badge>
           <Badge variant="info">
-            <Icon path={icone("goleiro")} /> Goleiro
+            <Icon path={iconPath("goalkeeper")} /> Goleiro
           </Badge>
           <Badge variant="outline">Convidado</Badge>
           <Badge variant="live">Ao vivo</Badge>
-        </Linha>
-        <Linha>
+        </Row>
+        <Row>
           <Badge variant="count">12</Badge>
           <Badge variant="accent">Novo</Badge>
           <Badge>Admin</Badge>
           <Badge variant="secondary">Reserva</Badge>
           <Badge variant="bronze">Bronze</Badge>
-          <Badge variant="prata">Prata</Badge>
-          <Badge variant="ouro">Ouro</Badge>
-          <Badge variant="diamante">Diamante</Badge>
-        </Linha>
+          <Badge variant="silver">Prata</Badge>
+          <Badge variant="gold">Ouro</Badge>
+          <Badge variant="diamond">Diamante</Badge>
+        </Row>
       </Demo>
-    </Bloco>
+    </Block>
   )
 }
 
 function Cards() {
   return (
-    <Bloco titulo="Card" nota="Superfície branca sobre a página, raio 16, sem borda e sem sombra: a elevação é só de tom. Card só para um objeto que se aciona (próximo jogo, resumo do jogador, carta do título); conjuntos são linhas, como na tabela abaixo.">
+    <Block title="Card" note="Superfície branca sobre a página, raio 16, sem borda e sem sombra: a elevação é só de tom. Card só para um objeto que se aciona (próximo jogo, resumo do jogador, carta do título); conjuntos são linhas, como na tabela abaixo.">
       <Demo>
         <Card>
           <CardHeader>
@@ -230,7 +230,7 @@ function Cards() {
                 <AvatarFallback>LA</AvatarFallback>
               </Avatar>
               <Avatar>
-                <AvatarFallback tom="lavanda">RS</AvatarFallback>
+                <AvatarFallback tone="lavender">RS</AvatarFallback>
               </Avatar>
               <Avatar>
                 <AvatarFallback>BT</AvatarFallback>
@@ -241,10 +241,10 @@ function Cards() {
           </CardContent>
           <CardFooter className="gap-2">
             <Button size="sm">
-              <Icon path={icone("presenca")} /> Confirmar
+              <Icon path={iconPath("attendance")} /> Confirmar
             </Button>
             <Button size="sm" variant="ghost">
-              <Icon path={icone("compartilhar")} /> Convite
+              <Icon path={iconPath("share")} /> Convite
             </Button>
           </CardFooter>
         </Card>
@@ -255,19 +255,19 @@ function Cards() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-3 rounded-lg bg-surface-2 p-3 text-sm text-fg-2">
-              <Logo svg={pequeno} className="h-6 text-muted-foreground" />
+              <Logo svg={smallLogo} className="h-6 text-muted-foreground" />
               Desenho numa sessão própria.
             </div>
           </CardContent>
         </Card>
       </Demo>
-    </Bloco>
+    </Block>
   )
 }
 
 function Ranking() {
   return (
-    <Bloco titulo="Tabela de ranking" nota="Linhas planas num só contêiner branco de raio 16, separadas por hairline. Cabeçalho em caixa de frase, Manrope 600 12 muted. Posição e números em Rajdhani, à direita. A linha do próprio usuário em roxo 6% (prop eu). O 1º lugar leva a coroa ouro pequena e nada mais é colorido.">
+    <Block title="Tabela de ranking" note="Linhas planas num só contêiner branco de raio 16, separadas por hairline. Cabeçalho em caixa de frase, Manrope 600 12 muted. Posição e números em Rajdhani, à direita. A linha do próprio usuário em roxo 6% (prop self). O 1º lugar leva a coroa ouro pequena e nada mais é colorido.">
       <Demo>
         <div className="overflow-hidden rounded-xl bg-card">
           <Table>
@@ -281,20 +281,20 @@ function Ranking() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {RANKING.map(([pos, nome, ini, j, pts, elo, eu]) => (
-                <TableRow key={pos} eu={eu}>
+              {RANKING.map(([pos, name, initials, j, pts, elo, self]) => (
+                <TableRow key={pos} self={self}>
                   <TableCell className="text-right font-num text-base font-semibold text-foreground">
                     <span className="inline-flex items-center justify-end gap-1">
-                      {pos === 1 ? <Icon path={icone("campeao")} className="size-4 text-ouro" title="1º lugar" /> : null}
+                      {pos === 1 ? <Icon path={iconPath("champion")} className="size-4 text-gold" title="1º lugar" /> : null}
                       {pos}
                     </span>
                   </TableCell>
                   <TableCell>
                     <span className="inline-flex items-center gap-2.5">
                       <Avatar>
-                        <AvatarFallback tom={pos % 2 ? "roxo" : "lavanda"}>{ini}</AvatarFallback>
+                        <AvatarFallback tone={pos % 2 ? "purple" : "lavender"}>{initials}</AvatarFallback>
                       </Avatar>
-                      <span className="text-[15px] font-bold text-foreground">{eu ? "Você" : nome}</span>
+                      <span className="text-[15px] font-bold text-foreground">{self ? "Você" : name}</span>
                     </span>
                   </TableCell>
                   <TableCell className="text-right font-num text-base font-semibold">{j}</TableCell>
@@ -306,53 +306,53 @@ function Ranking() {
           </Table>
         </div>
       </Demo>
-    </Bloco>
+    </Block>
   )
 }
 
-function Abas() {
+function TabsDemo() {
   return (
-    <Bloco titulo="Tabs" nota="Segmentado (padrão): a aba selecionada é a pílula cheia na tinta; as outras ficam em roxo 10% com texto roxo. Linha: sublinhado reto de 2 px na tinta sob a aba ativa, sobre a hairline da lista.">
+    <Block title="Tabs" note="Segmentado (padrão): a aba selecionada é a pílula cheia na tinta; as outras ficam em roxo 10% com texto roxo. Linha: sublinhado reto de 2 px na tinta sob a aba ativa, sobre a hairline da lista.">
       <Demo>
-        <Tabs defaultValue="marcar">
+        <Tabs defaultValue="score">
           <TabsList>
-            <TabsTrigger value="marcar">Marcar</TabsTrigger>
-            <TabsTrigger value="linha">Linha do tempo</TabsTrigger>
-            <TabsTrigger value="tabela">Tabela</TabsTrigger>
+            <TabsTrigger value="score">Marcar</TabsTrigger>
+            <TabsTrigger value="timeline">Linha do tempo</TabsTrigger>
+            <TabsTrigger value="table">Tabela</TabsTrigger>
           </TabsList>
-          <TabsContent value="marcar" className="pt-1 text-fg-2">
+          <TabsContent value="score" className="pt-1 text-fg-2">
             Toque no jogador para marcar o gol.
           </TabsContent>
-          <TabsContent value="linha" className="pt-1 text-fg-2">
+          <TabsContent value="timeline" className="pt-1 text-fg-2">
             Dois gols, um pênalti.
           </TabsContent>
-          <TabsContent value="tabela" className="pt-1 text-fg-2">
+          <TabsContent value="table" className="pt-1 text-fg-2">
             Vermelho lidera com 4 pontos.
           </TabsContent>
         </Tabs>
-        <Tabs defaultValue="partidas">
+        <Tabs defaultValue="matches">
           <TabsList variant="line">
-            <TabsTrigger value="partidas">Partidas</TabsTrigger>
+            <TabsTrigger value="matches">Partidas</TabsTrigger>
             <TabsTrigger value="ranking">Ranking</TabsTrigger>
-            <TabsTrigger value="eventos">Eventos</TabsTrigger>
-            <TabsTrigger value="ajustes" disabled>
+            <TabsTrigger value="events">Eventos</TabsTrigger>
+            <TabsTrigger value="settings" disabled>
               Ajustes
             </TabsTrigger>
           </TabsList>
         </Tabs>
       </Demo>
-    </Bloco>
+    </Block>
   )
 }
 
-function Sobrepostos() {
+function Overlays() {
   return (
-    <Bloco titulo="Dialog, confirmação, folha, menu e seleção" nota="Dialog e folha com raio 20 e a única sombra forte do sistema; o fundo escurece sem desfoque. A confirmação destrutiva tem o botão de texto na rosa-tinta. Menu e select sem sombra, item em foco em roxo 6%. Grupo de seleção: a opção escolhida é a pílula cheia na tinta; as outras em roxo 10% ou brancas.">
+    <Block title="Dialog, confirmação, folha, menu e seleção" note="Dialog e folha com raio 20 e a única sombra forte do sistema; o fundo escurece sem desfoque. A confirmação destrutiva tem o botão de texto na rosa-tinta. Menu e select sem sombra, item em foco em roxo 6%. Grupo de seleção: a opção escolhida é a pílula cheia na tinta; as outras em roxo 10% ou brancas.">
       <Demo>
-        <Linha>
+        <Row>
           <Dialog>
             <DialogTrigger render={<Button />}>
-              <Icon path={icone("apito")} /> Encerrar partida
+              <Icon path={iconPath("whistle")} /> Encerrar partida
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -370,7 +370,7 @@ function Sobrepostos() {
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogMedia>
-                  <Icon path={icone("excluir")} />
+                  <Icon path={iconPath("delete")} />
                 </AlertDialogMedia>
                 <AlertDialogTitle>Remover Caio do grupo?</AlertDialogTitle>
                 <AlertDialogDescription>Ele sai do ranking da temporada. O histórico das partidas fica.</AlertDialogDescription>
@@ -390,43 +390,43 @@ function Sobrepostos() {
               </SheetHeader>
               <div className="flex flex-col gap-2 px-4 pb-4">
                 <Button variant="secondary" className="justify-start">
-                  <Icon path={icone("gol")} /> Gol
+                  <Icon path={iconPath("goal")} /> Gol
                 </Button>
                 <Button variant="secondary" className="justify-start">
-                  <Icon path={icone("assistencia")} /> Assistência
+                  <Icon path={iconPath("assist")} /> Assistência
                 </Button>
                 <Button variant="secondary" className="justify-start">
-                  <Icon path={icone("penalti")} /> Pênalti
+                  <Icon path={iconPath("penalty")} /> Pênalti
                 </Button>
               </div>
             </SheetContent>
           </Sheet>
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label="Mais ações" />}>
-              <Icon path={icone("mais")} />
+              <Icon path={iconPath("more")} />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Sessão</DropdownMenuLabel>
               <DropdownMenuItem>
-                <Icon path={icone("editar")} /> Editar
+                <Icon path={iconPath("edit")} /> Editar
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Icon path={icone("compartilhar")} /> Compartilhar
+                <Icon path={iconPath("share")} /> Compartilhar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive">
-                <Icon path={icone("excluir")} /> Excluir
+                <Icon path={iconPath("delete")} /> Excluir
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Tooltip>
             <TooltipTrigger render={<Button variant="ghost" size="icon" aria-label="Como funciona o ELO" />}>
-              <Icon path={icone("info")} />
+              <Icon path={iconPath("info")} />
             </TooltipTrigger>
             <TooltipContent>O ELO muda a cada partida encerrada.</TooltipContent>
           </Tooltip>
-        </Linha>
-        <Linha>
+        </Row>
+        <Row>
           <span className="text-sm font-semibold text-fg-2">Times</span>
           <ToggleGroup defaultValue={["3"]}>
             <ToggleGroupItem value="2" aria-label="2 times">
@@ -439,8 +439,8 @@ function Sobrepostos() {
               4
             </ToggleGroupItem>
           </ToggleGroup>
-        </Linha>
-        <Linha>
+        </Row>
+        <Row>
           <ToggleGroup defaultValue={["10"]} variant="outline" size="sm">
             <ToggleGroupItem value="03">03/11</ToggleGroupItem>
             <ToggleGroupItem value="10">10/11 Hoje</ToggleGroupItem>
@@ -450,17 +450,17 @@ function Sobrepostos() {
             <Kbd>⌘</Kbd>
             <Kbd>K</Kbd>
           </KbdGroup>
-        </Linha>
+        </Row>
       </Demo>
-    </Bloco>
+    </Block>
   )
 }
 
-function Avisos() {
+function Notices() {
   return (
-    <Bloco titulo="Toast, snackbar e alerta" nota="Toast e alerta em superfície neutra, com ícone e texto na tinta: o estado está escrito no título, nunca num fundo vivo. O snackbar de desfazer é escuro (#1C1426), texto branco, ação Desfazer em lavanda, e some em cerca de 5 s: toastDesfazer(mensagem, onDesfazer).">
+    <Block title="Toast, snackbar e alerta" note="Toast e alerta em superfície neutra, com ícone e texto na tinta: o estado está escrito no título, nunca num fundo vivo. O snackbar de desfazer é escuro (#1C1426), texto branco, ação Desfazer em lavanda, e some em cerca de 5 s: toastUndo(message, onUndo).">
       <Demo>
-        <Linha>
+        <Row>
           <Button variant="secondary" size="sm" onClick={() => toast.success("Presença confirmada", { description: "Quinta, 20h30, Arena Vila Mariana." })}>
             Sucesso
           </Button>
@@ -476,46 +476,46 @@ function Avisos() {
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => toastDesfazer("Gol de Dudu registrado", () => toast("Gol desfeito"), { icone: icone("gol") })}
+            onClick={() => toastUndo("Gol de Dudu registrado", () => toast("Gol desfeito"), { icon: iconPath("goal") })}
           >
-            <Icon path={icone("desfazer")} /> Snackbar de desfazer
+            <Icon path={iconPath("undo")} /> Snackbar de desfazer
           </Button>
-        </Linha>
+        </Row>
         <div className="flex h-12 items-center gap-2 rounded-lg bg-snackbar pr-2 pl-4 text-white dark:ring-1 dark:ring-white/10" aria-hidden="true">
-          <Icon path={icone("gol")} className="size-5" />
+          <Icon path={iconPath("goal")} className="size-5" />
           <span className="flex-1 truncate text-sm font-semibold">Gol de Dudu registrado</span>
-          <span className="inline-flex h-9 items-center px-3 text-sm font-bold text-lavanda">Desfazer</span>
+          <span className="inline-flex h-9 items-center px-3 text-sm font-bold text-lavender">Desfazer</span>
         </div>
         <div className="flex flex-col gap-2">
           <Alert variant="success">
-            <Icon path={icone("sucesso")} />
+            <Icon path={iconPath("success")} />
             <AlertTitle>Sessão encerrada</AlertTitle>
             <AlertDescription>O ELO dos dez jogadores foi recalculado.</AlertDescription>
           </Alert>
           <Alert variant="warning">
-            <Icon path={icone("aviso")} />
+            <Icon path={iconPath("warning")} />
             <AlertTitle>Faltam 2 para fechar 3 times</AlertTitle>
             <AlertDescription>Com 10 confirmados, o sorteio sai com 2 times e 2 reservas.</AlertDescription>
           </Alert>
           <Alert variant="destructive">
-            <Icon path={icone("erro")} />
+            <Icon path={iconPath("error")} />
             <AlertTitle>Não deu para salvar</AlertTitle>
             <AlertDescription>Sem conexão. O placar fica guardado no aparelho até voltar.</AlertDescription>
           </Alert>
           <Alert>
-            <Icon path={icone("historico")} />
+            <Icon path={iconPath("history")} />
             <AlertTitle>Temporada 2026/2</AlertTitle>
             <AlertDescription>Fecha em 18 de dezembro. O ELO continua; os pontos zeram.</AlertDescription>
           </Alert>
         </div>
       </Demo>
-    </Bloco>
+    </Block>
   )
 }
 
-function Progresso() {
+function ProgressDemo() {
   return (
-    <Bloco titulo="Progresso, esqueleto e carregando" nota="Barra de 8 px na tinta sobre trilho em roxo 10%, valor em Rajdhani. Esqueleto em surface-2 enquanto o dado não chega. Spinner é o ícone loading do MDI girando.">
+    <Block title="Progresso, esqueleto e carregando" note="Barra de 8 px na tinta sobre trilho em roxo 10%, valor em Rajdhani. Esqueleto em surface-2 enquanto o dado não chega. Spinner é o ícone loading do MDI girando.">
       <Demo>
         <Progress value={14} max={18}>
           <ProgressLabel>Confirmados</ProgressLabel>
@@ -528,20 +528,20 @@ function Progresso() {
             <Skeleton className="h-3 w-1/3" />
           </div>
         </div>
-        <Linha>
+        <Row>
           <Spinner className="size-5 text-ink" />
           <span className="text-sm text-fg-2">Sorteando os times…</span>
-        </Linha>
+        </Row>
       </Demo>
-    </Bloco>
+    </Block>
   )
 }
 
-function Avatares() {
+function Avatars() {
   return (
-    <Bloco titulo="Avatar e estado vazio" nota="24, 32, 40 e 56 px. Sem foto, iniciais em Lexend 600 brancas sobre roxo; tom lavanda com iniciais na tinta fica no lugar de uma foto. O anel ouro é só do campeão da noite. Estado vazio em superfície branca: símbolo esmaecido a 64 px, título em Lexend, texto curto e uma ação.">
+    <Block title="Avatar e estado vazio" note="24, 32, 40 e 56 px. Sem foto, iniciais em Lexend 600 brancas sobre roxo; tom lavanda com iniciais na tinta fica no lugar de uma foto. O anel ouro é só do campeão da noite. Estado vazio em superfície branca: símbolo esmaecido a 64 px, título em Lexend, texto curto e uma ação.">
       <Demo>
-        <Linha>
+        <Row>
           <Avatar size="sm">
             <AvatarFallback>LA</AvatarFallback>
           </Avatar>
@@ -549,59 +549,59 @@ function Avatares() {
             <AvatarFallback>RS</AvatarFallback>
           </Avatar>
           <Avatar size="lg">
-            <AvatarFallback tom="lavanda">BT</AvatarFallback>
+            <AvatarFallback tone="lavender">BT</AvatarFallback>
           </Avatar>
           <Avatar size="xl">
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
-          <Avatar size="xl" className="ring-3 ring-ouro ring-offset-2 ring-offset-background">
+          <Avatar size="xl" className="ring-3 ring-gold ring-offset-2 ring-offset-background">
             <AvatarFallback>DM</AvatarFallback>
           </Avatar>
           <span className="text-sm text-fg-2">Campeão da noite</span>
-        </Linha>
+        </Row>
         <Empty>
           <EmptyHeader>
             <EmptyMedia>
-              <Logo svg={simbolo} className="h-16 text-ink opacity-30" />
+              <Logo svg={symbolLogo} className="h-16 text-ink opacity-30" />
             </EmptyMedia>
             <EmptyTitle>Nenhuma pelada marcada</EmptyTitle>
             <EmptyDescription>Crie a primeira e mande o convite para a galera. A presença e o sorteio vêm junto.</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <Button>
-              <Icon path={icone("adicionar")} /> Marcar pelada
+              <Icon path={iconPath("add")} /> Marcar pelada
             </Button>
           </EmptyContent>
         </Empty>
       </Demo>
-    </Bloco>
+    </Block>
   )
 }
 
-export function Componentes() {
+export function Components() {
   return (
     <Section
-      id="componentes"
+      id="components"
       n="08 · Componentes"
-      titulo="shadcn/ui, com a identidade por cima."
+      title="shadcn/ui, com a identidade por cima."
       lead={
         <>
           Cada componente é o do <a className="font-semibold text-ink underline underline-offset-4" href="https://ui.shadcn.com" target="_blank" rel="noreferrer">shadcn/ui</a> (Base UI, Tailwind 4), instalado pelo CLI e tematizado pelos tokens em <Code>packages/ui/src/styles/globals.css</Code>. O que mudou de verdade está no arquivo do componente, em <Code>packages/ui/src/components/ui/</Code>. O roxo conduz e a cor viva é sinal pequeno. Cada peça aparece nos dois temas, com estados ao vivo.
         </>
       }
     >
-      <Botoes />
-      <Campos />
+      <Buttons />
+      <Fields />
       <Chips />
       <Cards />
       <Ranking />
-      <Abas />
-      <Sobrepostos />
-      <Avisos />
-      <Progresso />
-      <Avatares />
+      <TabsDemo />
+      <Overlays />
+      <Notices />
+      <ProgressDemo />
+      <Avatars />
       <p className="text-sm text-fg-2">
-        Topos, navegação inferior, herói e placar ao vivo estão em <a className="font-semibold text-ink underline underline-offset-4" href="#padroes-de-tela">Padrões de tela</a>.
+        Topos, navegação inferior, herói e placar ao vivo estão em <a className="font-semibold text-ink underline underline-offset-4" href="#screen-patterns">Padrões de tela</a>.
       </p>
     </Section>
   )

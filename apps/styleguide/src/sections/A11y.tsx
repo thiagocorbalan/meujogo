@@ -1,8 +1,8 @@
 import { Section } from "./_shared"
 import { Icon } from "@meujogo/ui/components/icon"
-import { icone } from "@meujogo/ui/icones"
+import { iconPath } from "@meujogo/ui/icons"
 
-const ITENS: [string, string][] = [
+const ITEMS: [string, string][] = [
   ["Contraste medido", "Todo par de texto da tabela foi medido. Os estados usam a paleta da marca, e por isso cada um tem a versão tinta para texto corrido no claro."],
   ["Foco visível", "Anel de 3 px na cor de foco: ciano no claro, ouro no escuro. Vem do shadcn em todos os componentes. Tudo acionável por teclado na ordem de leitura."],
   ["Nunca só a cor", "Ouro, ciano e verde colapsam no cinza. Estado, tier e time levam ícone, texto ou posição junto."],
@@ -13,11 +13,11 @@ const ITENS: [string, string][] = [
 
 export function A11y() {
   return (
-    <Section id="acessibilidade" n="11 · Acessibilidade" titulo="O mínimo, sempre.">
+    <Section id="accessibility" n="11 · Acessibilidade" title="O mínimo, sempre.">
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {ITENS.map(([t, d]) => (
+        {ITEMS.map(([t, d]) => (
           <li key={t} className="flex gap-3 rounded-xl border border-border bg-card p-4">
-            <Icon path={icone("sucesso")} className="mt-0.5 size-5 shrink-0 text-success-ink" />
+            <Icon path={iconPath("success")} className="mt-0.5 size-5 shrink-0 text-success-ink" />
             <span className="flex flex-col gap-1">
               <b className="font-display text-base font-semibold text-ink">{t}</b>
               <span className="text-sm leading-relaxed text-fg-2">{d}</span>

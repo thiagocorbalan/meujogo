@@ -11,5 +11,5 @@ for (const i of ICONS) {
 }
 
 const map = ICONS.map(({ name, mdi, family, usage }) => ({ name, mdi, family, usage }))
-writeFileSync(resolve(out, "mapa.json"), JSON.stringify(map, null, 2) + "\n")
+writeFileSync(resolve(out, "map.json"), JSON.stringify(map, null, 2) + "\n")
 console.log(`${ICONS.length} icons in ${out}`)

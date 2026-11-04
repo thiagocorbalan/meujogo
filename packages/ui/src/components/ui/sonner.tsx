@@ -47,7 +47,7 @@ type UndoToastOptions = {
 
 /**
  * Snackbar escuro de desfazer: superfície `snackbar`, texto branco e a ação em
- * lavanda. Fecha sozinho depois de `duration` ou ao tocar na ação.
+ * lavender. Fecha sozinho depois de `duration` ou ao tocar na ação.
  */
 function toastUndo(
   message: string,

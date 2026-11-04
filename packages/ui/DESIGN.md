@@ -72,7 +72,7 @@ Budget per screen (the live red badge counts as one): at most 2 distinct vivid c
 
 ## Iconography
 
-- Material Design Icons (Pictogrammers), one icon per function, in currentColor. The map function → MDI name is in `marca/icones/mapa.json`. Filled for active/selected, outline for inactive.
+- Material Design Icons (Pictogrammers), one icon per function, in currentColor. The map function → MDI name is in `marca/icones/map.json`. Filled for active/selected, outline for inactive.
 - Sizes 16, 20 (buttons), 24 (nav). Never draw custom icons or mix another library. Yellow and red card glyphs are the only icons that keep their real color.
 
 ## Components (shadcn/ui, Base UI, Tailwind 4)
